@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#092b1b">
+<title>JUNGLE ESCAPE 3D</title>
+<style>
+:root{--gold:#ffd45a;--green:#2be28a;--panel:rgba(5,25,18,.88);--white:#f5fff8}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061a13;color:var(--white);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;touch-action:none}
+#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;inset:0;pointer-events:none;display:none}
+.topbar{position:absolute;top:env(safe-area-inset-top,10px);left:0;right:0;display:flex;justify-content:space-between;padding:12px;gap:8px}
+.pill{background:rgba(3,22,15,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:8px 12px;font-weight:800;text-shadow:0 2px 3px #000;backdrop-filter:blur(8px);font-size:14px}
+#pauseBtn{pointer-events:auto;border:0;color:white;background:#164b34;border-radius:12px;padding:9px 13px;font-size:18px}
+#mobileControls{position:absolute;bottom:calc(15px + env(safe-area-inset-bottom,0px));left:0;right:0;display:flex;justify-content:center;gap:12px;pointer-events:auto}
+.ctrl{width:58px;height:58px;border-radius:18px;border:1px solid #ffffff55;background:#06291dcc;color:white;font-size:24px;font-weight:900;box-shadow:0 5px 15px #0007;touch-action:manipulation}
+.ctrl:active{transform:scale(.94);background:#16774b}
+#overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(180deg,#03150a66,#03150acc)}
+.panel{width:min(440px,100%);max-height:92%;overflow:auto;text-align:center;padding:26px 22px;border:1px solid #d6ffdf44;border-radius:26px;background:linear-gradient(145deg,rgba(9,49,31,.94),rgba(3,19,15,.96));box-shadow:0 20px 70px #0009;backdrop-filter:blur(12px)}
+.logo{font-size:clamp(32px,8vw,52px);line-height:.95;font-weight:1000;letter-spacing:1px;color:#ffe17b;text-shadow:0 4px 0 #80501b,0 8px 24px #000; margin:5px 0 12px}
+.sub{color:#d4f5df;font-size:14px;margin-bottom:20px}
+button.action{width:100%;padding:14px 18px;border:0;border-radius:15px;margin:7px 0;font-weight:900;font-size:17px;color:#14301e;background:linear-gradient(180deg,#ffe88a,#ffb52e);box-shadow:0 5px 0 #a76616;cursor:pointer}
+button.secondary{background:linear-gradient(180deg,#5de6a1,#1da968);box-shadow:0 5px 0 #0d5738;color:#062b1b}
+button.ghost{background:#ffffff12;border:1px solid #ffffff44;color:white;box-shadow:none}
+.stats{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:15px 0;color:#f9e8ad;font-weight:800}
+small{color:#c4e4d0;line-height:1.5}.settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;margin:15px 0}.settings label{font-size:13px;color:#d8f5e2}.settings select,.settings input{width:100%;margin-top:4px;padding:8px;border-radius:8px;background:#0b3424;color:white;border:1px solid #ffffff44}
+.hidden{display:none!important}
+#toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);padding:9px 16px;background:#082819dd;border:1px solid #ffffff44;border-radius:20px;font-weight:800;opacity:0;transition:opacity .2s;pointer-events:none}
+@media(min-width:700px){#mobileControls{opacity:.7}.panel{padding:32px}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+ <div class="topbar">
+  <div class="pill">🏃 <span id="score">0</span> &nbsp;|&nbsp; 📏 <span id="distance">0</span>m</div>
+  <div class="pill">🪙 <span id="runCoins">0</span> &nbsp; 🔑 <span id="keys">0</span> &nbsp; 💎 <span id="diamonds">0</span></div>
+  <button id="pauseBtn" aria-label="Pause">Ⅱ</button>
+ </div>
+ <div id="mobileControls">
+  <button class="ctrl" data-act="left">◀</button><button class="ctrl" data-act="jump">▲</button>
+  <button class="ctrl" data-act="slide">▼</button><button class="ctrl" data-act="right">▶</button>
+ </div>
+ <div id="toast"></div>
+</div>
+<div id="overlay">
+ <div class="panel" id="menuPanel">
+  <div class="logo">JUNGLE<br>ESCAPE 3D</div>
+  <div class="sub">THE LOST TEMPLE · Explore ancient India, find the treasure, escape the guardian.</div>
+  <div class="stats"><span>🏆 Best: <b id="bestMenu">0</b></span><span>🪙 Bank: <b id="bankMenu">0</b></span></div>
+  <button class="action" id="playBtn">▶ PLAY</button>
+  <button class="action secondary" id="settingsBtn">⚙ SETTINGS</button>
+  <small>Swipe or use buttons · Find keys, diamonds and hidden treasure · Avoid the temple guardian.</small>
+ </div>
+ <div class="panel hidden" id="pausePanel">
+  <div class="logo">PAUSED</div><div class="sub">Catch your breath, adventurer.</div>
+  <button class="action" id="resumeBtn">▶ RESUME</button><button class="action secondary" id="restartBtn">↻ RESTART</button><button class="action ghost" id="menuBtn">MAIN MENU</button>
+ </div>
+ <div class="panel hidden" id="overPanel">
+  <div class="logo">RUN OVER</div><div class="sub">The jungle got you this time!</div>
+  <div class="stats"><span>Score <b id="finalScore">0</b></span><span>Distance <b id="finalDist">0</b>m</span><span>Coins <b id="finalCoins">0</b></span></div>
+  <div class="stats">🏆 Best score: <b id="bestOver">0</b></div>
+  <button class="action" id="againBtn">↻ PLAY AGAIN</button><button class="action ghost" id="overMenuBtn">MAIN MENU</button>
+ </div>
+ <div class="panel hidden" id="settingsPanel">
+  <div class="logo" style="font-size:34px">SETTINGS</div>
+  <div class="settings">
+   <label>Graphics<select id="quality"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+   <label>Music volume<input id="musicVol" type="range" min="0" max="100" value="35"></label>
+   <label>Sound volume<input id="sfxVol" type="range" min="0" max="100" value="70"></label>
+   <label>Music<select id="musicOn"><option value="yes">On</option><option value="no">Off</option></select></label>
+  </div>
+  <button class="action secondary" id="saveSettings">SAVE SETTINGS</button><button class="action ghost" id="backSettings">BACK</button>
+ </div>
+</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem('je3d_'+k))??d}catch{return d}},set(k,v){try{localStorage.setItem('je3d_'+k,JSON.stringify(v))}catch{}}};
+let best=store.get('best',0),bank=store.get('bank',0),settings=store.get('settings',{quality:'Medium',musicVol:35,sfxVol:70,musicOn:'yes'});
+$('bestMenu').textContent=best;$('bankMenu').textContent=bank;
+$('quality').value=settings.quality;$('musicVol').value=settings.musicVol;$('sfxVol').value=settings.sfxVol;$('musicOn').value=settings.musicOn;
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bd9c2);scene.fog=new THREE.FogExp2(0x9bd9c2,.012);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,180);
+camera.position.set(0,5.5,10);
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:settings.quality!=='Low',powerPreference:'high-performance'});}
+catch(e){document.querySelector('#menuPanel .sub').textContent='This browser could not start WebGL. Please try Chrome with hardware acceleration enabled.';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.7:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=settings.quality!=='Low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+$('game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd8fff0,0x35543b,2));
+const sun=new THREE.DirectionalLight(0xfff2c7,2.4);sun.position.set(-8,15,8);sun.castShadow=renderer.shadowMap.enabled;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+
+const mat=(color,roughness=.85)=>new THREE.MeshStandardMaterial({color,roughness});
+const mats={road:mat(0x786044),edge:mat(0x4d3827),leaf:mat(0x1c7443),leaf2:mat(0x3a9b55),trunk:mat(0x654329),stone:mat(0xa18b67),saffron:mat(0x9c4f25),turquoise:mat(0x268d83),darkStone:mat(0x51483c),gold:new THREE.MeshStandardMaterial({color:0xffc928,metalness:.72,roughness:.22,emissive:0x8b5600,emissiveIntensity:.5}),wood:mat(0x8a5128),rock:mat(0x555c4c),fire:new THREE.MeshBasicMaterial({color:0xff6a12}),water:new THREE.MeshStandardMaterial({color:0x2b9caa,metalness:.25,roughness:.2})};
+const geo={box:new THREE.BoxGeometry(1,1,1),sphere:new THREE.SphereGeometry(1,12,10),cyl:new THREE.CylinderGeometry(.5,.6,1,8),coin:new THREE.CylinderGeometry(.34,.34,.09,20)};
+function mesh(g,m,parent,x=0,y=0,z=0,sx=1,sy=1,sz=1){let o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+const ground=mesh(geo.box,mats.road,scene,0,-.25,-30,8,.5,100);ground.receiveShadow=true;
+const water=mesh(new THREE.BoxGeometry(22,.08,120),mats.water,scene,0,-1.2,-35);water.visible=false;
+const lanes=[-2.15,0,2.15];
+const player=new THREE.Group();scene.add(player);player.position.set(0,0,2);
+const body=new THREE.Group();player.add(body);
+mesh(geo.sphere,mat(0xc78a54),body,0,1.52,0,.38,.48,.3);
+mesh(geo.sphere,mat(0x9b512b),body,0,1.02,0,.42,.52,.27);
+// Original Indian treasure hunter: adventure jacket, belt, backpack and leather boots
+mesh(geo.box,mat(0x51311f),body,0,1.05,-.32,.34,.48,.18);mesh(geo.box,mat(0xc59b52),body,0,1.02,.02,.48,.09,.31);
+mesh(geo.box,mat(0x704324),body,0,1.35,-.34,.34,.42,.22);mesh(geo.box,mat(0x382719),body,0,.18,-.05,.44,.18,.34);
+mesh(geo.sphere,mat(0x9a613c),body,0,2.08,0,.29,.31,.29);
+mesh(geo.sphere,mat(0x34251e),body,0,2.31,-.02,.31,.16,.3);
+mesh(geo.sphere,mat(0x171c18),body,-.11,2.1,.25,.045,.055,.035);mesh(geo.sphere,mat(0x171c18),body,.11,2.1,.25,.045,.055,.035);
+const limbs=[];
+for(let side of [-1,1]){
+ const arm=new THREE.Group();arm.position.set(side*.43,1.35,0);body.add(arm);mesh(geo.cyl,mat(0xc78a54),arm,0,-.27,0,.13,.55,.13);limbs.push(arm);
+ const leg=new THREE.Group();leg.position.set(side*.19,.73,0);body.add(leg);mesh(geo.cyl,mat(0x293a30),leg,0,-.28,0,.16,.58,.17);mesh(geo.box,mat(0x3a2418),leg,0,-.58,.08,.25,.16,.42);limbs.push(leg);
+}
+const monster=new THREE.Group();scene.add(monster);monster.position.set(0,0,7);
+// Ancient forest guardian: stone-green hide, crown horns and broad shoulders
+mesh(geo.sphere,mat(0x315f37),monster,0,1.25,0,.62,.82,.5);
+mesh(geo.sphere,mat(0x315f37),monster,0,2.1,-.03,.46,.45,.42);
+for(let side of [-1,1]){let horn=mesh(geo.cyl,mat(0xc6a66a),monster,side*.3,2.53,-.02,.11,.5,.11);horn.rotation.z=side*-.35;mesh(geo.sphere,mat(0x27442c),monster,side*.53,1.42,0,.28,.48,.28)}
+const monsterMouth=mesh(geo.box,mat(0x170e0b),monster,0,1.91,.42,.34,.16,.08);
+mesh(geo.sphere,mat(0xffd45a),monster,-.17,2.15,.34,.08,.09,.06);mesh(geo.sphere,mat(0xffd45a),monster,.17,2.15,.34,.08,.09,.06);
+mesh(geo.box,mat(0x211b17),monster,0,1.88,.4,.38,.12,.12);
+for(let s of [-1,1]){mesh(geo.cyl,mat(0x315f37),monster,s*.48,.65,0,.18,.7,.18);mesh(geo.cyl,mat(0x315f37),monster,s*.23,.35,0,.2,.65,.2)}
+
+let state='menu',lane=1,targetLane=1,speed=15,distance=0,runCoins=0,score=0,jumpV=0,sliding=0,invuln=0,monsterGap=8,shake=0,spawnAt=-15,worldTime=0;
+let keysFound=0,diamondsFound=0,shieldTime=0,magnetTime=0,boostTime=0,treasureFound=0,roarClock=0;
+const entities=[],decor=[],particles=[];let last=performance.now(),spawnCounter=0;
+function tree(x,z,scale=1){let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);mesh(geo.cyl,mats.trunk,g,0,1.5,0,.35*scale,3*scale,.35*scale);for(let i=0;i<3;i++){let crown=mesh(geo.sphere,i%2?mats.leaf:mats.leaf2,g,0,(3+i*.45)*scale,0,(1.35-i*.18)*scale,(1.15-i*.12)*scale,(1.25-i*.15)*scale);crown.castShadow=false;}decor.push(g);return g}
+function templeShrine(x,z,scale=1){
+ let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);g.scale.setScalar(scale);
+ const stone=mats.stone, dark=mats.darkStone;
+ mesh(geo.box,stone,g,0,.22,0,3.2,.42,2.2);
+ for(let xx of [-1.05,1.05]){mesh(geo.box,stone,g,xx,1.25,0,.38,2,.42);for(let yy of [.45,1.05,1.75])mesh(geo.box,dark,g,xx,yy,.02,.48,.12,.5)}
+ mesh(geo.box,stone,g,0,2.28,0,2.65,.38,.75);mesh(geo.box,dark,g,0,2.57,0,2.2,.18,.65);
+ // stepped Indian-style shikhara silhouette
+ for(let i=0;i<4;i++)mesh(geo.box,stone,g,0,2.85+i*.34,-.12,.0+2.1-i*.34,.42,.68);
+ mesh(geo.sphere,mats.gold,g,0,4.35,-.12,.13,.18,.13);
+ // entrance shadow
+ mesh(geo.box,mat(0x211b16),g,0,.95,.23,.85,1.55,.06);
+ decor.push(g);return g;
+}
+function torch(x,z){let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);mesh(geo.cyl,mats.wood,g,0,.75,0,.09,1.5,.09);mesh(geo.sphere,mats.fire,g,0,1.55,0,.22,.34,.22);let glow=new THREE.PointLight(0xff9b35,.8,7);glow.position.set(0,1.5,0);g.add(glow);decor.push(g)}
+function statue(x,z){let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);mesh(geo.box,mats.stone,g,0,.25,0,.95,.5,.9);mesh(geo.sphere,mats.stone,g,0,1.35,0,.42,.65,.35);mesh(geo.cyl,mats.stone,g,0,.7,0,.48,.6,.42);mesh(geo.sphere,mats.gold,g,0,1.55,.31,.06,.07,.04);decor.push(g)}
+function segment(z){
+ // lane markings and roadside jungle
+ for(let x of [-1.08,1.08]){let stripe=mesh(geo.box,mat(0xc6b58a),scene,x,-.005,z, .045,.018,18);decor.push(stripe)}
+ for(let side of [-1,1]){tree(side*(5+Math.random()*4),z-3-Math.random()*10,.7+Math.random()*.7);
+  if(Math.random()<.45){let rock=mesh(geo.sphere,mats.rock,scene,side*(3.8+Math.random()*1.4),.3,z-5,.7,.5,.8);decor.push(rock)}}
+ if(Math.random()<.14){let bridge=new THREE.Group();scene.add(bridge);bridge.position.set(0,-.02,z-8);for(let i=0;i<9;i++)mesh(geo.box,mats.wood,bridge,0,0,i*.42-1.7,6,.16,.38);for(let side of [-1,1]){mesh(geo.box,mats.wood,bridge,side*2.8,.55,0,.14,1.1,4.2);for(let i=0;i<4;i++)mesh(geo.box,mats.wood,bridge,side*2.8,.9,i*.95-1.4,.14,.12,.12)}decor.push(bridge)}
+ if(Math.random()<.08){let fall=mesh(geo.box,mats.water,scene,(Math.random()<.5?-1:1)*7,2,z-10,.55,4,.16);decor.push(fall)}
+ if(Math.random()<.24){let side=Math.random()<.5?-1:1;templeShrine(side*5.1,z-7,.48+Math.random()*.2);torch(side*3.6,z-5)}
+ if(Math.random()<.12)statue((Math.random()<.5?-1:1)*3.5,z-8);
+}
+for(let z=-10;z>-150;z-=18)segment(z);
+function addEntity(type,laneIndex,z){
+ let group=new THREE.Group();group.position.set(lanes[laneIndex],0,z);scene.add(group);
+ let hitY=0,hitZ=0;
+ if(type==='coin'){let c=mesh(geo.coin,mats.gold,group,0,1.25,0);c.rotation.x=Math.PI/2;hitY=1.25;}
+ if(type==='key'){mesh(geo.cyl,mats.gold,group,0,1.25,0,.12,.65,.12);mesh(geo.sphere,mats.gold,group,0,1.58,0,.22,.22,.12);hitY=1.25}
+ if(type==='diamond'){let d=mesh(new THREE.OctahedronGeometry(.38),mat(0x4de8ef,.2),group,0,1.35,0);hitY=1.35}
+ if(type==='chest'){mesh(geo.box,mats.wood,group,0,.55,0,.95,.7,.65);mesh(geo.box,mats.gold,group,0,.58,.34,1,.12,.08);hitY=.55}
+ if(type==='shield'||type==='magnet'||type==='boost'){let col=type==='shield'?0x55baff:type==='magnet'?0xff5e9c:0x9aff55;mesh(new THREE.TorusGeometry(.34,.1,8,18),mat(col,.25),group,0,1.3,0);mesh(geo.sphere,mat(col,.25),group,0,1.3,0,.17,.17,.17);hitY=1.3}
+ if(type==='vault'){
+  // A small concealed temple vault: enter with a key for a treasure-room reward
+  mesh(geo.box,mats.darkStone,group,0,1.25,0,1.75,2.5,.35);mesh(geo.box,mats.stone,group,0,2.55,0,2.05,.38,.55);
+  for(let xx of [-.78,.78])mesh(geo.box,mats.stone,group,xx,1.25,.08,.28,2.5,.42);
+  mesh(geo.box,mat(0x1b1712),group,0,.95,.22,.78,1.75,.08);
+  mesh(geo.box,mats.gold,group,0,.45,.38,.72,.35,.35);hitY=1.1
+}
+ if(type==='rock'){mesh(geo.sphere,mats.rock,group,0,.55,0,.75,.58,.65);hitY=.55}
+ if(type==='log'){let o=mesh(new THREE.CylinderGeometry(.38,.38,2.4,10),mats.wood,group,0,.42,0);o.rotation.z=Math.PI/2;hitY=.42}
+ if(type==='barrier'){mesh(geo.box,mats.wood,group,0,.72,0,1.5,1.1,.25);for(let x of [-.58,.58])mesh(geo.box,mats.wood,group,x,.25,0,.16,.5,.2);hitY=.72}
+ if(type==='fire'){mesh(geo.box,mats.stone,group,0,.18,0,1.35,.35,.55);mesh(geo.sphere,mats.fire,group,0,.65,0,.45,.55,.35);hitY=.3}
+ if(type==='branch'){mesh(geo.box,mats.wood,group,0,2.05,0,1.8,.3,.35);hitY=2.05}
+ if(type==='gap'){mesh(geo.box,mat(0x182d28),group,0,-.31,0,1.95,.1,3.5);hitY=0}
+ if(type==='coinline'){for(let i=0;i<5;i++){let c=mesh(geo.coin,mats.gold,group,0,1.15,i*1.2-2.4);c.rotation.x=Math.PI/2;}hitY=1.15}
+ entities.push({group,type,lane:laneIndex,z,hitY,active:true});
+}
+const obstacleTypes=['rock','log','barrier','fire','branch','gap'];
+const rewardTypes=['key','diamond','chest','shield','magnet','boost','vault'];
+function spawnPattern(z){
+ let roll=Math.random(),blocked=[];
+ if(roll<.055){let l=Math.floor(Math.random()*3);addEntity(rewardTypes[Math.floor(Math.random()*rewardTypes.length)],l,z);return}
+ if(roll<.2){let l=Math.floor(Math.random()*3);addEntity('coinline',l,z);return}
+ let count=Math.random()<.35?2:1;
+ while(blocked.length<count){let l=Math.floor(Math.random()*3);if(!blocked.includes(l))blocked.push(l)}
+ blocked.forEach(l=>addEntity(obstacleTypes[Math.floor(Math.random()*obstacleTypes.length)],l,z));
+ // ensure a coin reward route in a free lane
+ let free=[0,1,2].filter(x=>!blocked.includes(x));if(free.length&&Math.random()<.65)addEntity('coin',free[Math.floor(Math.random()*free.length)],z-5);
+}
+function cleanup(){for(let i=entities.length-1;i>=0;i--){let e=entities[i];if(e.z>camera.position.z+10){scene.remove(e.group);e.group.traverse(o=>{if(o.geometry&&o.geometry!==geo.coin&&o.geometry!==geo.sphere&&o.geometry!==geo.box&&o.geometry!==geo.cyl)o.geometry.dispose()});entities.splice(i,1)}}for(let i=decor.length-1;i>=0;i--){if(decor[i].position.z>camera.position.z+12){scene.remove(decor[i]);decor.splice(i,1)}}}
+function sound(freq=440,dur=.08,type='sine',vol=.06){if(settings.sfxVol<=0)return;try{let ctx=audio();let o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime);g.gain.setValueAtTime(vol*settings.sfxVol/70,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+dur)}catch{}}
+let actx=null,musicOsc=null;function audio(){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx}
+function startMusic(){if(settings.musicOn==='no'||settings.musicVol<=0)return;try{let c=audio();if(musicOsc)return;let o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=82;g.gain.value=.012*settings.musicVol/35;o.connect(g);g.connect(c.destination);o.start();musicOsc=o}catch{}}
+function stopMusic(){if(musicOsc){try{musicOsc.stop()}catch{}musicOsc=null}}
+function toast(t){$('toast').textContent=t;$('toast').style.opacity=1;setTimeout(()=>$('toast').style.opacity=0,800)}
+function showPanel(id){['menuPanel','pausePanel','overPanel','settingsPanel'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('overlay').style.display='flex'}
+function startGame(){audio();stopMusic();startMusic();entities.forEach(e=>scene.remove(e.group));entities.length=0;distance=0;runCoins=0;score=0;speed=15;lane=targetLane=1;jumpV=0;sliding=0;invuln=0;monsterGap=8;keysFound=0;diamondsFound=0;shieldTime=0;magnetTime=0;boostTime=0;treasureFound=0;player.position.set(0,0,2);monster.position.set(0,0,7);spawnAt=-15;state='playing';$('overlay').style.display='none';$('hud').style.display='block';for(let z=-15;z>-130;z-=15)spawnPattern(z);last=performance.now()}
+function pause(){if(state!=='playing')return;state='paused';showPanel('pausePanel');stopMusic()}
+function resume(){if(state!=='paused')return;state='playing';$('overlay').style.display='none';startMusic();last=performance.now()}
+function gameOver(){if(state!=='playing')return;state='over';stopMusic();sound(90,.5,'sawtooth',.1);let final=Math.floor(distance+runCoins*10+diamondsFound*50+treasureFound*100);best=Math.max(best,final);bank+=runCoins;store.set('best',best);store.set('bank',bank);$('finalScore').textContent=final;$('finalDist').textContent=Math.floor(distance);$('finalCoins').textContent=runCoins;$('bestOver').textContent=best;$('bestMenu').textContent=best;$('bankMenu').textContent=bank;$('hud').style.display='none';showPanel('overPanel')}
+function move(dir){if(state!=='playing')return;targetLane=Math.max(0,Math.min(2,targetLane+dir));sound(260,.04,'square',.025)}
+function jump(){if(state!=='playing'||player.position.y>.02||sliding>0)return;jumpV=8.2;sound(520,.12,'triangle')}
+function slide(){if(state!=='playing'||sliding>0||player.position.y>.05)return;sliding=.72;sound(160,.13,'sawtooth',.035)}
+function action(a){if(a==='left')move(-1);if(a==='right')move(1);if(a==='jump')jump();if(a==='slide')slide()}
+window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','Escape'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')action('left');if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')action('right');if(e.key==='ArrowUp'||e.key.toLowerCase()==='w'||e.key===' ')action('jump');if(e.key==='ArrowDown'||e.key.toLowerCase()==='s')action('slide');if(e.key==='Escape')state==='playing'?pause():state==='paused'?resume():null});
+let sx=0,sy=0;renderer.domElement.addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY},{passive:true});
+renderer.domElement.addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<25)return;if(Math.abs(dx)>Math.abs(dy))action(dx>0?'right':'left');else action(dy<0?'jump':'slide')},{passive:true});
+document.querySelectorAll('.ctrl').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();action(b.dataset.act)}));
+$('playBtn').onclick=startGame;$('resumeBtn').onclick=resume;$('restartBtn').onclick=startGame;$('againBtn').onclick=startGame;
+$('pauseBtn').onclick=pause;$('settingsBtn').onclick=()=>showPanel('settingsPanel');$('backSettings').onclick=()=>showPanel('menuPanel');
+$('menuBtn').onclick=$('overMenuBtn').onclick=()=>{state='menu';$('hud').style.display='none';showPanel('menuPanel');stopMusic()};
+$('saveSettings').onclick=()=>{settings={quality:$('quality').value,musicVol:+$('musicVol').value,sfxVol:+$('sfxVol').value,musicOn:$('musicOn').value};store.set('settings',settings);renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.7:1.25));renderer.shadowMap.enabled=settings.quality!=='Low';toast('Settings saved');showPanel('menuPanel')};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause()});
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+function update(dt){
+ worldTime+=dt;
+ if(state==='playing'){
+  speed=Math.min(27,15+distance*.018);if(boostTime>0){boostTime-=dt;speed=Math.min(31,speed*1.28)}if(shieldTime>0)shieldTime-=dt;if(magnetTime>0)magnetTime-=dt;distance+=speed*dt;score=Math.floor(distance+runCoins*10+diamondsFound*50+treasureFound*100);
+  player.position.x=THREE.MathUtils.damp(player.position.x,lanes[targetLane],12,dt);
+  if(jumpV!==0||player.position.y>0){player.position.y+=jumpV*dt;jumpV-=20*dt;if(player.position.y<0){player.position.y=0;jumpV=0}}
+  if(sliding>0){sliding-=dt;body.scale.y=.52}else body.scale.y=1;
+  let run=Math.sin(worldTime*speed*.8);limbs[0].rotation.x=run*.8;limbs[1].rotation.x=-run*.8;limbs[2].rotation.x=-run*.9;limbs[3].rotation.x=run*.9;
+  body.rotation.x=sliding>0?-.7:0;
+  player.position.z=2;
+  monsterGap=THREE.MathUtils.damp(monsterGap,invuln>0?Math.max(2.5,monsterGap-.8):Math.min(9,monsterGap+.2),.3,dt);
+  monster.position.x=THREE.MathUtils.damp(monster.position.x,player.position.x*.75,2,dt);monster.position.z=player.position.z+monsterGap;
+  if(monsterGap<2.8){gameOver();return}
+  if(invuln>0)invuln-=dt;
+  spawnAt-=speed*dt;if(spawnAt<-20){spawnPattern(-110);segment(-150);spawnAt=0}
+  for(let i=entities.length-1;i>=0;i--){let e=entities[i];e.z+=speed*dt;e.group.position.z=e.z;
+   if(['coin','coinline','key','diamond','chest','vault','shield','magnet','boost'].includes(e.type)){e.group.rotation.y+=dt*2.5;let magnetPull=magnetTime>0&&e.type==='coin'&&Math.abs(e.z-player.position.z)<9;if(magnetPull)e.group.position.x=THREE.MathUtils.damp(e.group.position.x,player.position.x,5,dt);if(Math.abs(e.z-player.position.z)<1.15&&Math.abs(e.group.position.x-player.position.x)<.95){if(e.type==='coin'||e.type==='coinline'){runCoins+=e.type==='coinline'?5:1;sound(880,.12,'sine');toast('+ COIN')}else if(e.type==='key'){keysFound++;sound(740,.18,'sine');toast('GOLDEN KEY +1')}else if(e.type==='diamond'){diamondsFound++;sound(1100,.2,'sine');toast('RARE DIAMOND +1')}else if(e.type==='chest'){if(keysFound>0){keysFound--;runCoins+=30;treasureFound++;sound(620,.3,'triangle');toast('TREASURE CHEST +30 COINS')}else{toast('CHEST LOCKED — FIND A KEY');continue}}else if(e.type==='vault'){if(keysFound>0){keysFound--;runCoins+=75;diamondsFound++;treasureFound++;sound(660,.35,'triangle');toast('SECRET TEMPLE ROOM +75 COINS + DIAMOND')}else{toast('SECRET ROOM LOCKED — FIND A GOLDEN KEY');continue}}else if(e.type==='shield'){shieldTime=8;toast('SHIELD ACTIVE')}else if(e.type==='magnet'){magnetTime=10;toast('COIN MAGNET ACTIVE')}else if(e.type==='boost'){boostTime=4;toast('SPEED BOOST!')}score=Math.floor(distance+runCoins*10+diamondsFound*50+treasureFound*100);scene.remove(e.group);entities.splice(i,1);continue}}
+   else if(Math.abs(e.z-player.position.z)<1.0&&Math.abs(e.group.position.x-player.position.x)<.85&&invuln<=0){
+    let safe=(e.type==='branch'&&sliding>0)||(e.type!=='branch'&&e.type!=='gap'&&player.position.y>1.05)||(e.type==='gap'&&player.position.y>1.0);
+    if(!safe){if(shieldTime>0){shieldTime=0;invuln=.8;sound(500,.18,'triangle');toast('SHIELD SAVED YOU!');scene.remove(e.group);entities.splice(i,1);continue}invuln=1.0;monsterGap-=2.4;shake=.35;sound(110,.25,'sawtooth',.1);toast('WATCH OUT!');if(monsterGap<2.8){gameOver();return}}
+   }
+  }
+  if(Math.floor(distance)%100<speed*dt) { /* score refresh handled below */ }
+  $('score').textContent=score;$('distance').textContent=Math.floor(distance);$('runCoins').textContent=runCoins;$('keys').textContent=keysFound;$('diamonds').textContent=diamondsFound;
+  cleanup();
+ }
+ // Move decorative world towards camera to simulate endless forward running
+ for(let o of decor){o.position.z+=state==='playing'?speed*dt:0}
+ // camera smoothing and collision shake
+ let desired=new THREE.Vector3(player.position.x*.35,5.1+player.position.y*.2,10.5);
+ camera.position.lerp(desired,1-Math.exp(-4*dt));camera.lookAt(player.position.x*.25,1.2,player.position.z-5);
+ if(shake>0){shake-=dt;camera.position.x+=(Math.random()-.5)*shake*1.8}
+ for(let p of particles){p.life-=dt}
+ monster.rotation.z=Math.sin(worldTime*5)*.05;monster.position.y=Math.abs(Math.sin(worldTime*7))*.12;roarClock+=dt;monsterMouth.scale.y=.08+(Math.sin(worldTime*3.1)>0.94?.45:0);if(roarClock>9&&state==='playing'){roarClock=0;sound(72,.32,'sawtooth',.045)}
+}
+function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.04);last=now;update(dt);renderer.render(scene,camera)}
+requestAnimationFrame(animate);
+</script>
+</body></html>
