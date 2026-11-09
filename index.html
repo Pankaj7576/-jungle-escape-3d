@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#092b1b">
-<title>JUNGLE ESCAPE 3D</title>
+<meta name="description" content="An atmospheric 3D endless runner through ancient Indian jungle temples."><title>JUNGLE ESCAPE 3D – THE LOST TEMPLE</title>
 <style>
 :root{--gold:#ffd45a;--green:#2be28a;--panel:rgba(5,25,18,.88);--white:#f5fff8}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#061a13;color:var(--white);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;touch-action:none}
@@ -83,64 +83,111 @@ let best=store.get('best',0),bank=store.get('bank',0),settings=store.get('settin
 $('bestMenu').textContent=best;$('bankMenu').textContent=bank;
 $('quality').value=settings.quality;$('musicVol').value=settings.musicVol;$('sfxVol').value=settings.sfxVol;$('musicOn').value=settings.musicOn;
 
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bd9c2);scene.fog=new THREE.FogExp2(0x9bd9c2,.012);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,180);
-camera.position.set(0,5.5,10);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x879b8b);scene.fog=new THREE.FogExp2(0x879b8b,.0095);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,220);
+camera.position.set(0,4.6,12.8);
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:settings.quality!=='Low',powerPreference:'high-performance'});}
 catch(e){document.querySelector('#menuPanel .sub').textContent='This browser could not start WebGL. Please try Chrome with hardware acceleration enabled.';throw e;}
-renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.7:1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=settings.quality!=='Low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.6:1.15));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=settings.quality!=='Low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
 $('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xd8fff0,0x35543b,2));
-const sun=new THREE.DirectionalLight(0xfff2c7,2.4);sun.position.set(-8,15,8);sun.castShadow=renderer.shadowMap.enabled;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xcbd9d0,0x252b20,1.35));
+const sun=new THREE.DirectionalLight(0xffdfb0,3.1);sun.position.set(-9,18,7);sun.castShadow=renderer.shadowMap.enabled;sun.shadow.mapSize.set(settings.quality==='High'?2048:1024,settings.quality==='High'?2048:1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=22;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.00025;scene.add(sun);
+const fillLight=new THREE.DirectionalLight(0x9bb8aa,.65);fillLight.position.set(8,7,-12);scene.add(fillLight);
 
+function proceduralTexture(base,seed=1,scale=1){
+ const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
+ let h=seed>>>0;const rnd=()=>{h=(h*1664525+1013904223)>>>0;return h/4294967296};
+ for(let i=0;i<11500;i++){const v=Math.floor(rnd()*58)-29,a=.035+rnd()*.14;ctx.fillStyle=`rgba(${v>0?255:0},${v>0?255:0},${v>0?255:0},${a})`;const x=rnd()*256,y=rnd()*256,r=.4+rnd()*2.2;ctx.fillRect(x,y,r*scale,r*scale)}
+ for(let i=0;i<28;i++){ctx.strokeStyle=`rgba(20,17,12,${.035+rnd()*.07})`;ctx.lineWidth=.5+rnd()*1.5;ctx.beginPath();let y=rnd()*256;ctx.moveTo(0,y);ctx.bezierCurveTo(80,y-8,160,y+8,256,y+(rnd()-.5)*14);ctx.stroke()}
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;
+}
+const stoneTex=proceduralTexture('#756b58',17),roadTex=proceduralTexture('#51483a',31,1.2),barkTex=proceduralTexture('#493526',53),clothTex=proceduralTexture('#343a32',71),leafTex=proceduralTexture('#263e2d',91);
 const mat=(color,roughness=.85)=>new THREE.MeshStandardMaterial({color,roughness});
-const mats={road:mat(0x786044),edge:mat(0x4d3827),leaf:mat(0x1c7443),leaf2:mat(0x3a9b55),trunk:mat(0x654329),stone:mat(0xa18b67),saffron:mat(0x9c4f25),turquoise:mat(0x268d83),darkStone:mat(0x51483c),gold:new THREE.MeshStandardMaterial({color:0xffc928,metalness:.72,roughness:.22,emissive:0x8b5600,emissiveIntensity:.5}),wood:mat(0x8a5128),rock:mat(0x555c4c),fire:new THREE.MeshBasicMaterial({color:0xff6a12}),water:new THREE.MeshStandardMaterial({color:0x2b9caa,metalness:.25,roughness:.2})};
+const stoneMat=new THREE.MeshStandardMaterial({color:0xb3a58a,map:stoneTex,bumpMap:stoneTex,bumpScale:.075,roughness:.96});
+const roadMat=new THREE.MeshStandardMaterial({color:0x9a8b70,map:roadTex,bumpMap:roadTex,bumpScale:.09,roughness:1});
+const barkMat=new THREE.MeshStandardMaterial({color:0x8a6747,map:barkTex,bumpMap:barkTex,bumpScale:.12,roughness:.95});
+const clothMat=new THREE.MeshStandardMaterial({color:0x858477,map:clothTex,bumpMap:clothTex,bumpScale:.025,roughness:.9});
+const leafMat=new THREE.MeshStandardMaterial({color:0x6d8761,map:leafTex,roughness:.94,side:THREE.DoubleSide});
+const mats={road:roadMat,edge:mat(0x342d24),leaf:leafMat,leaf2:new THREE.MeshStandardMaterial({color:0x78906a,map:leafTex,roughness:.9}),trunk:barkMat,stone:stoneMat,saffron:mat(0x80543a),turquoise:mat(0x477b73),darkStone:mat(0x403c34),gold:new THREE.MeshStandardMaterial({color:0xffcf55,metalness:.88,roughness:.2,emissive:0x5d3300,emissiveIntensity:.22}),wood:new THREE.MeshStandardMaterial({color:0x795536,map:barkTex,bumpMap:barkTex,bumpScale:.08,roughness:.9}),rock:stoneMat,fire:new THREE.MeshBasicMaterial({color:0xff7a28}),water:new THREE.MeshPhysicalMaterial({color:0x387e83,metalness:.18,roughness:.16,transparent:true,opacity:.82,clearcoat:.8,clearcoatRoughness:.12})};
 const geo={box:new THREE.BoxGeometry(1,1,1),sphere:new THREE.SphereGeometry(1,12,10),cyl:new THREE.CylinderGeometry(.5,.6,1,8),coin:new THREE.CylinderGeometry(.34,.34,.09,20)};
 function mesh(g,m,parent,x=0,y=0,z=0,sx=1,sy=1,sz=1){let o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
-const ground=mesh(geo.box,mats.road,scene,0,-.25,-30,8,.5,100);ground.receiveShadow=true;
+const ground=mesh(geo.box,mats.road,scene,0,-.25,-42,8.4,.5,150);ground.receiveShadow=true;
+const shoulderMat=new THREE.MeshStandardMaterial({color:0x4a4639,map:stoneTex,bumpMap:stoneTex,bumpScale:.12,roughness:1});mesh(geo.box,shoulderMat,scene,-4.55,-.34,-42,1.1,.42,150);mesh(geo.box,shoulderMat,scene,4.55,-.34,-42,1.1,.42,150);
 const water=mesh(new THREE.BoxGeometry(22,.08,120),mats.water,scene,0,-1.2,-35);water.visible=false;
+const distantRidgeMat=new THREE.MeshStandardMaterial({color:0x46584a,roughness:1});
+for(let i=0;i<9;i++){let ridge=mesh(new THREE.ConeGeometry(7+Math.random()*5,8+Math.random()*8,7),distantRidgeMat,scene,(i-4)*8,3,-105-Math.random()*18);ridge.rotation.z=(Math.random()-.5)*.2;ridge.castShadow=false;}
 const lanes=[-2.15,0,2.15];
 const player=new THREE.Group();scene.add(player);player.position.set(0,0,2);
 const body=new THREE.Group();player.add(body);
-mesh(geo.sphere,mat(0xc78a54),body,0,1.52,0,.38,.48,.3);
-mesh(geo.sphere,mat(0x9b512b),body,0,1.02,0,.42,.52,.27);
-// Original Indian treasure hunter: adventure jacket, belt, backpack and leather boots
-mesh(geo.box,mat(0x51311f),body,0,1.05,-.32,.34,.48,.18);mesh(geo.box,mat(0xc59b52),body,0,1.02,.02,.48,.09,.31);
-mesh(geo.box,mat(0x704324),body,0,1.35,-.34,.34,.42,.22);mesh(geo.box,mat(0x382719),body,0,.18,-.05,.44,.18,.34);
-mesh(geo.sphere,mat(0x9a613c),body,0,2.08,0,.29,.31,.29);
-mesh(geo.sphere,mat(0x34251e),body,0,2.31,-.02,.31,.16,.3);
-mesh(geo.sphere,mat(0x171c18),body,-.11,2.1,.25,.045,.055,.035);mesh(geo.sphere,mat(0x171c18),body,.11,2.1,.25,.045,.055,.035);
+const skin=new THREE.MeshStandardMaterial({color:0x9b6748,roughness:.78});
+const jacket=new THREE.MeshStandardMaterial({color:0x343e35,map:clothTex,bumpMap:clothTex,bumpScale:.025,roughness:.88});
+const pants=new THREE.MeshStandardMaterial({color:0x51483a,map:clothTex,roughness:.95});
+const leather=new THREE.MeshStandardMaterial({color:0x38271d,map:barkTex,roughness:.72});
+const brass=new THREE.MeshStandardMaterial({color:0x9b7943,metalness:.72,roughness:.34});
+const capsule=(r,len,material,parent,x,y,z)=>{const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,5,10),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m};
+// Anatomically proportioned adventurer: layered jacket, collar, belt, straps, backpack and boots.
+capsule(.31,.52,jacket,body,0,1.35,0);
+mesh(new THREE.BoxGeometry(.64,.12,.38),leather,body,0,1.05,0);
+mesh(new THREE.BoxGeometry(.13,.13,.08),brass,body,0,1.05,.22);
+mesh(new THREE.BoxGeometry(.34,.46,.2),leather,body,0,1.43,-.31);
+for(let side of [-1,1]){let strap=mesh(new THREE.BoxGeometry(.075,.52,.045),brass,body,side*.22,1.39,.18);strap.rotation.z=side*-.12;}
+// neck and head with ears, nose, brow and hair silhouette
+capsule(.105,.12,skin,body,0,1.78,0);
+mesh(new THREE.SphereGeometry(.205,20,16),skin,body,0,2.02,.015,1,1.18,.9);
+mesh(new THREE.SphereGeometry(.208,16,12),leather,body,0,2.17,-.025,1.03,.54,1.02);
+mesh(new THREE.SphereGeometry(.09,12,8),leather,body,0,2.27,-.01,1.15,.5,1.1);
+for(let side of [-1,1]){mesh(new THREE.SphereGeometry(.045,10,8),skin,body,side*.205,2.01,0);mesh(new THREE.SphereGeometry(.027,10,8),mat(0x171713),body,side*.078,2.02,.196);mesh(new THREE.BoxGeometry(.075,.025,.035),leather,body,side*.078,2.075,.19);}
+mesh(new THREE.ConeGeometry(.045,.11,8),skin,body,0,1.99,.215);
 const limbs=[];
 for(let side of [-1,1]){
- const arm=new THREE.Group();arm.position.set(side*.43,1.35,0);body.add(arm);mesh(geo.cyl,mat(0xc78a54),arm,0,-.27,0,.13,.55,.13);limbs.push(arm);
- const leg=new THREE.Group();leg.position.set(side*.19,.73,0);body.add(leg);mesh(geo.cyl,mat(0x293a30),leg,0,-.28,0,.16,.58,.17);mesh(geo.box,mat(0x3a2418),leg,0,-.58,.08,.25,.16,.42);limbs.push(leg);
+ const arm=new THREE.Group();arm.position.set(side*.37,1.55,0);body.add(arm);capsule(.105,.34,jacket,arm,0,-.24,0);capsule(.075,.28,skin,arm,0,-.55,.015);mesh(new THREE.BoxGeometry(.14,.12,.14),leather,arm,0,-.72,.04);limbs.push(arm);
+ const leg=new THREE.Group();leg.position.set(side*.16,.91,0);body.add(leg);capsule(.12,.42,pants,leg,0,-.27,0);capsule(.105,.28,pants,leg,0,-.62,.02);mesh(new THREE.BoxGeometry(.25,.16,.4),leather,leg,0,-.82,.09);mesh(new THREE.BoxGeometry(.255,.035,.41),mat(0x171511),leg,0,-.9,.09);limbs.push(leg);
 }
-const monster=new THREE.Group();scene.add(monster);monster.position.set(0,0,7);
-// Ancient forest guardian: stone-green hide, crown horns and broad shoulders
-mesh(geo.sphere,mat(0x315f37),monster,0,1.25,0,.62,.82,.5);
-mesh(geo.sphere,mat(0x315f37),monster,0,2.1,-.03,.46,.45,.42);
-for(let side of [-1,1]){let horn=mesh(geo.cyl,mat(0xc6a66a),monster,side*.3,2.53,-.02,.11,.5,.11);horn.rotation.z=side*-.35;mesh(geo.sphere,mat(0x27442c),monster,side*.53,1.42,0,.28,.48,.28)}
-const monsterMouth=mesh(geo.box,mat(0x170e0b),monster,0,1.91,.42,.34,.16,.08);
-mesh(geo.sphere,mat(0xffd45a),monster,-.17,2.15,.34,.08,.09,.06);mesh(geo.sphere,mat(0xffd45a),monster,.17,2.15,.34,.08,.09,.06);
-mesh(geo.box,mat(0x211b17),monster,0,1.88,.4,.38,.12,.12);
-for(let s of [-1,1]){mesh(geo.cyl,mat(0x315f37),monster,s*.48,.65,0,.18,.7,.18);mesh(geo.cyl,mat(0x315f37),monster,s*.23,.35,0,.2,.65,.2)}
+// Guardian is deliberately scaled down and kept visually behind the runner.
+const monster=new THREE.Group();scene.add(monster);monster.scale.setScalar(.62);monster.position.set(0,0,5.6);
+const hide=new THREE.MeshStandardMaterial({color:0x34483a,roughness:.93,map:leafTex,bumpMap:leafTex,bumpScale:.06});
+const hideDark=new THREE.MeshStandardMaterial({color:0x202d27,roughness:.95});
+const bone=new THREE.MeshStandardMaterial({color:0xb5a17b,roughness:.78});
+capsule(.48,.58,hide,monster,0,1.25,0);
+mesh(new THREE.SphereGeometry(.34,18,14),hide,monster,0,2.03,.02,1.05,1.15,.95);
+mesh(new THREE.SphereGeometry(.29,16,12),hideDark,monster,0,1.91,.23,1,.52,.5);
+mesh(new THREE.BoxGeometry(.36,.12,.09),hideDark,monster,0,1.83,.42);
+for(let side of [-1,1]){
+ const horn=mesh(new THREE.ConeGeometry(.095,.55,12),bone,monster,side*.23,2.43,-.02);horn.rotation.z=side*.3;
+ capsule(.19,.5,hide,monster,side*.48,1.33,0);
+ mesh(new THREE.SphereGeometry(.065,12,10),new THREE.MeshStandardMaterial({color:0xe7b85c,emissive:0x8a4a12,emissiveIntensity:.8}),monster,side*.13,2.08,.29);
+ mesh(new THREE.ConeGeometry(.045,.18,8),bone,monster,side*.1,1.76,.43).rotation.x=Math.PI;
+}
+for(let i=0;i<5;i++){let spike=mesh(new THREE.ConeGeometry(.08,.27,8),bone,monster,-.28+i*.14,1.68,-.32);spike.rotation.x=-.5;}
+const monsterMouth=mesh(new THREE.BoxGeometry(.26,.09,.045),hideDark,monster,0,1.88,.44);
+for(let side of [-1,1]){capsule(.13,.42,hide,monster,side*.2,.47,0);}
 
 let state='menu',lane=1,targetLane=1,speed=15,distance=0,runCoins=0,score=0,jumpV=0,sliding=0,invuln=0,monsterGap=8,shake=0,spawnAt=-15,worldTime=0;
 let keysFound=0,diamondsFound=0,shieldTime=0,magnetTime=0,boostTime=0,treasureFound=0,roarClock=0;
 const entities=[],decor=[],particles=[];let last=performance.now(),spawnCounter=0;
-function tree(x,z,scale=1){let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);mesh(geo.cyl,mats.trunk,g,0,1.5,0,.35*scale,3*scale,.35*scale);for(let i=0;i<3;i++){let crown=mesh(geo.sphere,i%2?mats.leaf:mats.leaf2,g,0,(3+i*.45)*scale,0,(1.35-i*.18)*scale,(1.15-i*.12)*scale,(1.25-i*.15)*scale);crown.castShadow=false;}decor.push(g);return g}
+function tree(x,z,scale=1){
+ let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);g.rotation.z=(Math.random()-.5)*.08;
+ const trunk=mesh(new THREE.CylinderGeometry(.2*scale,.42*scale,4.4*scale,14,5),mats.trunk,g,0,2.2*scale,0);trunk.rotation.z=(Math.random()-.5)*.1;
+ for(let b=0;b<4;b++){let a=b*Math.PI*2/4+.4,br=mesh(new THREE.CylinderGeometry(.045*scale,.12*scale,1.7*scale,8),mats.trunk,g,Math.cos(a)*.48*scale,2.65*scale,Math.sin(a)*.48*scale);br.rotation.z=Math.cos(a)*-.62;br.rotation.x=Math.sin(a)*.62;}
+ // Layered foliage clusters with irregular silhouettes, not primitive low-poly tree crowns.
+ for(let i=0;i<18;i++){let a=Math.random()*Math.PI*2,y=(3.1+Math.random()*2.0)*scale,r=(.45+Math.random()*.95)*scale;let leaf=mesh(new THREE.SphereGeometry(1,12,9),Math.random()<.5?mats.leaf:mats.leaf2,g,Math.cos(a)*r,y,Math.sin(a)*r,(.32+Math.random()*.35)*scale,(.42+Math.random()*.48)*scale,(.3+Math.random()*.35)*scale);leaf.rotation.set(Math.random(),Math.random()*Math.PI,Math.random());leaf.castShadow=false;}
+ decor.push(g);return g;
+}
 function templeShrine(x,z,scale=1){
  let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);g.scale.setScalar(scale);
- const stone=mats.stone, dark=mats.darkStone;
- mesh(geo.box,stone,g,0,.22,0,3.2,.42,2.2);
- for(let xx of [-1.05,1.05]){mesh(geo.box,stone,g,xx,1.25,0,.38,2,.42);for(let yy of [.45,1.05,1.75])mesh(geo.box,dark,g,xx,yy,.02,.48,.12,.5)}
- mesh(geo.box,stone,g,0,2.28,0,2.65,.38,.75);mesh(geo.box,dark,g,0,2.57,0,2.2,.18,.65);
- // stepped Indian-style shikhara silhouette
- for(let i=0;i<4;i++)mesh(geo.box,stone,g,0,2.85+i*.34,-.12,.0+2.1-i*.34,.42,.68);
- mesh(geo.sphere,mats.gold,g,0,4.35,-.12,.13,.18,.13);
- // entrance shadow
- mesh(geo.box,mat(0x211b16),g,0,.95,.23,.85,1.55,.06);
+ const stone=mats.stone,dark=mats.darkStone;
+ mesh(new THREE.BoxGeometry(3.7,.38,2.8),stone,g,0,.2,0);
+ mesh(new THREE.BoxGeometry(3.35,.16,2.48),dark,g,0,.47,0);
+ for(let xx of [-1.12,1.12]){for(let zz of [-.78,.78]){mesh(new THREE.CylinderGeometry(.17,.22,2.25,12),stone,g,xx,1.55,zz);mesh(new THREE.CylinderGeometry(.25,.25,.16,12),dark,g,xx,2.62,zz);mesh(new THREE.CylinderGeometry(.23,.28,.14,12),stone,g,xx,.48,zz);}}
+ mesh(new THREE.BoxGeometry(3.25,.3,2.5),stone,g,0,2.78,0);
+ // stepped shikhara with carved horizontal mouldings and a finial
+ for(let i=0;i<6;i++){let w=2.65-i*.34,y=3.02+i*.34;mesh(new THREE.BoxGeometry(w,.34,1.35-i*.14),stone,g,0,y,-.12);mesh(new THREE.BoxGeometry(w+.08,.055,1.42-i*.14),dark,g,0,y-.15,-.12);}
+ mesh(new THREE.SphereGeometry(.13,12,10),mats.gold,g,0,5.12,-.12,.8,1.45,.8);
+ mesh(new THREE.BoxGeometry(.82,1.65,.08),mat(0x171510),g,0,1.35,1.27);
+ for(let side of [-1,1]){for(let y of [.85,1.25,1.65,2.05])mesh(new THREE.BoxGeometry(.12,.07,.035),dark,g,side*.95,y,1.3);}
+ // small sculptural reliefs on the facade
+ for(let x of [-.72,0,.72]){mesh(new THREE.SphereGeometry(.16,10,8),dark,g,x,2.34,1.29,.7,1.3,.3);mesh(new THREE.BoxGeometry(.26,.06,.05),stone,g,x,2.12,1.32);}
  decor.push(g);return g;
 }
 function torch(x,z){let g=new THREE.Group();scene.add(g);g.position.set(x,0,z);mesh(geo.cyl,mats.wood,g,0,.75,0,.09,1.5,.09);mesh(geo.sphere,mats.fire,g,0,1.55,0,.22,.34,.22);let glow=new THREE.PointLight(0xff9b35,.8,7);glow.position.set(0,1.5,0);g.add(glow);decor.push(g)}
@@ -229,7 +276,7 @@ function update(dt){
   body.rotation.x=sliding>0?-.7:0;
   player.position.z=2;
   monsterGap=THREE.MathUtils.damp(monsterGap,invuln>0?Math.max(2.5,monsterGap-.8):Math.min(9,monsterGap+.2),.3,dt);
-  monster.position.x=THREE.MathUtils.damp(monster.position.x,player.position.x*.75,2,dt);monster.position.z=player.position.z+monsterGap;
+  monster.position.x=THREE.MathUtils.damp(monster.position.x,player.position.x*.75,2,dt);monster.position.z=player.position.z+Math.min(monsterGap,4.2);
   if(monsterGap<2.8){gameOver();return}
   if(invuln>0)invuln-=dt;
   spawnAt-=speed*dt;if(spawnAt<-20){spawnPattern(-110);segment(-150);spawnAt=0}
@@ -247,8 +294,8 @@ function update(dt){
  // Move decorative world towards camera to simulate endless forward running
  for(let o of decor){o.position.z+=state==='playing'?speed*dt:0}
  // camera smoothing and collision shake
- let desired=new THREE.Vector3(player.position.x*.35,5.1+player.position.y*.2,10.5);
- camera.position.lerp(desired,1-Math.exp(-4*dt));camera.lookAt(player.position.x*.25,1.2,player.position.z-5);
+ let desired=new THREE.Vector3(player.position.x*.28,4.35+player.position.y*.18,12.4);
+ camera.position.lerp(desired,1-Math.exp(-4*dt));camera.lookAt(player.position.x*.18,1.15,player.position.z-6.2);
  if(shake>0){shake-=dt;camera.position.x+=(Math.random()-.5)*shake*1.8}
  for(let p of particles){p.life-=dt}
  monster.rotation.z=Math.sin(worldTime*5)*.05;monster.position.y=Math.abs(Math.sin(worldTime*7))*.12;roarClock+=dt;monsterMouth.scale.y=.08+(Math.sin(worldTime*3.1)>0.94?.45:0);if(roarClock>9&&state==='playing'){roarClock=0;sound(72,.32,'sawtooth',.045)}

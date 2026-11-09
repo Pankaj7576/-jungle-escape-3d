@@ -1,6 +1,6 @@
 # JUNGLE ESCAPE 3D — THE LOST TEMPLE
 
-A procedural 3D endless runner with an Indian adventure / ancient lost-temple theme. The project is designed for modern Android and desktop browsers.
+A browser-based 3D endless runner with an Indian ancient-temple adventure theme. This revision upgrades the original primitive scene with procedural surface textures, physically based materials, a revised humanoid adventurer, a smaller guardian, more detailed temple architecture, improved shadows and a cinematic third-person camera.
 
 ## Run
 1. Extract `JUNGLE_ESCAPE_3D.zip`.
@@ -29,14 +29,23 @@ Three.js 0.160.0 is loaded from jsDelivr at runtime, so an internet connection i
 ## Audio
 Sound effects are synthesized with Web Audio. There are no downloaded recordings or music tracks. Browser audio starts after the player taps Play.
 
+## Visual revision
+- Procedural stone, road, bark, cloth and foliage texture maps with bump detail
+- PBR-style roughness and metalness materials, ACES filmic tone mapping and improved directional lighting
+- Revised human-proportioned adventurer with layered clothing, backpack, straps, boots and articulated limbs
+- Reduced guardian scale to keep the player readable in the chase camera
+- More detailed temple facade with pillars, mouldings, shikhara tiers and relief details
+- Layered tree trunks, branches and foliage clusters; distant ridge silhouettes and atmospheric fog
+- Revised third-person camera framing and road shoulders
+
 ## Performance
-Low/Medium/High quality controls pixel ratio, antialiasing and shadow settings. The game uses procedural low-poly geometry to keep the asset footprint small. Actual performance varies by device and browser.
+Low/Medium/High quality controls pixel ratio, antialiasing and shadow settings. Procedural textures and geometry avoid large downloads. Actual performance varies by device and browser.
 
 ## Limitations / honest status
-- Character and guardian are procedural mesh characters with code-driven motion, not imported skeletal animation rigs.
-- The waterfall, bridges, temple facades and ruins are stylized procedural scenery, not photogrammetry or historically exact reconstructions.
+- The player and guardian are still original procedural meshes with code-driven motion, not externally sourced high-detail skeletal GLB rigs. This is a visual improvement, not photorealistic AAA asset quality.
+- The waterfall, bridges, temple facades, vegetation and ruins are procedural scenery, not photogrammetry or historically exact reconstructions.
 - The hidden vault is represented as a rare locked gate/treasure encounter on a lane, rather than a separate streamed interior level.
 - Audio is synthesized; no recorded birds, waterfall ambience, temple bells or licensed soundtrack are bundled.
-- This project has been source-checked, but has not been physically play-tested on a range of Android devices. WebGL, ES modules and network access to the Three.js CDN are required.
+- JavaScript syntax is checked, but this revision has not been physically play-tested on a range of Android devices. WebGL, ES modules and network access to the Three.js CDN are required.
 
 See `ASSET_CREDITS.md` for dependency and asset provenance.
