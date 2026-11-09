@@ -89,10 +89,10 @@ camera.position.set(0,4.6,12.8);
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:settings.quality!=='Low',powerPreference:'high-performance'});}
 catch(e){document.querySelector('#menuPanel .sub').textContent='This browser could not start WebGL. Please try Chrome with hardware acceleration enabled.';throw e;}
-renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.75:1.15));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=settings.quality!=='Low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
+renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='High'?1.75:1.15));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=settings.quality!=='Low';renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;
 $('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xd9e5d2,0x30271d,1.55));
-const sun=new THREE.DirectionalLight(0xffd49a,3.35);sun.position.set(-9,18,7);sun.castShadow=renderer.shadowMap.enabled;sun.shadow.mapSize.set(settings.quality==='High'?2048:1024,settings.quality==='High'?2048:1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=22;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.00025;scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xc9f5ff,0x59402c,1.9));
+const sun=new THREE.DirectionalLight(0xffe39a,3.8);sun.position.set(-9,18,7);sun.castShadow=renderer.shadowMap.enabled;sun.shadow.mapSize.set(settings.quality==='High'?2048:1024,settings.quality==='High'?2048:1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=22;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.00025;scene.add(sun);
 const fillLight=new THREE.DirectionalLight(0x9bb8aa,.65);fillLight.position.set(8,7,-12);scene.add(fillLight);
 
 function proceduralTexture(base,seed=1,scale=1){
@@ -119,10 +119,10 @@ const distantRidgeMat=new THREE.MeshStandardMaterial({color:0x46584a,roughness:1
 for(let i=0;i<9;i++){let ridge=mesh(new THREE.ConeGeometry(7+Math.random()*5,8+Math.random()*8,7),distantRidgeMat,scene,(i-4)*8,3,-105-Math.random()*18);ridge.rotation.z=(Math.random()-.5)*.2;ridge.castShadow=false;}
 const lanes=[-2.15,0,2.15];
 const player=new THREE.Group();scene.add(player);player.position.set(0,0,2);
-const body=new THREE.Group();player.add(body);
-const skin=new THREE.MeshStandardMaterial({color:0x9b6748,roughness:.78});
-const jacket=new THREE.MeshStandardMaterial({color:0x343e35,map:clothTex,bumpMap:clothTex,bumpScale:.025,roughness:.88});
-const pants=new THREE.MeshStandardMaterial({color:0x51483a,map:clothTex,roughness:.95});
+const body=new THREE.Group();player.add(body);body.rotation.y=Math.PI;
+const skin=new THREE.MeshStandardMaterial({color:0xd98b58,roughness:.78});
+const jacket=new THREE.MeshStandardMaterial({color:0x16a6a0,map:clothTex,bumpMap:clothTex,bumpScale:.025,roughness:.88});
+const pants=new THREE.MeshStandardMaterial({color:0x3457a6,map:clothTex,roughness:.95});
 const leather=new THREE.MeshStandardMaterial({color:0x38271d,map:barkTex,roughness:.72});
 const brass=new THREE.MeshStandardMaterial({color:0x9b7943,metalness:.72,roughness:.34});
 const capsule=(r,len,material,parent,x,y,z)=>{const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,5,10),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m};
@@ -132,23 +132,24 @@ mesh(new THREE.BoxGeometry(.64,.12,.38),leather,body,0,1.05,0);
 mesh(new THREE.BoxGeometry(.13,.13,.08),brass,body,0,1.05,.22);
 mesh(new THREE.BoxGeometry(.34,.46,.2),leather,body,0,1.43,-.31);
 for(let side of [-1,1]){let strap=mesh(new THREE.BoxGeometry(.075,.52,.045),brass,body,side*.22,1.39,.18);strap.rotation.z=side*-.12;}
-// neck and head with ears, nose, brow and hair silhouette
+// Neck plus a separately pivoted head: torso faces forward while the hero looks back.
 capsule(.105,.12,skin,body,0,1.78,0);
-mesh(new THREE.SphereGeometry(.205,20,16),skin,body,0,2.02,.015,1,1.18,.9);
-mesh(new THREE.SphereGeometry(.208,16,12),leather,body,0,2.17,-.025,1.03,.54,1.02);
-mesh(new THREE.SphereGeometry(.09,12,8),leather,body,0,2.27,-.01,1.15,.5,1.1);
-for(let side of [-1,1]){mesh(new THREE.SphereGeometry(.045,10,8),skin,body,side*.205,2.01,0);mesh(new THREE.SphereGeometry(.027,10,8),mat(0x171713),body,side*.078,2.02,.196);mesh(new THREE.BoxGeometry(.075,.025,.035),leather,body,side*.078,2.075,.19);}
-mesh(new THREE.ConeGeometry(.045,.11,8),skin,body,0,1.99,.215);
+const head=new THREE.Group();head.position.set(0,1.82,0);head.rotation.y=Math.PI;body.add(head);
+mesh(new THREE.SphereGeometry(.205,20,16),skin,head,0,.20,.015,1,1.18,.9);
+mesh(new THREE.SphereGeometry(.208,16,12),leather,head,0,.35,-.025,1.03,.54,1.02);
+mesh(new THREE.SphereGeometry(.09,12,8),leather,head,0,.45,-.01,1.15,.54,1.02);
+for(let side of [-1,1]){mesh(new THREE.SphereGeometry(.045,10,8),skin,head,side*.205,.19,0);mesh(new THREE.SphereGeometry(.027,10,8),mat(0x171713),head,side*.078,.20,.196);mesh(new THREE.BoxGeometry(.075,.025,.035),leather,head,side*.078,.255,.19);}
+mesh(new THREE.ConeGeometry(.045,.11,8),skin,head,0,.17,.215);
 const limbs=[];
 for(let side of [-1,1]){
  const arm=new THREE.Group();arm.position.set(side*.37,1.55,0);body.add(arm);capsule(.105,.34,jacket,arm,0,-.24,0);capsule(.075,.28,skin,arm,0,-.55,.015);mesh(new THREE.BoxGeometry(.14,.12,.14),leather,arm,0,-.72,.04);limbs.push(arm);
  const leg=new THREE.Group();leg.position.set(side*.16,.91,0);body.add(leg);capsule(.12,.42,pants,leg,0,-.27,0);capsule(.105,.28,pants,leg,0,-.62,.02);mesh(new THREE.BoxGeometry(.25,.16,.4),leather,leg,0,-.82,.09);mesh(new THREE.BoxGeometry(.255,.035,.41),mat(0x171511),leg,0,-.9,.09);limbs.push(leg);
 }
 // Guardian is deliberately scaled down and kept visually behind the runner.
-const monster=new THREE.Group();scene.add(monster);monster.scale.setScalar(.62);monster.position.set(0,0,5.6);
-const hide=new THREE.MeshStandardMaterial({color:0x34483a,roughness:.93,map:leafTex,bumpMap:leafTex,bumpScale:.06});
-const hideDark=new THREE.MeshStandardMaterial({color:0x202d27,roughness:.95});
-const bone=new THREE.MeshStandardMaterial({color:0xb5a17b,roughness:.78});
+const monster=new THREE.Group();scene.add(monster);monster.scale.setScalar(1.22);monster.position.set(0,0,6.0);
+const hide=new THREE.MeshStandardMaterial({color:0x55b94b,roughness:.93,map:leafTex,bumpMap:leafTex,bumpScale:.06});
+const hideDark=new THREE.MeshStandardMaterial({color:0x253b78,roughness:.95});
+const bone=new THREE.MeshStandardMaterial({color:0xffd45a,roughness:.78});
 capsule(.48,.58,hide,monster,0,1.25,0);
 mesh(new THREE.SphereGeometry(.34,18,14),hide,monster,0,2.03,.02,1.05,1.15,.95);
 mesh(new THREE.SphereGeometry(.29,16,12),hideDark,monster,0,1.91,.23,1,.52,.5);
@@ -156,7 +157,7 @@ mesh(new THREE.BoxGeometry(.36,.12,.09),hideDark,monster,0,1.83,.42);
 for(let side of [-1,1]){
  const horn=mesh(new THREE.ConeGeometry(.095,.55,12),bone,monster,side*.23,2.43,-.02);horn.rotation.z=side*.3;
  capsule(.19,.5,hide,monster,side*.48,1.33,0);
- mesh(new THREE.SphereGeometry(.065,12,10),new THREE.MeshStandardMaterial({color:0xe7b85c,emissive:0x8a4a12,emissiveIntensity:.8}),monster,side*.13,2.08,.29);
+ mesh(new THREE.SphereGeometry(.065,12,10),new THREE.MeshStandardMaterial({color:0xffef45,emissive:0xff8a00,emissiveIntensity:.8}),monster,side*.13,2.08,.29);
  mesh(new THREE.ConeGeometry(.045,.18,8),bone,monster,side*.1,1.76,.43).rotation.x=Math.PI;
 }
 for(let i=0;i<5;i++){let spike=mesh(new THREE.ConeGeometry(.08,.27,8),bone,monster,-.28+i*.14,1.68,-.32);spike.rotation.x=-.5;}
