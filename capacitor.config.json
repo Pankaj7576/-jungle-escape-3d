@@ -1,0 +1,6 @@
+{
+  "appId": "com.jungleescape.losttemple",
+  "appName": "Jungle Escape 3D",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
