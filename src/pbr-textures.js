@@ -33,18 +33,22 @@ export function makePBRMaterial(hex, seed = 1, options = {}) {
     for (let x = 0; x < size; x++) {
       const u = x / size;
       const v = y / size;
-      const broad = Math.sin(tau * (u * 3 + seed * 0.13)) * Math.cos(tau * (v * 2 - seed * 0.07));
-      const mid = Math.sin(tau * (u * 13 + v * 7 + seed)) * 0.45;
-      const fine = (hash(x, y) - 0.5) * 0.42;
-      const grain = broad * 0.12 + mid * 0.07 + fine;
-      const stain = Math.max(0, Math.sin(tau * (u * 2.1 + v * 1.7 + seed)) - 0.68) * 0.08;
-      const shade = THREE.MathUtils.clamp(0.91 + grain - stain, 0.62, 1.12);
+      // Multi-scale mineral mottling, worn striations, tiny pits and dark deposits.
+      const broad = Math.sin(tau * (u * 2.1 + seed * 0.13)) * Math.cos(tau * (v * 1.7 - seed * 0.07));
+      const mid = Math.sin(tau * (u * 11 + v * 8 + seed)) * 0.42;
+      const fine = (hash(x, y) - 0.5) * 0.34;
+      const grain = broad * 0.17 + mid * 0.085 + fine;
+      const striation = Math.sin(tau * (u * 29 + v * 3.5 + seed * .31)) * .018;
+      const pore = Math.pow(hash(Math.floor(x / 2), Math.floor(y / 2)), 20) * .13;
+      const damp = Math.max(0, Math.sin(tau * (u * 1.8 + v * 1.3 + seed)) - 0.57) * 0.13;
+      const shade = THREE.MathUtils.clamp(0.88 + grain + striation - damp - pore, 0.48, 1.14);
       const i = (y * size + x) * 4;
       albedo.data[i] = Math.round(THREE.MathUtils.clamp(base.r * shade, 0, 1) * 255);
       albedo.data[i + 1] = Math.round(THREE.MathUtils.clamp(base.g * shade, 0, 1) * 255);
       albedo.data[i + 2] = Math.round(THREE.MathUtils.clamp(base.b * shade, 0, 1) * 255);
       albedo.data[i + 3] = 255;
-      const h = THREE.MathUtils.clamp(0.52 + broad * 0.12 + mid * 0.06 + fine * 0.18, 0, 1);
+      const fissure = Math.pow(Math.max(0, Math.sin(tau * (u * 17 + v * 13 + seed * .4))), 28) * .11;
+      const h = THREE.MathUtils.clamp(0.5 + broad * 0.18 + mid * 0.09 + fine * 0.22 + striation - pore - fissure, 0, 1);
       const g = Math.round(h * 255);
       height.data[i] = height.data[i + 1] = height.data[i + 2] = g;
       height.data[i + 3] = 255;
