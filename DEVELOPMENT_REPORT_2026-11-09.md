@@ -32,3 +32,22 @@
 ## Next milestone
 
 Acquire and optimize the CC0 hero/guardian GLBs on a machine with network access, validate their animation clips and orientation in Three.js, then add a verified Indian temple/environment model or modular CC0 temple set. Follow with Android device FPS, memory and touch-control tests.
+
+## Visual redesign milestone — 2026-11-10
+
+The first live-device review found that the original procedural scene read as cartoon-like. The art direction has therefore been rebuilt around a grounded ancient Indian stone-temple ruin rather than adding more decorative primitives.
+
+- Replaced the pale, uniformly lit atmosphere with a darker forest palette, restrained ambient fill and warm directional sunlight.
+- Rebuilt the temple silhouette around a Nagara-inspired shrine: raised jagati, mandapa columns, deep sanctum doorway, carved facade niches, stepped shikhara, amalaka/kalasha finial, weathered side walls and fallen stone blocks.
+- Reworked the causeway with raised kerbs, irregular flagstones, dark joints, retaining walls and broken masonry.
+- Reworked trees with tapered trunks, exposed roots, branching limbs, irregular canopy clusters, hanging vines and undergrowth.
+- Improved the procedural runner silhouette and guardian with expedition gear, face details, a hunched creature profile, tusks, claws and mane ridges.
+- Added multi-scale mottling, mineral streaks, pits and damp weathering to generated surface textures.
+- Kept the three-lane path and obstacle silhouettes readable; the runner and near path remain the primary focus.
+
+### Verification status
+
+- Source changes are committed to `game-updates-test`; `main` has not been modified.
+- Android build workflow fix: explicitly request only `platform-tools` from `android-actions/setup-android@v3`, because the action's old default also requests Google's retired `tools` package. Platform/build-tools are installed separately with `sdkmanager`.
+- A fresh build against the corrected workflow is still required. Do not treat the APK as ready until the workflow completes and its APK artifact is present.
+- This milestone is a procedural visual-art pass, not scanned photogrammetry or final AAA art. Character GLBs remain optional and are not bundled.
