@@ -9,7 +9,7 @@ scene.background = new THREE.Color(0x596b58);
 scene.fog = new THREE.FogExp2(0x596b58, 0.0095);
 const camera = new THREE.PerspectiveCamera(innerHeight > innerWidth ? 64 : 58, innerWidth/innerHeight, .1, 180);
 camera.position.set(0,4.25,8.8);
-const renderer = new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+const renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
 const qualityPresets={low:{pixelRatio:1,shadows:false,shadowSize:512},medium:{pixelRatio:1.25,shadows:true,shadowSize:1024},high:{pixelRatio:1.5,shadows:true,shadowSize:1536}};
 const savedQuality=localStorage.getItem('lostTempleGraphics');
@@ -19,7 +19,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.12;
 $('app').prepend(renderer.domElement);
 
 scene.add(new THREE.HemisphereLight(0xc6d1c1,0x211e17,.82));
@@ -53,6 +53,29 @@ const keyOf=(...values)=>values.map(v=>Number(v).toFixed(3)).join(':');
 function getSphereGeometry(detail=1){const key=detail===1?'16:12':'10:8';if(!sphereGeometries.has(key))sphereGeometries.set(key,new THREE.SphereGeometry(1,...(detail===1?[16,12]:[10,8])));return sphereGeometries.get(key)}
 function getCylinderGeometry(rt,rb,h,segments){const key=keyOf(rt,rb,h,segments);if(!cylinderGeometries.has(key))cylinderGeometries.set(key,new THREE.CylinderGeometry(rt,rb,h,segments));return cylinderGeometries.get(key)}
 function getConeGeometry(r,h,segments){const key=keyOf(r,h,segments);if(!coneGeometries.has(key))coneGeometries.set(key,new THREE.ConeGeometry(r,h,segments));return coneGeometries.get(key)}
+
+function capsuleBetween(parent,material,a,b,radius,radial=12){
+ const av=new THREE.Vector3(...a),bv=new THREE.Vector3(...b),delta=bv.clone().sub(av);
+ const mesh=new THREE.Mesh(new THREE.CapsuleGeometry(radius,Math.max(.02,delta.length()-radius*2),4,radial),material);
+ mesh.position.copy(av).add(bv).multiplyScalar(.5);
+ mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
+ mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+function lathe(parent,material,x,y,z,profile,segments=32){
+ const points=profile.map(([r,h])=>new THREE.Vector2(r,h));
+ const mesh=new THREE.Mesh(new THREE.LatheGeometry(points,segments),material);
+ mesh.position.set(x,y,z);mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+function tube(parent,material,points,radius,segments=32,radial=8){
+ const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
+ const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,segments,radius,radial,false),material);
+ mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+}
+const leafShape=new THREE.Shape();
+leafShape.moveTo(0,-.55);leafShape.quadraticCurveTo(.34,-.12,0,.58);leafShape.quadraticCurveTo(-.34,-.12,0,-.55);
+const leafGeo=new THREE.ShapeGeometry(leafShape,5);leafGeo.computeVertexNormals();
+const leafMat=new THREE.MeshStandardMaterial({color:0x54784a,roughness:.86,side:THREE.DoubleSide});
+
 function box(parent,material,x,y,z,sx,sy,sz,castShadow=false){const m=new THREE.Mesh(boxGeo,material);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=castShadow;m.receiveShadow=true;parent.add(m);return m}
 function sphere(parent,material,x,y,z,sx,sy,sz,detail=1,castShadow=false){const m=new THREE.Mesh(getSphereGeometry(detail),material);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=castShadow;parent.add(m);return m}
 function cyl(parent,material,x,y,z,rt,rb,h,segments=10,castShadow=false){const m=new THREE.Mesh(getCylinderGeometry(rt,rb,h,segments),material);m.position.set(x,y,z);m.castShadow=castShadow;m.receiveShadow=true;parent.add(m);return m}
@@ -62,80 +85,46 @@ const ground= new THREE.Mesh(new THREE.PlaneGeometry(220,220),M.soil);ground.rot
 const world=new THREE.Group();scene.add(world);
 const segments=[];
 const laneX=[-2.35,0,2.35];
+
 function makeTree(parent,x,z,scale=1){
  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
- // Mature tropical hardwood: tapered trunk, exposed roots and irregular branches.
- cyl(g,M.bark,0,2.15,0,.28,.43,4.3,12,true);
- for(let r=0;r<4;r++){const a=r*Math.PI/2+.35;const root=cyl(g,M.bark,Math.cos(a)*.34,.2,Math.sin(a)*.34,.11,.28,1.05,7);root.rotation.z=Math.cos(a)*.68;root.rotation.x=Math.sin(a)*.68}
- for(let b=0;b<3;b++){const a=b*2.1+.4;const branch=cyl(g,M.bark,Math.cos(a)*.62,3.35,Math.sin(a)*.55,.12,.2,1.65,8);branch.rotation.z=Math.cos(a)*-.62;branch.rotation.x=Math.sin(a)*.62}
- for(let i=0;i<9;i++){const a=i*2.399;const radius=.65+(i%3)*.25;const crown=sphere(g,i%3===0?M.leaf2:M.leaf,Math.cos(a)*radius,4.05+(i%4)*.34,Math.sin(a)*radius,.72+(i%2)*.16,.72+(i%3)*.12,.72,1);crown.rotation.y=a}
- // Hanging vines break the repeated spherical canopy silhouette.
- for(let i=0;i<3;i++){const vine=cyl(g,M.moss,Math.cos(i*2.1)*.72,3.05,Math.sin(i*2.1)*.72,.025,.018,1.15,5);vine.rotation.z=(Math.random()-.5)*.22}
+ lathe(g,M.bark,0,0,0,[[.24,0],[.34,.18],[.27,.55],[.22,1.25],[.18,2],[.14,2.8],[.09,3.65],[.025,4.25],[0,4.35]],18);
+ for(let i=0;i<5;i++){const a=i*Math.PI*2/5+.3,dx=Math.cos(a),dz=Math.sin(a);tube(g,M.bark,[[0,.38,0],[dx*.25,.22,dz*.25],[dx*.62,.08,dz*.62],[dx*.92,.035,dz*.92]],.105,12,7)}
+ for(let i=0;i<7;i++){const a=i*2.399,dx=Math.cos(a),dz=Math.sin(a),h=2.55+(i%3)*.34;const end=[dx*(1.1+(i%2)*.35),h+.7,dz*(1.1+(i%2)*.35)];tube(g,M.bark,[[0,h*.62,0],[dx*.35,h+.15,dz*.35],[dx*.78,h+.48,dz*.78],end],.085-(i%3)*.012,18,7)}
+ const count=185,leaves=new THREE.InstancedMesh(leafGeo,leafMat,count),dummy=new THREE.Object3D();leaves.frustumCulled=false;
+ for(let i=0;i<count;i++){const a=i*2.399,rad=.55+Math.sqrt((i+.5)/count)*1.65,y=3.45+Math.sin(i*1.73)*.78+Math.cos(a*2)*.18;dummy.position.set(Math.cos(a)*rad,y,Math.sin(a)*rad);dummy.rotation.set((Math.random()-.5)*1.25,a+(Math.random()-.5)*.8,(Math.random()-.5)*1.1);const sz=.42+Math.random()*.52;dummy.scale.set(sz*.68,sz,sz*.08);dummy.updateMatrix();leaves.setMatrixAt(i,dummy.matrix);leaves.setColorAt(i,new THREE.Color().setHSL(.25+Math.random()*.07,.27+Math.random()*.22,.22+Math.random()*.15))}
+ leaves.instanceMatrix.needsUpdate=true;if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;leaves.castShadow=graphicsQuality!=='low';leaves.receiveShadow=true;leaves.userData.qualityShadow=true;g.add(leaves);
+ for(let i=0;i<4;i++){const a=i*1.57+.2,xx=Math.cos(a),zz=Math.sin(a);tube(g,M.moss,[[xx*.7,4.1,zz*.7],[xx*.9,3.2,zz*.9],[xx*.84,2.3,zz*.84]],.018,12,5)}
  return g;
 }
 function makeTemple(parent,z){
  const g=new THREE.Group();g.position.z=z;parent.add(g);
- // An original North-Indian Nagara-inspired stone shrine: jagati, mandapa,
- // deep sanctum, carved pilasters and a stepped curvilinear shikhara.
- box(g,M.stoneDark,0,.28,-5.9,9.4,.42,7.2);
- box(g,M.stone,0,.58,-5.9,8.9,.34,6.8);
- for(let step=0;step<3;step++)box(g,step%2?M.stoneDark:M.stone,0,.82+step*.16,-2.75-step*.22,6.7-step*.48,.16,.72);
- // Sanctum mass and shadowed doorway.
- box(g,M.stone,0,2.0,-7.0,4.55,3.0,3.5,true);
- box(g,M.templeInterior,0,1.72,-5.22,1.42,2.25,.08);
- // Door frame with layered jambs and lintel.
- for(const x of [-.92,.92]){
-  box(g,M.stoneDark,x,1.75,-5.13,.22,2.45,.26);
-  for(let k=0;k<5;k++)box(g,k%2?M.stone:M.stoneDark,x, .72+k*.45,-4.98,.3,.08,.18);
-  cyl(g,M.stone,x,1.7,-5.0,.16,.16,1.85,10);
+ const base=new THREE.Mesh(new THREE.BoxGeometry(8.6,.58,8.6),M.stone);base.position.set(0,.29,-5.5);base.castShadow=true;base.receiveShadow=true;g.add(base);
+ for(let level=0;level<3;level++){const stair=new THREE.Mesh(new THREE.BoxGeometry(5.2-level*.7,.16,.72),M.stoneDark);stair.position.set(0,.66+level*.16,-1.12-level*.5);stair.castShadow=true;g.add(stair)}
+ const sanctum=new THREE.Mesh(new THREE.BoxGeometry(4.15,3.35,3.65),M.stone);sanctum.position.set(0,2.22,-7.05);sanctum.castShadow=true;sanctum.receiveShadow=true;g.add(sanctum);
+ for(const x of [-2.18,2.18])for(const zz of [-8.55,-5.6])lathe(g,M.stoneDark,x,.72,zz,[[.16,0],[.22,.12],[.17,.28],[.13,1.6],[.19,1.78],[.23,1.9],[.12,2.05],[0,2.05]],20);
+ box(g,M.templeInterior,0,1.72,-5.19,1.42,2.25,.08);
+ for(const x of [-.86,.86]){lathe(g,M.stoneDark,x,.62,-5.12,[[.12,0],[.17,.12],[.13,.25],[.12,1.9],[.19,2.05],[.14,2.18],[0,2.18]],20);for(let k=0;k<4;k++)sphere(g,M.stone,x,1+k*.38,-4.98,.11,.12,.09,1,true)}
+ const archShape=new THREE.Shape();archShape.moveTo(-.82,0);archShape.lineTo(-.82,1.7);archShape.absarc(0,1.7,.82,Math.PI,0,true);archShape.lineTo(.82,0);archShape.lineTo(.58,0);archShape.lineTo(.58,1.7);archShape.absarc(0,1.7,.58,0,Math.PI,false);archShape.lineTo(-.58,0);archShape.closePath();
+ const arch=new THREE.Mesh(new THREE.ExtrudeGeometry(archShape,{depth:.12,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.035,bevelThickness:.035}),M.stoneDark);arch.position.set(0,.66,-5.28);arch.castShadow=true;g.add(arch);
+ for(const x of [-3.05,-1.05,1.05,3.05])for(const zz of [-3.15,-1.35]){
+  lathe(g,M.stone,x,.72,zz,[[.34,0],[.43,.12],[.28,.25],[.2,.42],[.17,1.35],[.23,1.55],[.34,1.72],[.42,1.84],[.28,1.98],[0,1.98]],24);
+  for(let k=0;k<3;k++){const ring=new THREE.Mesh(new THREE.TorusGeometry(k===1?.3:.38,.045,8,24),M.stoneDark);ring.position.set(x,.95+k*.47,zz);ring.rotation.x=Math.PI/2;g.add(ring)}
  }
- box(g,M.stoneDark,0,2.98,-5.12,2.2,.28,.35);
- // Carved relief panels and repeated miniature niches on sanctum facade.
- for(const x of [-1.72,1.72]){
-  box(g,M.stoneDark,x,2.0,-5.18,.72,1.38,.14);
-  box(g,M.stone,x,2.0,-5.07,.52,1.18,.12);
-  sphere(g,M.stoneDark,x,2.05,-4.98,.19,.34,.09);
-  for(let k=0;k<3;k++)cyl(g,M.stoneDark,x,1.25+k*.48,-4.93,.035,.035,.28,6);
- }
- // Mandapa: stone columns with bases, fluted shafts, lotus-like capitals.
- for(const x of [-3.05,-1.05,1.05,3.05]){
-  for(const zz of [-3.35,-1.15]){
-   box(g,M.stoneDark,x,.92,zz,.78,.22,.78);
-   cyl(g,M.stone,x,1.9,zz,.27,.34,1.8,14,true);
-   for(let k=0;k<8;k++){const a=k*Math.PI/4;const rib=cyl(g,M.stoneDark,x+Math.cos(a)*.245,1.9,zz+Math.sin(a)*.245,.025,.025,1.48,5);rib.rotation.z=Math.cos(a)*.04}
-   cyl(g,M.stoneDark,x,2.82,zz,.43,.35,.22,12);
-   box(g,M.stone,x,3.03,zz,.72,.2,.72);
-  }
- }
- // Mandapa roof and ornate horizontal cornices.
- box(g,M.stoneDark,0,3.2,-2.25,7.9,.28,3.5);
- box(g,M.stone,0,3.43,-2.25,8.15,.18,3.7);
- for(let x=-3.5;x<=3.51;x+=.5){
-  const bead=sphere(g,M.stoneDark,x,3.55,-2.25,.075,.075,.075,0);bead.castShadow=true;
- }
- // Tall stepped shikhara rises behind the hall, with amalaka and kalasha.
- for(let tier=0;tier<7;tier++){
-  const y=3.55+tier*.48, width=3.65-tier*.43;
-  const level=cone(g,tier%2?M.stone:M.stoneDark,0,y,-7.15,width*.72,.82,12,true);
-  level.scale.z=1.0;
-  // vertical miniature ribs on the tower face
-  for(const side of [-1,1]){const rib=box(g,M.stone,side*width*.34,y,-6.48,.12,.72,.12);rib.rotation.z=side*.12}
- }
- cyl(g,M.stoneDark,0,6.9,-7.15,.78,.82,.28,16);
- for(let k=0;k<3;k++)cyl(g,M.stone,0,7.12+k*.13,-7.15,.48-k*.1,.48-k*.1,.12,14);
- sphere(g,M.stoneDark,0,7.55,-7.15,.23,.24,.23);
- cone(g,M.stone,0,7.9,-7.15,.12,.55,10);
- // Weathered side walls, broken edges and moss patches.
- for(const side of [-1,1]){
-  box(g,M.stoneDark,side*4.1,1.25,-4.1,.38,2.1,3.1,true);
-  for(let k=0;k<4;k++)box(g,M.stone,side*(3.92+k*.06),.9+k*.28,-4.6,.16,.12,.72);
-  sphere(g,M.moss,side*3.9,2.1,-3.1,.48,.22,.6);
- }
- // Fallen carved blocks around the ruined court.
- for(let i=0;i<5;i++){const b=box(g,i%2?M.stone:M.stoneDark,-4.4+(i%3)*.55,.22,-1.0-i*.75,.7,.38,.55,true);b.rotation.y=i*.45;b.rotation.z=(i%2)*.12}
- g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
- return g;
+ for(let k=0;k<4;k++){const roof=new THREE.Mesh(new THREE.CylinderGeometry(3.65-k*.56,4.1-k*.56,.22,4,1),k%2?M.stone:M.stoneDark);roof.rotation.y=Math.PI/4;roof.position.set(0,2.86+k*.23,-2.15);roof.castShadow=true;roof.receiveShadow=true;g.add(roof)}
+ const towerProfile=[[0,0],[1.92,0],[2.02,.18],[1.88,.42],[1.78,.78],[1.65,1.18],[1.48,1.62],[1.28,2.08],[1.08,2.55],[.86,3.03],[.65,3.48],[.43,3.88],[.22,4.22],[0,4.42]];
+ lathe(g,M.stone,0,3.48,-7.1,towerProfile,48);
+ for(let k=0;k<7;k++){const y=3.82+k*.52,rad=1.88-k*.235;const band=new THREE.Mesh(new THREE.TorusGeometry(rad,.055,8,48),M.stoneDark);band.position.set(0,y,-7.1);band.rotation.x=Math.PI/2;g.add(band)}
+ for(let i=0;i<12;i++){const a=i*Math.PI/6,pts=[];for(let k=0;k<8;k++){const y=3.58+k*.53,rad=1.9-k*.235;pts.push([Math.cos(a)*rad,y,-7.1+Math.sin(a)*rad])}tube(g,M.stoneDark,pts,.035,24,5)}
+ for(const x of [-1.55,1.55])for(const zz of [-8.15,-6.05])lathe(g,M.stoneDark,x,4.05,zz,[[0,0],[.34,0],[.38,.12],[.31,.35],[.24,.62],[.14,.9],[.04,1.16],[0,1.22]],20);
+ lathe(g,M.stoneDark,0,7.83,-7.1,[[0,0],[.56,0],[.7,.1],[.78,.22],[.72,.34],[.58,.43],[0,.43]],40);
+ for(let i=0;i<16;i++){const a=i*Math.PI/8;sphere(g,M.stone,Math.cos(a)*.62,8.05,-7.1+Math.sin(a)*.62,.09,.2,.09,1,true)}
+ lathe(g,M.stone,0,8.25,-7.1,[[.18,0],[.23,.1],[.16,.25],[.1,.36],[.16,.45],[.11,.58],[0,.75]],24);
+ for(const x of [-1.45,1.45]){box(g,M.stoneDark,x,2.05,-5.17,.72,1.38,.16);box(g,M.stone,x,2.05,-5.06,.52,1.15,.08);sphere(g,M.stoneDark,x,2.15,-4.98,.19,.32,.08,1,true)}
+ for(let i=0;i<9;i++){const b=new THREE.Mesh(new THREE.DodecahedronGeometry(.32+Math.random()*.3,1),i%2?M.stone:M.stoneDark);b.position.set(-4.5+Math.random()*9,.22+Math.random()*.12,-1.2-Math.random()*7);b.rotation.set(Math.random(),Math.random(),Math.random());b.castShadow=true;g.add(b)}
+ g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});return g;
 }
+
 function buildSegment(z,index){
  const g=new THREE.Group();g.position.z=z;world.add(g);
  // A raised, uneven flagstone causeway with dark joints and worn side kerbs.
@@ -179,42 +168,23 @@ function buildSegment(z,index){
 }
 for(let i=0;i<7;i++)segments.push(buildSegment(-i*25,i));
 
+
 function makeHero(){
- const g=new THREE.Group();
- // Rugged expedition runner with readable human proportions and layered field gear.
- sphere(g,M.skin,0,1.57,-.015,.235,.30,.22);
- sphere(g,M.leather,0,1.79,.035,.255,.17,.24);
- // Face plane, brow, nose and hair silhouette face toward the run direction (-Z).
- sphere(g,M.skin,0,1.59,-.205,.19,.19,.045);
- for(const x of [-.085,.085])sphere(g,M.templeInterior,x,1.64,-.248,.027,.027,.018,0);
- sphere(g,M.skin,0,1.55,-.26,.035,.055,.035,0);
- sphere(g,M.leather,0,1.91,.02,.27,.105,.25);
- // Chest, shoulder harness and waist belt.
- const torso=cyl(g,M.cloth,0,1.12,0,.26,.32,.66,12,true);torso.rotation.z=.02;
- box(g,M.leather,0,.82,-.005,.53,.12,.34);
- for(const x of [-.19,.19]){const strap=box(g,M.leather,x,1.18,-.18,.055,.58,.045);strap.rotation.z=x*.65}
- // Backpack and rolled bedroll.
- box(g,M.leather,0,1.25,.23,.39,.52,.2);
- cyl(g,M.stoneDark,0,1.53,.26,.12,.12,.42,9).rotation.z=Math.PI/2;
- const arms=[],legs=[];
- for(const x of [-.36,.36]){
-  const shoulder=sphere(g,M.cloth,x,1.35,0,.16,.17,.16);
-  const upper=cyl(g,M.cloth,x,1.08,0,.105,.13,.48,10,true);upper.rotation.z=x<0?-.12:.12;
-  const elbow=sphere(g,M.skin,x,.83,0,.105,.11,.1,0);
-  const lower=cyl(g,M.cloth,x,.68,-.01,.085,.105,.34,9,true);
-  sphere(g,M.skin,x,.48,-.02,.09,.10,.09,0);arms.push(upper,lower);
- }
- for(const x of [-.15,.15]){
-  const thigh=cyl(g,M.pants,x,.52,0,.14,.17,.48,10,true);
-  const knee=sphere(g,M.pants,x,.29,-.01,.14,.14,.14);
-  const shin=cyl(g,M.pants,x,.19,-.01,.09,.12,.32,9,true);
-  box(g,M.leather,x,.075,-.08,.24,.14,.38);
-  legs.push(thigh,shin);
- }
- g.userData.arms=arms;g.userData.legs=legs;
- g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
- return g;
+ const g=new THREE.Group(),arms=[],legs=[];
+ capsuleBetween(g,M.pants,[-.16,.62,0],[-.16,.25,0],.115);capsuleBetween(g,M.pants,[.16,.62,0],[.16,.25,0],.115);
+ capsuleBetween(g,M.leather,[-.16,.18,-.04],[-.16,.06,-.25],.14);capsuleBetween(g,M.leather,[.16,.18,-.04],[.16,.06,-.25],.14);
+ sphere(g,M.cloth,0,1.12,0,.31,.48,.205);sphere(g,M.leather,0,1.25,-.105,.285,.34,.13);
+ for(const x of [-1,1]){sphere(g,M.cloth,x*.29,1.42,0,.16,.18,.17);const a=capsuleBetween(g,M.cloth,[x*.31,1.39,0],[x*.43,1.05,-.01],.105);const b=capsuleBetween(g,M.cloth,[x*.43,1.05,-.01],[x*.39,.76,-.09],.09);capsuleBetween(g,M.leather,[x*.39,.78,-.09],[x*.4,.66,-.12],.085);arms.push(a,b);capsuleBetween(g,M.leather,[x*.43,1.02,-.02],[x*.39,.82,-.07],.105);const strap=box(g,M.leather,x*.1,1.27,-.22,.055,.55,.025);strap.rotation.z=-x*.27}
+ const belt=new THREE.Mesh(new THREE.TorusGeometry(.235,.045,8,32),M.leather);belt.position.set(0,.79,0);belt.rotation.x=Math.PI/2;g.add(belt);box(g,M.gold,0,.8,-.205,.11,.1,.025);box(g,M.leather,-.31,.83,.08,.18,.2,.16);
+ capsuleBetween(g,M.skin,[0,1.48,0],[0,1.62,0],.095);sphere(g,M.skin,0,1.79,-.015,.205,.265,.19);sphere(g,M.leather,0,1.94,.015,.218,.145,.205);
+ for(const x of [-.19,.19])sphere(g,M.skin,x,1.79,0,.055,.09,.055);
+ for(const x of [-.075,.075]){sphere(g,M.templeInterior,x,1.82,-.188,.027,.024,.012,1);capsuleBetween(g,M.leather,[x-.035,1.88,-.17],[x+.035,1.88,-.17],.025)}
+ sphere(g,M.skin,0,1.76,-.205,.035,.065,.04);sphere(g,M.leather,0,1.69,-.18,.105,.035,.035);
+ for(let i=0;i<7;i++){const x=(i-3)*.055;capsuleBetween(g,M.leather,[x,1.98,.06],[x*.9,1.82,.22],.045)}
+ box(g,M.leather,0,1.18,.23,.37,.46,.18);capsuleBetween(g,M.stoneDark,[-.19,1.43,.24],[.19,1.43,.24],.09);
+ g.userData.arms=arms;g.userData.legs=legs;g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});return g;
 }
+
 const hero=makeHero();hero.position.set(0,0,2.4);scene.add(hero);
 const gltfLoader=new GLTFLoader();
 const animationMixers=[];
@@ -268,26 +238,22 @@ function playCharacterAnimation(controller,state){
  next.fadeIn(.18).play();controller.current?.fadeOut(.18);controller.current=next;
 }
 const heroController=attachAnimatedGLB('/assets/models/hero.glb',hero,{targetHeight:1.72,position:[0,0,0],fallbackChildren:[...hero.children]});
-const guardian=new THREE.Group();
-// A heavy stone-age jungle guardian: hunched shoulders, long arms, brow, jaw,
-// tusks and a jagged mane. This remains a fallback until a verified rig is added.
-sphere(guardian,M.monster,0,1.05,.02,.62,.72,.48);
-sphere(guardian,M.monster2,0,1.68,-.08,.48,.48,.43);
-sphere(guardian,M.monster,0,1.43,-.43,.38,.31,.22);
-sphere(guardian,M.monster2,0,1.22,-.47,.31,.16,.18);
-for(const x of [-.22,.22]){
- sphere(guardian,M.monsterEye,x,1.78,-.47,.085,.065,.045,0);
- const brow=cyl(guardian,M.monster,x,1.9,-.43,.09,.13,.34,8);brow.rotation.z=x<0?-.28:.28;
- const tusk=cone(guardian,M.stone,x,1.28,-.61,.075,.28,7);tusk.rotation.z=x<0?-.2:.2;
- const shoulder=sphere(guardian,M.monster2,x*2,1.42,.02,.31,.35,.36);
- const arm=cyl(guardian,M.monster,x*1.75,.88,-.02,.2,.25,1.0,10,true);arm.rotation.z=x<0?-.32:.32;
- sphere(guardian,M.monster,x*1.82,.35,-.12,.22,.2,.2);
- for(let claw=0;claw<3;claw++)cone(guardian,M.stone,x*1.82+(claw-1)*.12,.17,-.22,.045,.2,6);
+
+const guardian=new THREE.Group(),guardianArms=[],guardianLegs=[];
+sphere(guardian,M.monster,0,1.38,.04,.53,.68,.38);sphere(guardian,M.monster2,0,1.78,-.12,.4,.42,.34);sphere(guardian,M.monster,0,1.51,-.39,.34,.27,.22);sphere(guardian,M.monster2,0,1.34,-.48,.27,.14,.12);
+for(const side of [-1,1]){
+ const x=side;sphere(guardian,M.monster2,x*.48,1.72,.02,.31,.34,.32);
+ const upper=capsuleBetween(guardian,M.monster,x*.48?[x*.48,1.68,.02]:[0,1.68,.02],[x*.72,1.08,-.02],.22);
+ const fore=capsuleBetween(guardian,M.monster2,[x*.72,1.08,-.02],[x*.82,.48,-.2],.17);sphere(guardian,M.monster,x*.82,.4,-.2,.19,.2,.15);guardianArms.push(upper,fore);
+ for(let claw=0;claw<4;claw++){const fx=x*.82+(claw-1.5)*.085;capsuleBetween(guardian,M.stoneDark,[fx,.35,-.27],[fx,.15,-.36],.035,8)}
+ const thigh=capsuleBetween(guardian,M.monster,[x*.22,.88,.05],[x*.3,.42,.02],.19),shin=capsuleBetween(guardian,M.monster2,[x*.3,.42,.02],[x*.34,.12,-.08],.13);sphere(guardian,M.monster,x*.34,.12,-.2,.19,.12,.3);guardianLegs.push(thigh,shin);
+ lathe(guardian,M.stoneDark,x*.22,1.18,-.54,[[0,0],[.08,.12],[.055,.25],[.025,.39],[0,.48]],12);
+ tube(guardian,M.monster,[[x*.25,1.98,-.04],[x*.42,2.12,.03],[x*.53,2.38,.12],[x*.47,2.53,.13]],.085,14,8);
 }
-// Jagged dorsal mane and bone-like ridges create a readable silhouette.
-for(let i=0;i<7;i++){const spine=cone(guardian,M.stoneDark,(i-3)*.14,1.85-Math.abs(i-3)*.08,.28,.13,.42,6);spine.rotation.z=(i-3)*-.1}
-guardian.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
-guardian.position.set(0,0,7.3);scene.add(guardian);
+for(let i=0;i<9;i++){const x=(i-4)*.105;tube(guardian,M.monster2,[[x,1.95,.16],[x*1.12,2.12,.26],[x*1.25,2.26,.3]],.055,10,6)}
+for(const x of [-.13,.13]){sphere(guardian,M.monsterEye,x,1.83,-.445,.055,.045,.025,1);capsuleBetween(guardian,M.monster,[x-.09,1.93,-.4],[x+.09,1.94,-.4],.065)}
+guardian.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});guardian.position.set(0,0,7.3);scene.add(guardian);
+
 const guardianController=attachAnimatedGLB('/assets/models/guardian.glb',guardian,{targetHeight:2.05,position:[0,0,0],fallbackChildren:[...guardian.children]});
 applyGraphicsQuality();
 
@@ -351,7 +317,7 @@ function frame(){
   if(slide>0)slide-=dt;hero.scale.y=slide>0?.63:1;
   hero.position.y=slide>0?-.1:(isJumping?hero.position.y:0);
   hero.rotation.z=Math.sin(elapsed*speed*.7)*.025;
-  if(!heroController.loaded)hero.userData.arms.forEach((a,i)=>a.rotation.x=Math.sin(elapsed*speed*.65+i*Math.PI)*.48);
+  if(!heroController.loaded){hero.userData.arms.forEach((a,i)=>{a.rotation.x=Math.sin(elapsed*speed*.65+i*Math.PI)*.38});hero.userData.legs.forEach((l,i)=>{l.rotation.x=Math.sin(elapsed*speed*.65+i*Math.PI)*.34})}if(!guardianController.loaded){guardianArms.forEach((a,i)=>{a.rotation.x=Math.sin(elapsed*5+i*Math.PI)*.16});guardianLegs.forEach((l,i)=>{l.rotation.x=Math.sin(elapsed*5+i*Math.PI)*.12})}
   playCharacterAnimation(heroController,slide>0?'slide':isJumping?'jump':'run');playCharacterAnimation(guardianController,'run');
   for(const mixer of animationMixers)mixer.update(dt);
   guardian.position.x+=(hero.position.x*.55-guardian.position.x)*dt*1.7;
