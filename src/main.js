@@ -269,10 +269,23 @@ function playCharacterAnimation(controller,state){
 }
 const heroController=attachAnimatedGLB('/assets/models/hero.glb',hero,{targetHeight:1.72,position:[0,0,0],fallbackChildren:[...hero.children]});
 const guardian=new THREE.Group();
-sphere(guardian,M.monster,0,1.0,0,.52,.72,.42);
-sphere(guardian,M.monster2,0,1.72,-.02,.43,.48,.4);
-for(const x of [-.2,.2])sphere(guardian,M.monsterEye,x,1.82,-.36,.075,.075,.045,0);
-for(const x of [-.34,.34]){const arm=cyl(guardian,M.monster,x,.95,0,.19,.23,.85,9);arm.rotation.z=x<0?-.35:.35}
+// A heavy stone-age jungle guardian: hunched shoulders, long arms, brow, jaw,
+// tusks and a jagged mane. This remains a fallback until a verified rig is added.
+sphere(guardian,M.monster,0,1.05,.02,.62,.72,.48);
+sphere(guardian,M.monster2,0,1.68,-.08,.48,.48,.43);
+sphere(guardian,M.monster,0,1.43,-.43,.38,.31,.22);
+sphere(guardian,M.monster2,0,1.22,-.47,.31,.16,.18);
+for(const x of [-.22,.22]){
+ sphere(guardian,M.monsterEye,x,1.78,-.47,.085,.065,.045,0);
+ const brow=cyl(guardian,M.monster,x,1.9,-.43,.09,.13,.34,8);brow.rotation.z=x<0?-.28:.28;
+ const tusk=cone(guardian,M.stone,x,1.28,-.61,.075,.28,7);tusk.rotation.z=x<0?-.2:.2;
+ const shoulder=sphere(guardian,M.monster2,x*2,1.42,.02,.31,.35,.36);
+ const arm=cyl(guardian,M.monster,x*1.75,.88,-.02,.2,.25,1.0,10,true);arm.rotation.z=x<0?-.32:.32;
+ sphere(guardian,M.monster,x*1.82,.35,-.12,.22,.2,.2);
+ for(let claw=0;claw<3;claw++)cone(guardian,M.stone,x*1.82+(claw-1)*.12,.17,-.22,.045,.2,6);
+}
+// Jagged dorsal mane and bone-like ridges create a readable silhouette.
+for(let i=0;i<7;i++){const spine=cone(guardian,M.stoneDark,(i-3)*.14,1.85-Math.abs(i-3)*.08,.28,.13,.42,6);spine.rotation.z=(i-3)*-.1}
 guardian.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
 guardian.position.set(0,0,7.3);scene.add(guardian);
 const guardianController=attachAnimatedGLB('/assets/models/guardian.glb',guardian,{targetHeight:2.05,position:[0,0,0],fallbackChildren:[...guardian.children]});
