@@ -5,10 +5,10 @@ import './style.css';
 
 const $ = id => document.getElementById(id);
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9bb8a3);
-scene.fog = new THREE.FogExp2(0x9bb8a3, 0.012);
+scene.background = new THREE.Color(0x596b58);
+scene.fog = new THREE.FogExp2(0x596b58, 0.0095);
 const camera = new THREE.PerspectiveCamera(innerHeight > innerWidth ? 64 : 58, innerWidth/innerHeight, .1, 180);
-camera.position.set(0,4.6,9.2);
+camera.position.set(0,4.25,8.8);
 const renderer = new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
 const qualityPresets={low:{pixelRatio:1,shadows:false,shadowSize:512},medium:{pixelRatio:1.25,shadows:true,shadowSize:1024},high:{pixelRatio:1.5,shadows:true,shadowSize:1536}};
@@ -22,25 +22,26 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 $('app').prepend(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xdcebdc,0x3c3826,1.55));
-const sun = new THREE.DirectionalLight(0xffdfaa,2.35);
-sun.position.set(-12,22,10); sun.castShadow=true;
+scene.add(new THREE.HemisphereLight(0xc6d1c1,0x211e17,.82));
+const sun = new THREE.DirectionalLight(0xffd39a,2.05);
+sun.position.set(-12,24,10); sun.castShadow=true;
 sun.shadow.mapSize.set(1024,1024);
 sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;
 scene.add(sun);
 applyGraphicsQuality();
-const fill = new THREE.DirectionalLight(0x9db8c6,.55); fill.position.set(8,8,-12);scene.add(fill);
+const fill = new THREE.DirectionalLight(0x81968b,.22); fill.position.set(8,8,-12);scene.add(fill);
+const bounce = new THREE.DirectionalLight(0xb2a17b,.28); bounce.position.set(0,5,12);scene.add(bounce);
 
 const mat=(color,roughness=.9,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
 const M={
- soil:makePBRMaterial(0x66553a,1,{repeat:7,roughness:.98,bumpScale:.035,anisotropy}),
- path:makePBRMaterial(0x877454,2,{repeat:4,roughness:.92,bumpScale:.025,anisotropy}),
- stone:makePBRMaterial(0x807866,3,{repeat:3,roughness:.9,bumpScale:.04,anisotropy}),
- stoneDark:makePBRMaterial(0x4e4b3d,4,{repeat:3,roughness:.94,bumpScale:.045,anisotropy}),
- bark:makePBRMaterial(0x493629,5,{repeat:2,roughness:.96,bumpScale:.035,anisotropy}),
- moss:makePBRMaterial(0x43583b,6,{repeat:3,roughness:1,bumpScale:.03,anisotropy}),
- edge:mat(0x403d2c),leaf:mat(0x315a38),leaf2:mat(0x547448),
+ soil:makePBRMaterial(0x514633,1,{repeat:9,roughness:1,bumpScale:.055,anisotropy}),
+ path:makePBRMaterial(0x75664e,2,{repeat:5,roughness:.96,bumpScale:.045,anisotropy}),
+ stone:makePBRMaterial(0x766e5e,3,{repeat:4,roughness:.94,bumpScale:.065,anisotropy}),
+ stoneDark:makePBRMaterial(0x454238,4,{repeat:4,roughness:.98,bumpScale:.06,anisotropy}),
+ bark:makePBRMaterial(0x39291e,5,{repeat:3,roughness:1,bumpScale:.055,anisotropy}),
+ moss:makePBRMaterial(0x34432d,6,{repeat:4,roughness:1,bumpScale:.045,anisotropy}),
+ edge:mat(0x373329),leaf:mat(0x203d29),leaf2:mat(0x38543a),
  gold:mat(0xe7b83f,.28,.72),water:mat(0x3b8987,.22,.2),cloth:mat(0x52634a),pants:mat(0x393b32),
  skin:mat(0x9c6848),leather:mat(0x3b2920),monster:mat(0x283c2c),monster2:mat(0x43543a),
  templeInterior:mat(0x171c16),gap:mat(0x171b16),monsterEye:mat(0xe4b94f,.25),
@@ -63,50 +64,115 @@ const segments=[];
 const laneX=[-2.35,0,2.35];
 function makeTree(parent,x,z,scale=1){
  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
- cyl(g,M.bark,0,1.8,0,.24,.36,3.6,9);
- for(let i=0;i<5;i++){const a=i*1.25;const b=sphere(g,i%2?M.leaf:M.leaf2,Math.cos(a)*.55,3.2+(i%3)*.42,Math.sin(a)*.5,.9,1.05,.85);b.rotation.z=(Math.random()-.5)*.3}
+ // Mature tropical hardwood: tapered trunk, exposed roots and irregular branches.
+ cyl(g,M.bark,0,2.15,0,.28,.43,4.3,12,true);
+ for(let r=0;r<4;r++){const a=r*Math.PI/2+.35;const root=cyl(g,M.bark,Math.cos(a)*.34,.2,Math.sin(a)*.34,.11,.28,1.05,7);root.rotation.z=Math.cos(a)*.68;root.rotation.x=Math.sin(a)*.68}
+ for(let b=0;b<3;b++){const a=b*2.1+.4;const branch=cyl(g,M.bark,Math.cos(a)*.62,3.35,Math.sin(a)*.55,.12,.2,1.65,8);branch.rotation.z=Math.cos(a)*-.62;branch.rotation.x=Math.sin(a)*.62}
+ for(let i=0;i<9;i++){const a=i*2.399;const radius=.65+(i%3)*.25;const crown=sphere(g,i%3===0?M.leaf2:M.leaf,Math.cos(a)*radius,4.05+(i%4)*.34,Math.sin(a)*radius,.72+(i%2)*.16,.72+(i%3)*.12,.72,1);crown.rotation.y=a}
+ // Hanging vines break the repeated spherical canopy silhouette.
+ for(let i=0;i<3;i++){const vine=cyl(g,M.moss,Math.cos(i*2.1)*.72,3.05,Math.sin(i*2.1)*.72,.025,.018,1.15,5);vine.rotation.z=(Math.random()-.5)*.22}
  return g;
 }
 function makeTemple(parent,z){
  const g=new THREE.Group();g.position.z=z;parent.add(g);
- // carved base, pillars, lintels, stepped shikhara
- box(g,M.stone,0,.48,-5.4,7.8,.9,5.6);
- for(const x of [-2.9,-1,1,2.9]){
-  cyl(g,M.stoneDark,x,1.65,-4.1,.31,.38,2.25,12);
-  cyl(g,M.stone,x,2.75,-4.1,.48,.42,.22,12);
-  for(let k=0;k<3;k++)cyl(g,k%2?M.stone:M.stoneDark,x,1.0+k*.42,-4.1,.34,.34,.09,12);
+ // An original North-Indian Nagara-inspired stone shrine: jagati, mandapa,
+ // deep sanctum, carved pilasters and a stepped curvilinear shikhara.
+ box(g,M.stoneDark,0,.28,-5.9,9.4,.42,7.2);
+ box(g,M.stone,0,.58,-5.9,8.9,.34,6.8);
+ for(let step=0;step<3;step++)box(g,step%2?M.stoneDark:M.stone,0,.82+step*.16,-2.75-step*.22,6.7-step*.48,.16,.72);
+ // Sanctum mass and shadowed doorway.
+ box(g,M.stone,0,2.0,-7.0,4.55,3.0,3.5,true);
+ box(g,M.templeInterior,0,1.72,-5.22,1.42,2.25,.08);
+ // Door frame with layered jambs and lintel.
+ for(const x of [-.92,.92]){
+  box(g,M.stoneDark,x,1.75,-5.13,.22,2.45,.26);
+  for(let k=0;k<5;k++)box(g,k%2?M.stone:M.stoneDark,x, .72+k*.45,-4.98,.3,.08,.18);
+  cyl(g,M.stone,x,1.7,-5.0,.16,.16,1.85,10);
  }
- box(g,M.stone,0,2.85,-4.1,7.3,.45,1.1);
- box(g,M.stoneDark,0,3.2,-4.1,7.5,.18,1.2);
- for(let i=0;i<5;i++){const y=3.45+i*.27;const w=3.1-i*.45;box(g,i%2?M.stone:M.stoneDark,0,y,-4.4,w,.3,1.35)}
- cone(g,M.stone,0,5.15,-4.4,.55,1.15,8);
- // entry darkness
- box(g,M.templeInterior,0,1.1,-3.51,1.65,2.2,.06);
- for(const x of [-3.5,3.5]){box(g,M.stoneDark,x,1.5,-5.2,.25,3,.4,true);sphere(g,M.moss,x,3.1,-5.2,.55,.45,.55)}
+ box(g,M.stoneDark,0,2.98,-5.12,2.2,.28,.35);
+ // Carved relief panels and repeated miniature niches on sanctum facade.
+ for(const x of [-1.72,1.72]){
+  box(g,M.stoneDark,x,2.0,-5.18,.72,1.38,.14);
+  box(g,M.stone,x,2.0,-5.07,.52,1.18,.12);
+  sphere(g,M.stoneDark,x,2.05,-4.98,.19,.34,.09);
+  for(let k=0;k<3;k++)cyl(g,M.stoneDark,x,1.25+k*.48,-4.93,.035,.035,.28,6);
+ }
+ // Mandapa: stone columns with bases, fluted shafts, lotus-like capitals.
+ for(const x of [-3.05,-1.05,1.05,3.05]){
+  for(const zz of [-3.35,-1.15]){
+   box(g,M.stoneDark,x,.92,zz,.78,.22,.78);
+   cyl(g,M.stone,x,1.9,zz,.27,.34,1.8,14,true);
+   for(let k=0;k<8;k++){const a=k*Math.PI/4;const rib=cyl(g,M.stoneDark,x+Math.cos(a)*.245,1.9,zz+Math.sin(a)*.245,.025,.025,1.48,5);rib.rotation.z=Math.cos(a)*.04}
+   cyl(g,M.stoneDark,x,2.82,zz,.43,.35,.22,12);
+   box(g,M.stone,x,3.03,zz,.72,.2,.72);
+  }
+ }
+ // Mandapa roof and ornate horizontal cornices.
+ box(g,M.stoneDark,0,3.2,-2.25,7.9,.28,3.5);
+ box(g,M.stone,0,3.43,-2.25,8.15,.18,3.7);
+ for(let x=-3.5;x<=3.51;x+=.5){
+  const bead=sphere(g,M.stoneDark,x,3.55,-2.25,.075,.075,.075,0);bead.castShadow=true;
+ }
+ // Tall stepped shikhara rises behind the hall, with amalaka and kalasha.
+ for(let tier=0;tier<7;tier++){
+  const y=3.55+tier*.48, width=3.65-tier*.43;
+  const level=cone(g,tier%2?M.stone:M.stoneDark,0,y,-7.15,width*.72,.82,12,true);
+  level.scale.z=1.0;
+  // vertical miniature ribs on the tower face
+  for(const side of [-1,1]){const rib=box(g,M.stone,side*width*.34,y,-6.48,.12,.72,.12);rib.rotation.z=side*.12}
+ }
+ cyl(g,M.stoneDark,0,6.9,-7.15,.78,.82,.28,16);
+ for(let k=0;k<3;k++)cyl(g,M.stone,0,7.12+k*.13,-7.15,.48-k*.1,.48-k*.1,.12,14);
+ sphere(g,M.stoneDark,0,7.55,-7.15,.23,.24,.23);
+ cone(g,M.stone,0,7.9,-7.15,.12,.55,10);
+ // Weathered side walls, broken edges and moss patches.
+ for(const side of [-1,1]){
+  box(g,M.stoneDark,side*4.1,1.25,-4.1,.38,2.1,3.1,true);
+  for(let k=0;k<4;k++)box(g,M.stone,side*(3.92+k*.06),.9+k*.28,-4.6,.16,.12,.72);
+  sphere(g,M.moss,side*3.9,2.1,-3.1,.48,.22,.6);
+ }
+ // Fallen carved blocks around the ruined court.
+ for(let i=0;i<5;i++){const b=box(g,i%2?M.stone:M.stoneDark,-4.4+(i%3)*.55,.22,-1.0-i*.75,.7,.38,.55,true);b.rotation.y=i*.45;b.rotation.z=(i%2)*.12}
  g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
  return g;
 }
 function buildSegment(z,index){
  const g=new THREE.Group();g.position.z=z;world.add(g);
- box(g,M.path,0,-.08,-12,7.7,.28,27);
- for(const x of [-3.95,3.95])box(g,M.edge,x,-.02,-12,.3,.42,27);
- // broken paving stones on road
- for(let i=0;i<12;i++)for(let j=0;j<3;j++){
-  if(Math.random()<.25)continue;
-  const p=box(g,i%2?M.stone:M.path,(j-1)*2.35+(Math.random()-.5)*.3,-.0,-i*2.15-1,2.15,.035,1.9);
+ // A raised, uneven flagstone causeway with dark joints and worn side kerbs.
+ box(g,M.path,0,-.13,-12,7.35,.42,27);
+ for(const x of [-3.78,3.78]){
+  box(g,M.stoneDark,x,-.02,-12,.48,.62,27);
+  for(let k=0;k<12;k++)box(g,M.stone,x,-.25,-k*2.25-1,.52,.22,1.9);
+ }
+ for(let i=0;i<13;i++)for(let j=0;j<3;j++){
+  if(Math.random()<.13)continue;
+  const x=(j-1)*2.36+(Math.random()-.5)*.18,zp=-i*2.08-1;
+  const slab=box(g,(i+j)%4===0?M.stoneDark:M.stone,x,-.0,zp,2.24+(Math.random()-.5)*.12,.10,1.94);
+  slab.rotation.y=(Math.random()-.5)*.025;
+  if(Math.random()<.22){const crack=box(g,M.edge,x+(Math.random()-.5)*.8,.055,zp,.018,.012,1.3);crack.rotation.y=Math.random()*.3}
+ }
+ // Ancient retaining walls and scattered ruins frame the playable lane.
+ for(const side of [-1,1]){
+  if(index%2===0){box(g,M.stoneDark,side*5.0,.8,-13,.65,1.65,24);for(let k=0;k<5;k++)box(g,M.stone,side*5.0,1.7,-3-k*4,.78,.18,1.2)}
+  for(let i=0;i<3;i++){const ruin=box(g,M.stone,side*(4.7+Math.random()*1.1),.42,-4-i*8,.9,.82,1.0,true);ruin.rotation.z=(Math.random()-.5)*.18;ruin.rotation.y=Math.random()*.5}
  }
  if(index%3===0)makeTemple(g,-13);
  if(index%4===1){
-  box(g,M.water,6.2,-.16,-12,3.8,.08,27);
-  for(let k=0;k<5;k++)box(g,M.stone,4.6,-.02,-5-k*4,1.2,.3,1.6);
+  box(g,M.water,6.5,-.24,-12,4.8,.09,27);
+  for(let k=0;k<7;k++){const stepping=box(g,M.stone,4.9,-.02,-4-k*3.5,1.1,.34,1.35,true);stepping.rotation.y=(Math.random()-.5)*.08}
  }
- for(const side of [-1,1])for(let i=0;i<5;i++)makeTree(g,side*(5.7+Math.random()*3.5),-i*5.1-2,.72+Math.random()*.5);
- // distant cliff silhouettes
- for(const side of [-1,1]){const cliff=cone(g,M.moss,side*12,3,-18,5,8,7);cliff.rotation.z=side*.12}
- // torch stands
- for(const x of [-3.55,3.55]){
-  cyl(g,M.stoneDark,x,.45,-8,.13,.18,.9);
-  const flame=sphere(g,M.fire,x,1.05,-8,.13,.25,.13,0);
+ for(const side of [-1,1])for(let i=0;i<5;i++)makeTree(g,side*(6.2+Math.random()*4.0),-i*5.0-2,.8+Math.random()*.62);
+ // Fern-like undergrowth at the jungle edge.
+ for(const side of [-1,1])for(let i=0;i<7;i++){
+  const x=side*(4.6+Math.random()*2.5),zz=-Math.random()*25;
+  for(let leaf=0;leaf<4;leaf++){const frond=cyl(g,M.leaf,x,.22+leaf*.035,zz,.018,.035,.9,5);frond.rotation.z=(leaf-1.5)*.32+side*.5}
+ }
+ for(const side of [-1,1]){const cliff=cone(g,M.moss,side*14,3,-18,6,9,9);cliff.rotation.z=side*.12}
+ // Weathered stone oil-lamp pillars, not bright arcade torches.
+ for(const x of [-3.45,3.45]){
+  box(g,M.stoneDark,x,.32,-8,.42,.64,.42);
+  cyl(g,M.stone,x,.82,-8,.2,.24,.38,10);
+  const flame=sphere(g,M.fire,x,1.12,-8,.075,.16,.075,0);
   flame.userData.flame=true;
  }
  return g;
@@ -115,17 +181,39 @@ for(let i=0;i<7;i++)segments.push(buildSegment(-i*25,i));
 
 function makeHero(){
  const g=new THREE.Group();
- // more human-like layered silhouette, procedural fallback (replaceable by GLB)
- sphere(g,M.skin,0,1.58,0,.27,.34,.25);
- sphere(g,M.leather,0,1.88,.015,.29,.17,.27);
- box(g,M.cloth,0,1.08,0,.55,.72,.32);
- box(g,M.pants,-.15,.49,0,.22,.55,.24);box(g,M.pants,.15,.49,0,.22,.55,.24);
- box(g,M.leather,-.15,.16,.05,.25,.2,.38);box(g,M.leather,.15,.16,.05,.25,.2,.38);
- const arms=[];
- for(const x of [-.37,.37]){const arm=cyl(g,M.cloth,x,1.08,0,.105,.13,.58,9);arm.rotation.z=x<0?-.18:.18;arms.push(arm);sphere(g,M.skin,x, .77,0,.12,.13,.12,0)}
- // backpack
- box(g,M.leather,0,1.2,.22,.36,.46,.17);
- g.userData.arms=arms;g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});return g;
+ // Rugged expedition runner with readable human proportions and layered field gear.
+ sphere(g,M.skin,0,1.57,-.015,.235,.30,.22);
+ sphere(g,M.leather,0,1.79,.035,.255,.17,.24);
+ // Face plane, brow, nose and hair silhouette face toward the run direction (-Z).
+ sphere(g,M.skin,0,1.59,-.205,.19,.19,.045);
+ for(const x of [-.085,.085])sphere(g,M.templeInterior,x,1.64,-.248,.027,.027,.018,0);
+ sphere(g,M.skin,0,1.55,-.26,.035,.055,.035,0);
+ sphere(g,M.leather,0,1.91,.02,.27,.105,.25);
+ // Chest, shoulder harness and waist belt.
+ const torso=cyl(g,M.cloth,0,1.12,0,.26,.32,.66,12,true);torso.rotation.z=.02;
+ box(g,M.leather,0,.82,-.005,.53,.12,.34);
+ for(const x of [-.19,.19]){const strap=box(g,M.leather,x,1.18,-.18,.055,.58,.045);strap.rotation.z=x*.65}
+ // Backpack and rolled bedroll.
+ box(g,M.leather,0,1.25,.23,.39,.52,.2);
+ cyl(g,M.stoneDark,0,1.53,.26,.12,.12,.42,9).rotation.z=Math.PI/2;
+ const arms=[],legs=[];
+ for(const x of [-.36,.36]){
+  const shoulder=sphere(g,M.cloth,x,1.35,0,.16,.17,.16);
+  const upper=cyl(g,M.cloth,x,1.08,0,.105,.13,.48,10,true);upper.rotation.z=x<0?-.12:.12;
+  const elbow=sphere(g,M.skin,x,.83,0,.105,.11,.1,0);
+  const lower=cyl(g,M.cloth,x,.68,-.01,.085,.105,.34,9,true);
+  sphere(g,M.skin,x,.48,-.02,.09,.10,.09,0);arms.push(upper,lower);
+ }
+ for(const x of [-.15,.15]){
+  const thigh=cyl(g,M.pants,x,.52,0,.14,.17,.48,10,true);
+  const knee=sphere(g,M.pants,x,.29,-.01,.14,.14,.14);
+  const shin=cyl(g,M.pants,x,.19,-.01,.09,.12,.32,9,true);
+  box(g,M.leather,x,.075,-.08,.24,.14,.38);
+  legs.push(thigh,shin);
+ }
+ g.userData.arms=arms;g.userData.legs=legs;
+ g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});
+ return g;
 }
 const hero=makeHero();hero.position.set(0,0,2.4);scene.add(hero);
 const gltfLoader=new GLTFLoader();
@@ -270,7 +358,7 @@ function frame(){
  }
  // camera eases with lane changes; keep the road visible
  camera.position.x+=(hero.position.x*.24-camera.position.x)*.04;
- camera.lookAt(hero.position.x*.18,1.25,-8);
+ camera.lookAt(hero.position.x*.16,1.35,-9.5);
  renderer.render(scene,camera);
 }
 frame();
