@@ -171,8 +171,11 @@ for(let i=0;i<7;i++)segments.push(buildSegment(-i*25,i));
 
 function makeHero(){
  const g=new THREE.Group(),arms=[],legs=[];
- capsuleBetween(g,M.pants,[-.16,.62,0],[-.16,.25,0],.115);capsuleBetween(g,M.pants,[.16,.62,0],[.16,.25,0],.115);
- capsuleBetween(g,M.leather,[-.16,.18,-.04],[-.16,.06,-.25],.14);capsuleBetween(g,M.leather,[.16,.18,-.04],[.16,.06,-.25],.14);
+ const leftThigh=capsuleBetween(g,M.pants,[-.16,.62,0],[-.16,.25,0],.115);
+ const rightThigh=capsuleBetween(g,M.pants,[.16,.62,0],[.16,.25,0],.115);
+ const leftBoot=capsuleBetween(g,M.leather,[-.16,.18,-.04],[-.16,.06,-.25],.14);
+ const rightBoot=capsuleBetween(g,M.leather,[.16,.18,-.04],[.16,.06,-.25],.14);
+ legs.push(leftThigh,rightThigh,leftBoot,rightBoot);
  sphere(g,M.cloth,0,1.12,0,.31,.48,.205);sphere(g,M.leather,0,1.25,-.105,.285,.34,.13);
  for(const x of [-1,1]){sphere(g,M.cloth,x*.29,1.42,0,.16,.18,.17);const a=capsuleBetween(g,M.cloth,[x*.31,1.39,0],[x*.43,1.05,-.01],.105);const b=capsuleBetween(g,M.cloth,[x*.43,1.05,-.01],[x*.39,.76,-.09],.09);capsuleBetween(g,M.leather,[x*.39,.78,-.09],[x*.4,.66,-.12],.085);arms.push(a,b);capsuleBetween(g,M.leather,[x*.43,1.02,-.02],[x*.39,.82,-.07],.105);const strap=box(g,M.leather,x*.1,1.27,-.22,.055,.55,.025);strap.rotation.z=-x*.27}
  const belt=new THREE.Mesh(new THREE.TorusGeometry(.235,.045,8,32),M.leather);belt.position.set(0,.79,0);belt.rotation.x=Math.PI/2;g.add(belt);box(g,M.gold,0,.8,-.205,.11,.1,.025);box(g,M.leather,-.31,.83,.08,.18,.2,.16);
