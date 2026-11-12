@@ -12,8 +12,10 @@ camera.position.set(0,4.25,8.8);
 const renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
 const qualityPresets={low:{pixelRatio:1,shadows:false,shadowSize:512},medium:{pixelRatio:1.25,shadows:true,shadowSize:1024},high:{pixelRatio:1.5,shadows:true,shadowSize:1536}};
+const graphicsDefaultVersion='super-smooth-v1';
+if(localStorage.getItem('lostTempleGraphicsDefault')!==graphicsDefaultVersion){localStorage.setItem('lostTempleGraphics','high');localStorage.setItem('lostTempleGraphicsDefault',graphicsDefaultVersion);}
 const savedQuality=localStorage.getItem('lostTempleGraphics');
-let graphicsQuality=Object.hasOwn(qualityPresets,savedQuality)?savedQuality:'medium';
+let graphicsQuality=Object.hasOwn(qualityPresets,savedQuality)?savedQuality:'high';
 function applyGraphicsQuality(){const q=qualityPresets[graphicsQuality]||qualityPresets.medium;renderer.setPixelRatio(Math.min(devicePixelRatio||1,q.pixelRatio));renderer.shadowMap.enabled=q.shadows;sun.shadow.mapSize.set(q.shadowSize,q.shadowSize);sun.shadow.needsUpdate=true;scene.traverse(o=>{if(o.isMesh&&o.userData.qualityShadow)o.castShadow=q.shadows;});}
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
