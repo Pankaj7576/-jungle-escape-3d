@@ -29,14 +29,18 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          # setup-android@v3 otherwise requests the retired Google "tools" package.
-          packages: 'platform-tools'
-
       - name: Install Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [ ! -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "Android sdkmanager not found under $SDK_ROOT" >&2
+            exit 1
+          fi
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -55,6 +59,31 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Lock Android orientation to portrait
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          if not manifest.is_file():
+              raise SystemExit(f"Android manifest missing: {manifest}")
+          content = manifest.read_text()
+          pattern = re.compile(r'(<activity\\b(?=[^>]*\\bandroid:name="[^"]*MainActivity")[^>]*)(>)')
+          def lock_portrait(match):
+              tag = match.group(1)
+              if re.search(r'\\bandroid:screenOrientation=', tag):
+                  return match.group(0)
+              return tag + ' android:screenOrientation="portrait"' + match.group(2)
+          updated, count = pattern.subn(lock_portrait, content, count=1)
+          if count != 1:
+              raise SystemExit("Could not locate the Capacitor MainActivity in AndroidManifest.xml")
+          manifest.write_text(updated)
+          if 'android:screenOrientation="portrait"' not in updated:
+              raise SystemExit("Portrait orientation was not applied")
+          print("Android MainActivity locked to portrait")
+          PY
 
       - name: Build debug APK
         working-directory: android
