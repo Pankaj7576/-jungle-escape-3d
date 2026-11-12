@@ -10,7 +10,7 @@
     "android:add": "npx cap add android",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
-    "check": "node --check src/main.js && node --check src/pbr-textures.js && node --check scripts/check-assets.mjs",
+    "check": "node --check src/main.js && node --check src/hero-animation.js && node --check src/pbr-textures.js && node --check scripts/check-assets.mjs && node scripts/check-gameplay.mjs",
     "assets:check": "node scripts/check-assets.mjs",
     "assets:inspect:hero": "gltf-transform inspect public/assets/models/hero-source.glb",
     "assets:inspect:guardian": "gltf-transform inspect public/assets/models/guardian-source.glb",
