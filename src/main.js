@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { makePBRMaterial } from './pbr-textures.js';
+import { lockHeroAnimationRootMotion } from './hero-animation.js';
 import './style.css';
 
 const $ = id => document.getElementById(id);
@@ -44,7 +45,7 @@ const M={
  bark:makePBRMaterial(0x39291e,5,{repeat:3,roughness:1,bumpScale:.055,anisotropy}),
  moss:makePBRMaterial(0x34432d,6,{repeat:4,roughness:1,bumpScale:.045,anisotropy}),
  edge:mat(0x373329),leaf:mat(0x203d29),leaf2:mat(0x38543a),
- gold:mat(0xe7b83f,.28,.72),water:mat(0x3b8987,.22,.2),cloth:mat(0x52634a),pants:mat(0x393b32),
+ gold:mat(0xe7b83f,.28,.72),cloth:mat(0x52634a),pants:mat(0x393b32),
  skin:mat(0x9c6848),leather:mat(0x3b2920),monster:mat(0x283c2c),monster2:mat(0x43543a),
  templeInterior:mat(0x171c16),gap:mat(0x171b16),monsterEye:mat(0xe4b94f,.25),
  fire:new THREE.MeshBasicMaterial({color:0xffa33b})
@@ -148,10 +149,6 @@ function buildSegment(z,index){
   for(let i=0;i<3;i++){const ruin=box(g,M.stone,side*(4.7+Math.random()*1.1),.42,-4-i*8,.9,.82,1.0,true);ruin.rotation.z=(Math.random()-.5)*.18;ruin.rotation.y=Math.random()*.5}
  }
  if(index%3===0)makeTemple(g,-13);
- if(index%4===1){
-  box(g,M.water,6.5,-.24,-12,4.8,.09,27);
-  for(let k=0;k<7;k++){const stepping=box(g,M.stone,4.9,-.02,-4-k*3.5,1.1,.34,1.35,true);stepping.rotation.y=(Math.random()-.5)*.08}
- }
  for(const side of [-1,1])for(let i=0;i<5;i++)makeTree(g,side*(6.2+Math.random()*4.0),-i*5.0-2,.8+Math.random()*.62);
  // Fern-like undergrowth at the jungle edge.
  for(const side of [-1,1])for(let i=0;i<7;i++){
@@ -217,7 +214,9 @@ function attachAnimatedGLB(url,parent,{targetHeight=1.75,position=[0,0,0],rotati
   fallbackChildren.forEach(o=>o.visible=false);
   if(gltf.animations?.length){
    controller.mixer=new THREE.AnimationMixer(model);
-   gltf.animations.forEach(clip=>{const action=controller.mixer.clipAction(clip);controller.actions[clip.name.toLowerCase()]=action});
+   // The runner's lane position belongs to gameplay input, never to a GLB run cycle.
+   const stableClips=url.endsWith('/hero.glb')?lockHeroAnimationRootMotion(gltf.animations):gltf.animations;
+   stableClips.forEach(clip=>{const action=controller.mixer.clipAction(clip);controller.actions[clip.name.toLowerCase()]=action});
    animationMixers.push(controller.mixer);
   }
   playCharacterAnimation(controller,controller.state);
@@ -321,7 +320,7 @@ function frame(){
   if(isJumping){vy-=19*dt;hero.position.y+=vy*dt;if(hero.position.y<=0){hero.position.y=0;vy=0;isJumping=false}}
   if(slide>0)slide-=dt;hero.scale.y=slide>0?.63:1;
   hero.position.y=slide>0?-.1:(isJumping?hero.position.y:0);
-  hero.rotation.z=Math.sin(elapsed*speed*.7)*.025;
+  hero.rotation.z=0;
   if(!heroController.loaded){hero.userData.arms.forEach((a,i)=>{a.rotation.x=Math.sin(elapsed*speed*.65+i*Math.PI)*.38});hero.userData.legs.forEach((l,i)=>{l.rotation.x=Math.sin(elapsed*speed*.65+i*Math.PI)*.34})}if(!guardianController.loaded){guardianArms.forEach((a,i)=>{a.rotation.x=Math.sin(elapsed*5+i*Math.PI)*.16});guardianLegs.forEach((l,i)=>{l.rotation.x=Math.sin(elapsed*5+i*Math.PI)*.12})}
   playCharacterAnimation(heroController,slide>0?'slide':isJumping?'jump':'run');playCharacterAnimation(guardianController,'run');
   for(const mixer of animationMixers)mixer.update(dt);
