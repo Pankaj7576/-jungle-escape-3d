@@ -71,10 +71,10 @@ jobs:
           if not manifest.is_file():
               raise SystemExit(f"Android manifest missing: {manifest}")
           content = manifest.read_text()
-          pattern = re.compile(r'(<activity\\b(?=[^>]*\\bandroid:name="[^"]*MainActivity")[^>]*)(>)')
+          pattern = re.compile(r'(<activity\b(?=[^>]*\bandroid:name="[^"]*MainActivity")[^>]*)(>)')
           def lock_portrait(match):
               tag = match.group(1)
-              if re.search(r'\\bandroid:screenOrientation=', tag):
+              if re.search(r'\bandroid:screenOrientation=', tag):
                   return match.group(0)
               return tag + ' android:screenOrientation="portrait"' + match.group(2)
           updated, count = pattern.subn(lock_portrait, content, count=1)
