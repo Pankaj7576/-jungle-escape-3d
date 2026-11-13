@@ -12,6 +12,8 @@ namespace JungleEscape
         [SerializeField, Range(0f, 1f)] private float hazardChance = 0.72f;
         [SerializeField, Min(0.5f)] private float laneWidth = 2f;
 
+        private static Material stoneMaterial;
+
         private readonly System.Collections.Generic.HashSet<TrackSegment> generated =
             new System.Collections.Generic.HashSet<TrackSegment>();
 
@@ -119,27 +121,60 @@ namespace JungleEscape
             body.isKinematic = true;
             body.useGravity = false;
 
-            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visual.name = "Visual";
-            visual.transform.SetParent(root.transform, false);
-            Collider visualCollider = visual.GetComponent<Collider>();
-            if (visualCollider != null) Destroy(visualCollider);
-
             if (avoidance == HazardAvoidance.Slide)
             {
-                root.transform.position += Vector3.up * 1.18f;
-                trigger.size = new Vector3(1.75f, 0.42f, 0.65f);
-                visual.transform.localScale = trigger.size;
+                trigger.center = new Vector3(0f, 1.35f, 0f);
+                trigger.size = new Vector3(1.9f, 0.45f, 0.8f);
+                CreateStonePiece(root.transform, "Left_Arch_Pillar",
+                    new Vector3(-0.78f, 0.72f, 0f), new Vector3(0.30f, 1.44f, 0.62f), Vector3.zero);
+                CreateStonePiece(root.transform, "Right_Arch_Pillar",
+                    new Vector3(0.78f, 0.72f, 0f), new Vector3(0.30f, 1.44f, 0.62f), Vector3.zero);
+                CreateStonePiece(root.transform, "Carved_Arch_Lintel",
+                    new Vector3(0f, 1.52f, 0f), new Vector3(1.95f, 0.34f, 0.72f), Vector3.zero);
             }
             else
             {
-                root.transform.position += Vector3.up * 0.55f;
-                trigger.size = new Vector3(1.0f, 1.1f, 0.85f);
-                visual.transform.localScale = trigger.size;
+                trigger.center = new Vector3(0f, 0.46f, 0f);
+                trigger.size = new Vector3(1.15f, 0.92f, 0.9f);
+                CreateStonePiece(root.transform, "Broken_Stone_A",
+                    new Vector3(-0.22f, 0.32f, 0f), new Vector3(0.70f, 0.62f, 0.72f),
+                    new Vector3(8f, 12f, -9f));
+                CreateStonePiece(root.transform, "Broken_Stone_B",
+                    new Vector3(0.24f, 0.42f, 0.02f), new Vector3(0.62f, 0.78f, 0.68f),
+                    new Vector3(-7f, -10f, 12f));
+                CreateStonePiece(root.transform, "Broken_Stone_C",
+                    new Vector3(0.02f, 0.76f, -0.06f), new Vector3(0.48f, 0.38f, 0.50f),
+                    new Vector3(14f, 5f, 18f));
             }
 
             ObstacleHazard hazard = root.AddComponent<ObstacleHazard>();
             hazard.Configure(game, avoidance);
+        }
+
+        private static void CreateStonePiece(Transform parent, string name,
+            Vector3 localPosition, Vector3 localScale, Vector3 euler)
+        {
+            GameObject piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            piece.name = name;
+            piece.transform.SetParent(parent, false);
+            piece.transform.localPosition = localPosition;
+            piece.transform.localScale = localScale;
+            piece.transform.localRotation = Quaternion.Euler(euler);
+            Collider collider = piece.GetComponent<Collider>();
+            if (collider != null) Destroy(collider);
+
+            Renderer renderer = piece.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                if (stoneMaterial == null)
+                {
+                    Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+                    if (shader == null) shader = Shader.Find("Standard");
+                    stoneMaterial = new Material(shader);
+                    stoneMaterial.color = new Color(0.28f, 0.26f, 0.22f);
+                }
+                renderer.sharedMaterial = stoneMaterial;
+            }
         }
     }
 }
