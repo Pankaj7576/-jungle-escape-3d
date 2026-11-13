@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: generated-assets-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   import:
     runs-on: ubuntu-latest
@@ -48,4 +52,5 @@ jobs:
             exit 0
           fi
           git commit -m "Import CC0 humanoid animation pack"
+          git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:${GITHUB_REF_NAME}"
