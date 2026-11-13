@@ -162,6 +162,7 @@ namespace JungleEscape.EditorTools
             foreach (string guid in modelGuids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith("/Characters/Guardian_Ape.fbx", StringComparison.OrdinalIgnoreCase)) continue;
                 foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(path))
                 {
                     if (asset is AnimationClip clip &&
