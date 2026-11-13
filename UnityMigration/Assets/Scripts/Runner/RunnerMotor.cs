@@ -15,6 +15,8 @@ namespace JungleEscape
 
         [Header("Movement")]
         [SerializeField, Min(0f)] private float forwardSpeed = 9.5f;
+        [SerializeField, Min(0f)] private float speedRampPerSecond = 0.045f;
+        [SerializeField, Min(1f)] private float maxForwardSpeed = 14.5f;
         [SerializeField, Min(0f)] private float stumbleSpeedMultiplier = 0.72f;
         [SerializeField, Min(1f)] private float jumpVelocity = 7.3f;
         [SerializeField] private float gravity = -21f;
@@ -25,6 +27,7 @@ namespace JungleEscape
 
         private CharacterController controller;
         private int lane = 1;
+        private float startingForwardSpeed;
         private float verticalSpeed;
         private float slideRemaining;
         private float standingHeight;
@@ -45,6 +48,7 @@ namespace JungleEscape
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
+            startingForwardSpeed = forwardSpeed;
             standingHeight = controller.height;
             standingCenter = controller.center;
             initialPosition = transform.position;
@@ -92,6 +96,7 @@ namespace JungleEscape
             if (controller.isGrounded && safeTrack && transform.position.y > fallDeathY + 1f)
                 lastSafePosition = transform.position;
 
+            forwardSpeed = Mathf.Min(maxForwardSpeed, forwardSpeed + speedRampPerSecond * Time.deltaTime);
             if (controller.isGrounded && verticalSpeed < 0f) verticalSpeed = -2f;
             verticalSpeed += gravity * Time.deltaTime;
             slideRemaining = Mathf.Max(0f, slideRemaining - Time.deltaTime);
@@ -157,6 +162,7 @@ namespace JungleEscape
             runActive = true;
             inputEnabled = true;
             lane = 1;
+            forwardSpeed = startingForwardSpeed;
             verticalSpeed = 0f;
             slideRemaining = 0f;
             IsStumbling = false;
