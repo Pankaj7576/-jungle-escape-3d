@@ -7,6 +7,7 @@ namespace JungleEscape
         [SerializeField] private RunnerMotor runner;
         [SerializeField] private RunnerAnimationDriver runnerAnimation;
         [SerializeField] private GuardianChase guardian;
+        [SerializeField] private GuardianAnimationDriver guardianAnimation;
         [SerializeField] private RunnerCamera runnerCamera;
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private TrackDirector track;
@@ -43,6 +44,8 @@ namespace JungleEscape
             runnerAnimation?.ResetAnimation();
             track?.ResetTrack();
             guardian?.ResetChase();
+            guardianAnimation?.ResetAnimation();
+            guardianAnimation?.PlayRoar();
             foreach (PickupItem pickup in FindObjectsByType<PickupItem>(FindObjectsSortMode.None))
                 pickup.ResetPickup();
             foreach (ObstacleHazard hazard in FindObjectsByType<ObstacleHazard>(FindObjectsSortMode.None))
@@ -76,6 +79,7 @@ namespace JungleEscape
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
             runnerAnimation?.PlayFall();
+            guardianAnimation?.PlayCatch();
             guardian?.SetChaseActive(false);
             if (reviveUsed) ui?.ShowGameOver();
             else ui?.ShowRevive();
@@ -90,6 +94,7 @@ namespace JungleEscape
             runner?.ReviveAtLastSafePosition();
             runnerAnimation?.ResetAnimation();
             guardian?.ResetChase();
+            guardianAnimation?.ResetAnimation();
             ui.ShowHUD();
             return true;
         }
