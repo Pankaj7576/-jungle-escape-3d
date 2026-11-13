@@ -37,7 +37,7 @@ export class TrackSystem {
     this.distance = 0;
     this.turnCooldown = 0;
     this.serial = 0;
-    for (let i = 0; i < 10; i++) this.addPiece('straight');
+    for (let i = 0; i < 3; i++) this.addPiece('straight');
   }
 
   transformLocal(v) {
