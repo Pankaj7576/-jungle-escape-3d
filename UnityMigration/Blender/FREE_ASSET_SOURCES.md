@@ -47,4 +47,4 @@ All listed sources below are free at the time checked. Re-check the licence and 
 5. Do not add a model to the APK until the licence, rig, scale, animation and Android performance are checked.
 
 ## Current status
-No external binary model or animation has been downloaded into this Unity branch yet. These are documented free sources and an import/optimization plan; they are not yet integrated assets.
+The CC0 KinemIQ animation pack has now been downloaded into Assets/Characters/Animations/KinemIQ by GitHub Actions. The black-suit hero FBX conversion and gorilla model are not yet imported. The model links above remain source references until their files are downloaded, checked and optimized.
