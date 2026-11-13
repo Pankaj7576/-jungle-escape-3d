@@ -29,8 +29,15 @@ jobs:
       - name: Install Blender from Ubuntu packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender unzip curl
           blender --version
+
+      - name: Download CC0 humanoid animation pack
+        run: |
+          mkdir -p UnityMigration/Assets/Characters/Animations/KinemIQ
+          curl -L --fail --retry 3 https://huggingface.co/datasets/Kinemiq/free-game-animations/resolve/main/KinemIQ_Free_Animations_CC0_FBX.zip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip
+          unzip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip -d UnityMigration/Assets/Characters/Animations/KinemIQ
+          find UnityMigration/Assets/Characters/Animations/KinemIQ -maxdepth 2 -type f -printf "%p %s bytes\\n"
 
       - name: Generate modular bridge assets
         run: |
@@ -50,7 +57,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add UnityMigration/Assets/Environment/Generated/
+          git add UnityMigration/Assets/Environment/Generated/ UnityMigration/Assets/Characters/Animations/KinemIQ/
           if git diff --cached --quiet; then
             echo "Generated files are already up to date."
             exit 0
