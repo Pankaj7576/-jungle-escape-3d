@@ -53,7 +53,23 @@ for(const side of [-1,1]){
  block(g,mats.steelDark,side*2.35,8.18,-12.5,.3,.3,.5);
  const diagonal=mesh(g,new THREE.BoxGeometry(.18,5.7,.18),mats.steel,[side*3.05,4.1,-12.5],[1,1,1]);
  diagonal.rotation.z=side*.35;
- for(let n=0;n<6;n++)tree(g,side*(10+Math.random()*9),-n*5-2,.9+Math.random()*.7)
+ // No freestanding trees beside the elevated deck: valley scenery is grounded below.
+ // Layered canyon shoulders descend away from the bridge to create a deep open-valley view.
+ const cliff=mesh(g,new THREE.ConeGeometry(8.5,17,7),mats.stone,[side*10.8,-6.8,-12.5],[1,1,1],false);
+ cliff.rotation.z=side>0?-.22:.22;
+ const lowerSlope=mesh(g,new THREE.ConeGeometry(10,12,8),mats.ground,[side*15,-10.5,-15],[1,1,1],false);
+ lowerSlope.rotation.z=side>0?-.18:.18;
+ for(let n=0;n<5;n++){
+  const ridge=mesh(g,new THREE.ConeGeometry(5.5,8,7),n%2?mats.leaf:mats.leaf2,[side*(12+n*2.1),-8.2,-3-n*5.2],[1,1,1],false);
+  ridge.rotation.z=side>0?-.2:.2;
+ }
+}
+// Distant layered green valley ridgelines frame the bridge without placing floating trees.
+for(const side of [-1,1]){
+ for(let n=0;n<4;n++){
+  const ridge=mesh(g,new THREE.ConeGeometry(10+n*1.2,13+n*1.5,8),n%2?mats.leaf:mats.leaf2,[side*(21+n*5),-10,-5-n*7],[1,1,1],false);
+  ridge.rotation.z=side>0?-.12:.12;
+ }
 }
 // Tower portal crossbeam and small warning beacons add a contemporary highway-bridge silhouette.
 block(g,mats.steelDark,0,8.15,-12.5,8.5,.36,.5);
