@@ -1,0 +1,138 @@
+# Blender 4.x script: generate straight, left/right 90-degree and broken-gap bridge modules.
+# Run from Blender > Scripting. Exports four GLB files beside this script.
+# Local Blender convention: +Y forward, +Z up. Reorient/verify anchors in Unity after import.
+import bpy
+import math
+from mathutils import Vector
+
+OUT = "//"
+WIDTH = 5.4
+DECK_WIDTH = 4.7
+STONE = (0.34, 0.32, 0.27, 1)
+DARK = (0.17, 0.16, 0.14, 1)
+MOSS = (0.10, 0.18, 0.07, 1)
+
+def clear_scene():
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.object.delete(use_global=False)
+    for datablocks in (bpy.data.meshes, bpy.data.curves, bpy.data.materials):
+        # Keep materials if another module is still exporting; scene is reset each time.
+        pass
+
+def mat(name, rgba):
+    m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    m.diffuse_color = rgba
+    m.roughness = 0.92
+    return m
+
+stone = mat("Aged limestone", STONE)
+dark = mat("Deep stone", DARK)
+moss = mat("Jungle moss", MOSS)
+
+def cube(name, loc, dims, material, yaw=0.0, bevel=0.04):
+    bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
+    o = bpy.context.object
+    o.name = name
+    o.dimensions = dims
+    o.rotation_euler[2] = yaw
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    o.data.materials.append(material)
+    if bevel:
+        b = o.modifiers.new("Soft chipped edges", "BEVEL")
+        b.width = bevel
+        b.segments = 2
+        o.modifiers.new("Weighted normals", "WEIGHTED_NORMAL")
+    return o
+
+def path_straight(length=18.0, step=0.75):
+    count = int(length / step)
+    return [(Vector((0, i * step, 0)), Vector((0, 1, 0))) for i in range(count + 1)]
+
+def path_turn(left=True, radius=8.5, steps=18):
+    points = []
+    sign = -1 if left else 1
+    for i in range(steps + 1):
+        a = (math.pi * 0.5) * i / steps
+        center = Vector((sign * radius * (1 - math.cos(a)), radius * math.sin(a), 0))
+        tangent = Vector((sign * math.sin(a), math.cos(a), 0))
+        points.append((center, tangent.normalized()))
+    return points
+
+def add_deck_mesh(name, points, gap=None):
+    verts, faces = [], []
+    half = DECK_WIDTH * 0.5
+    for i, (center, tangent) in enumerate(points):
+        right = Vector((tangent.y, -tangent.x, 0)).normalized()
+        left_edge = center - right * half
+        right_edge = center + right * half
+        verts.extend([
+            (left_edge.x, left_edge.y, -0.05),
+            (right_edge.x, right_edge.y, -0.05),
+            (left_edge.x, left_edge.y, 0.12),
+            (right_edge.x, right_edge.y, 0.12)
+        ])
+        if i == 0:
+            continue
+        prev_center = points[i - 1][0]
+        mid = (prev_center + center) * 0.5
+        if gap and gap[0] <= mid.y <= gap[1]:
+            continue
+        a = (i - 1) * 4
+        b = i * 4
+        faces.extend([
+            (a + 2, a + 3, b + 3, b + 2),
+            (a, b, b + 1, a + 1),
+            (a, a + 2, b + 2, b),
+            (a + 1, b + 1, b + 3, a + 3)
+        ])
+    mesh = bpy.data.meshes.new(name + "Mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.materials.append(stone)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    return obj
+
+def add_rails(points):
+    for side in (-1, 1):
+        for i in range(0, len(points), 3):
+            center, tangent = points[i]
+            right = Vector((tangent.y, -tangent.x, 0)).normalized()
+            pos = center + right * side * (WIDTH * 0.5 - 0.15)
+            yaw = math.atan2(-tangent.x, tangent.y)
+            cube("Parapet block", (pos.x, pos.y, 0.55), (0.42, 1.8, 0.62), dark, yaw, 0.07)
+            cube("Carved rail cap", (pos.x, pos.y, 0.91), (0.55, 1.8, 0.18), stone, yaw, 0.05)
+            cube("Pillar", (pos.x, pos.y, 1.22), (0.58, 0.58, 0.78), stone, yaw, 0.06)
+            cube("Moss detail", (pos.x, pos.y + 0.1, 1.62), (0.34, 0.25, 0.035), moss, yaw, 0.02)
+
+def add_anchors(points, name):
+    start, start_tangent = points[0]
+    end, end_tangent = points[-1]
+    entry = bpy.data.objects.new("Entry", None)
+    bpy.context.collection.objects.link(entry)
+    entry.location = start
+    entry.rotation_euler[2] = math.atan2(-start_tangent.x, start_tangent.y)
+    exit_obj = bpy.data.objects.new("Exit", None)
+    bpy.context.collection.objects.link(exit_obj)
+    exit_obj.location = end
+    exit_obj.rotation_euler[2] = math.atan2(-end_tangent.x, end_tangent.y)
+    for i in range(1, len(points) - 1, max(1, len(points) // 6)):
+        guide = bpy.data.objects.new("PathNode_%02d" % i, None)
+        bpy.context.collection.objects.link(guide)
+        guide.location = points[i][0]
+    return entry, exit_obj
+
+def export_module(name, points, gap=None):
+    clear_scene()
+    add_deck_mesh(name + "_Deck", points, gap)
+    add_rails(points)
+    add_anchors(points, name)
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
+        export_format='GLB', use_selection=True)
+    print("Exported", name + ".glb")
+
+export_module("Bridge_Straight_18m", path_straight(18.0))
+export_module("Bridge_Turn_Left_90", path_turn(True))
+export_module("Bridge_Turn_Right_90", path_turn(False))
+export_module("Bridge_Broken_Gap", path_straight(18.0), gap=(7.0, 11.0))
+print("Done. Import GLBs into Unity, verify axes, add TrackSegment and colliders.")
