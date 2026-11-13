@@ -1,0 +1,51 @@
+name: Import CC0 Humanoid Animations
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - unity-migration/phase-1
+    paths:
+      - 'UnityMigration/Assets/Characters/Animations/README.md'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+
+      - name: Download and unpack CC0 animation clips
+        run: |
+          mkdir -p UnityMigration/Assets/Characters/Animations/KinemIQ
+          curl -L --fail --retry 3 https://huggingface.co/datasets/Kinemiq/free-game-animations/resolve/main/KinemIQ_Free_Animations_CC0_FBX.zip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip
+          unzip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip -d UnityMigration/Assets/Characters/Animations/KinemIQ
+          count=$(find UnityMigration/Assets/Characters/Animations/KinemIQ -type f -name '*.fbx' | wc -l)
+          echo "Imported $count FBX files"
+          test "$count" -ge 20
+
+      - name: Upload CC0 animation pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jungle-Escape-CC0-Humanoid-Animations
+          path: UnityMigration/Assets/Characters/Animations/KinemIQ/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Commit CC0 animation files to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add UnityMigration/Assets/Characters/Animations/KinemIQ/
+          if git diff --cached --quiet; then
+            echo "Animation pack is already up to date."
+            exit 0
+          fi
+          git commit -m "Import CC0 humanoid animation pack"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
