@@ -19,6 +19,8 @@ namespace JungleEscape
         private bool caught;
         private bool chaseActive;
 
+        public bool IsChaseActive => chaseActive;
+
         private void Awake() => gap = desiredGap;
 
         public void SetCaughtHandler(UnityAction handler)
