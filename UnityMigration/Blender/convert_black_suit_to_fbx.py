@@ -1,6 +1,7 @@
 # Blender 4.x: convert the repository's existing black-suit GLB to a Unity-friendly FBX.
 # Run this file from Blender's Text Editor after opening it from the repository.
 # It does not alter the source GLB. Inspect the exported clips and retarget missing actions separately.
+# The GitHub Actions workflow runs this converter in a temporary output directory.
 
 import bpy
 import os
