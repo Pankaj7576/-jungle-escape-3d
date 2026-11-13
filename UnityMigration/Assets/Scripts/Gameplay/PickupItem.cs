@@ -4,7 +4,7 @@ namespace JungleEscape
 {
     public enum PickupKind { Coin, Gem, Boost }
 
-    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Collider), typeof(Rigidbody))]
     public sealed class PickupItem : MonoBehaviour
     {
         [SerializeField] private PickupKind kind = PickupKind.Coin;
@@ -18,7 +18,13 @@ namespace JungleEscape
         private bool collected;
         private Collider trigger;
 
-        private void Awake() => trigger = GetComponent<Collider>();
+        private void Awake()
+        {
+            trigger = GetComponent<Collider>();
+            Rigidbody body = GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+        }
 
         private void OnEnable()
         {
@@ -30,6 +36,9 @@ namespace JungleEscape
         private void Reset()
         {
             GetComponent<Collider>().isTrigger = true;
+            Rigidbody body = GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -46,7 +55,6 @@ namespace JungleEscape
 
             if (visualRoot != null) visualRoot.SetActive(false);
             if (trigger != null) trigger.enabled = false;
-            // Disable rather than Destroy: segment pooling can reactivate this pickup.
             // Keep this child active so OnEnable resets it when its pooled segment returns.
         }
     }
