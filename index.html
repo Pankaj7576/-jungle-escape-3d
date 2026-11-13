@@ -1,3 +1,60 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#10251d"><title>Jungle Escape 3D — The Lost Temple</title></head>
-<body><main id="game"><canvas id="world"></canvas><header id="hud" class="hidden"><span> DISTANCE <b id="distance">0</b> m</span><span> COINS <b id="coins">0</b></span><button id="pause">Ⅱ</button></header><section id="menu"><div class="panel"><small>AN ORIGINAL INDIAN JUNGLE ADVENTURE</small><h1>JUNGLE ESCAPE <i>3D</i></h1><h2>THE LOST TEMPLE</h2><p id="message">Run through ancient ruins, dodge deadly traps and escape the temple guardian.</p><div class="stats">BEST RUN <b id="best">0</b> m</div><button id="play">START RUN</button><p class="hint">Swipe left/right to move · Up to jump · Down to slide</p></div></section><nav id="controls" class="hidden"><div><button data-action="left">◀</button><button data-action="right">▶</button></div><div><button data-action="jump">▲</button><button data-action="slide">▼</button></div></nav></main><script type="module" src="/src/main.js"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1712">
+<title>Jungle Escape 3D — The Lost Temple</title>
+</head>
+<body>
+<main id="game">
+  <canvas id="world"></canvas>
+  <header id="hud" class="hidden">
+    <div class="hud-chip"><small>DISTANCE</small><b id="distance">0</b><small>m</small></div>
+    <div class="hud-chip"><small>COINS</small><b id="coins">0</b></div>
+    <div class="hud-chip gem-chip">◆ <b id="gem-count">5</b></div>
+    <button id="pause" aria-label="Pause">Ⅱ</button>
+  </header>
+  <div id="status-row">
+    <div id="magnet-status" class="status-pill hidden">MAGNET <b id="magnet-time">0</b>s</div>
+    <div id="boost-status" class="status-pill boost hidden">BOOST <b id="boost-time">0</b>s</div>
+    <div id="gap-status" class="status-pill danger hidden">GAP AHEAD · JUMP</div>
+    <div id="warning" class="status-pill danger hidden">THE BEAST IS CLOSING IN!</div>
+  </div>
+  <section id="menu">
+    <div class="panel">
+      <div class="eyebrow">AN ORIGINAL JUNGLE ADVENTURE</div>
+      <div class="crest">✦</div>
+      <h1>JUNGLE ESCAPE <i>3D</i></h1>
+      <h2>THE LOST TEMPLE</h2>
+      <p id="message">Ancient paths. Broken bridges. One relentless guardian.</p>
+      <div class="best-card"><small>BEST DISTANCE</small><b id="best">0</b><small>METRES</small></div>
+      <button id="play">PLAY <span>▶</span></button>
+      <p class="hint">SWIPE TO MOVE · UP TO JUMP · DOWN TO SLIDE</p>
+    </div>
+  </section>
+  <section id="revive" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-icon">◆</div>
+      <small>THE GUARDIAN IS NEAR</small>
+      <h2>ONE MORE CHANCE?</h2>
+      <p>You have reached <b id="revive-distance">0</b> metres. Spend 5 gems to revive and keep running.</p>
+      <div class="gem-balance">YOUR GEMS <b id="revive-gems">5</b></div>
+      <button id="revive-continue">REVIVE · 5 ◆</button>
+      <button id="revive-decline" class="secondary">END RUN</button>
+    </div>
+  </section>
+  <section id="pause-overlay" class="overlay hidden">
+    <div class="modal">
+      <small>TAKE A BREATH</small><h2>PAUSED</h2>
+      <button id="resume">RESUME RUN</button>
+    </div>
+  </section>
+  <nav id="controls" class="hidden">
+    <div class="control-cluster"><button data-action="left">◀</button><button data-action="right">▶</button></div>
+    <div class="control-cluster"><button data-action="jump">▲</button><button data-action="slide">▼</button></div>
+  </nav>
+</main>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
