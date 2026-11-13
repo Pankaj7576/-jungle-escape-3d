@@ -238,11 +238,22 @@ namespace JungleEscape.EditorTools
             if (pipeline == null)
             {
                 pipeline = ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
-                ScriptableRendererData renderer = pipeline.LoadBuiltinRendererData();
-                if (renderer == null)
+                ScriptableRendererData builtinRenderer = pipeline.LoadBuiltinRendererData();
+                if (builtinRenderer == null)
                     throw new System.InvalidOperationException("Unity could not create the default URP renderer data.");
 
-                AssetDatabase.CreateAsset(renderer, rendererPath);
+                // Unity may return its built-in renderer as an asset already stored at
+                // Assets/UniversalRenderer.asset. Never try to add that same object to
+                // a second asset file; clone it into our generated settings folder.
+                ScriptableRendererData renderer =
+                    AssetDatabase.LoadAssetAtPath<ScriptableRendererData>(rendererPath);
+                if (renderer == null)
+                {
+                    renderer = UnityEngine.Object.Instantiate(builtinRenderer);
+                    renderer.name = "JungleEscape_Renderer";
+                    AssetDatabase.CreateAsset(renderer, rendererPath);
+                }
+
                 SerializedObject serialized = new SerializedObject(pipeline);
                 SerializedProperty rendererList = serialized.FindProperty("m_RendererDataList");
                 if (rendererList == null)
