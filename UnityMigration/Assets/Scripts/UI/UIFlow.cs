@@ -26,14 +26,14 @@ namespace JungleEscape
         [Header("Revive")]
         [SerializeField] private Text reviveMessage;
         [SerializeField] private Button reviveButton;
-        [SerializeField] private Button playButton;\n        [SerializeField] private Button giveUpButton;
+        [SerializeField] private Button playButton;\n        [SerializeField] private Button giveUpButton;\n        [SerializeField] private Button restartButton;
         [SerializeField] private GameBootstrap game;
         [SerializeField] private RunProgress progress;
 
         private void Awake()
         {
             if (playButton != null) playButton.onClick.AddListener(() => game?.StartRun());
-            if (reviveButton != null) reviveButton.onClick.AddListener(() => game?.TryRevive());\n            if (giveUpButton != null) giveUpButton.onClick.AddListener(() => game?.EndRun());
+            if (reviveButton != null) reviveButton.onClick.AddListener(() => game?.TryRevive());\n            if (giveUpButton != null) giveUpButton.onClick.AddListener(() => game?.EndRun());\n            if (restartButton != null) restartButton.onClick.AddListener(() => game?.StartRun());
         }
 
         private void Update()
