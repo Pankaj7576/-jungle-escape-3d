@@ -2,6 +2,7 @@
 # The source is a static pose; this script decimates it and exports a compact FBX.
 # A separate Unity procedural body-sway component supplies placeholder motion until a real rig is authored.
 
+# Cloud asset commits rebase against the latest migration branch before pushing.
 import bpy
 import os
 import math
