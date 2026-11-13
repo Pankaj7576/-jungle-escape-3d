@@ -26,47 +26,47 @@ jobs:
           ref: ${{ github.ref_name }}
           persist-credentials: true
 
-      - name: Install Blender and asset tools
+      - name: Install Blender
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender unzip curl
+          sudo apt-get install -y blender
           blender --version
 
       - name: Patch Blender 5 FBX exporter compatibility issue
         run: |
           FBX_ADDON=$(find /usr/lib/blender -path '*/io_scene_fbx/__init__.py' | head -n 1)
           test -n "$FBX_ADDON"
-          sudo sed -i 's/self\\.use_space_transform/getattr(self, "use_space_transform", False)/g' "$FBX_ADDON"
+          sudo python3 - "$FBX_ADDON" <<'PY'
+          import pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          source = path.read_text()
+          source = source.replace("self.use_space_transform",
+                                  'getattr(self, "use_space_transform", False)')
+          path.write_text(source)
+          print("Patched", path)
+          PY
           grep -n 'getattr(self, "use_space_transform"' "$FBX_ADDON"
-
-      - name: Download CC0 humanoid animation pack
-        run: |
-          mkdir -p UnityMigration/Assets/Characters/Animations/KinemIQ
-          curl -L --fail --retry 3 https://huggingface.co/datasets/Kinemiq/free-game-animations/resolve/main/KinemIQ_Free_Animations_CC0_FBX.zip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip
-          unzip -o /tmp/KinemIQ_Free_Animations_CC0_FBX.zip -d UnityMigration/Assets/Characters/Animations/KinemIQ
-          find UnityMigration/Assets/Characters/Animations/KinemIQ -maxdepth 2 -type f -printf "%p %s bytes\\n"
 
       - name: Generate modular bridge assets
         run: |
           blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
           count=$(find UnityMigration/Assets/Environment/Generated -maxdepth 1 -name "*.fbx" | wc -l)
+          echo "Generated $count FBX modules"
           test "$count" -eq 4
 
-      - name: Upload generated asset bundle
+      - name: Upload generated bridge bundle
         uses: actions/upload-artifact@v4
         with:
           name: Jungle-Escape-Blender-Track-Assets
-          path: |
-            UnityMigration/Assets/Environment/Generated/
-            UnityMigration/Assets/Characters/Animations/KinemIQ/
+          path: UnityMigration/Assets/Environment/Generated/
           if-no-files-found: error
           retention-days: 14
 
-      - name: Commit generated Unity assets to this branch
+      - name: Commit generated Unity modules to this branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add UnityMigration/Assets/Environment/Generated/ UnityMigration/Assets/Characters/Animations/
+          git add UnityMigration/Assets/Environment/Generated/
           if git diff --cached --quiet; then
             echo "Generated files are already up to date."
             exit 0
