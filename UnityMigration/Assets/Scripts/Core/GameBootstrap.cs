@@ -10,7 +10,7 @@ namespace JungleEscape
         [SerializeField] private RunProgress runProgress;\n        [SerializeField] private TrackDirector track;
         [SerializeField] private UIFlow ui;
 
-        private bool gameOver;
+        private bool gameOver;\n        private bool reviveUsed;
 
         private void Awake()
         {
@@ -68,7 +68,7 @@ namespace JungleEscape
 
         public bool TryRevive()
         {
-            if (!gameOver || ui == null || !ui.TrySpendReviveGem()) return false;
+            if (!gameOver || reviveUsed || ui == null || !ui.TrySpendReviveGem()) return false;\n            reviveUsed = true;
             gameOver = false;
             runner?.ReviveAtLastSafePosition();
             guardian?.ResetChase();
