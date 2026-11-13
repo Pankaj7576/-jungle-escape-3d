@@ -21,6 +21,7 @@ STONE_LIGHT = (0.43, 0.40, 0.34, 1)
 STONE_COOL = (0.27, 0.29, 0.28, 1)
 WOOD = (0.20, 0.12, 0.07, 1)
 random.seed(27)
+print("Generating Jungle Escape modules with Blender", bpy.app.version_string)
 
 # Enable the bundled interchange exporters when Blender ships them as add-ons.
 for addon_name in ("io_scene_gltf2", "io_scene_fbx",
