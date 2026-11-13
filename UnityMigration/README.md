@@ -38,6 +38,7 @@ Without a valid UNITY_LICENSE secret, the workflow will fail before compilation.
 ## Implemented source systems
 - TrackSegment Entry/Exit anchors and ordered centerline path nodes for curved modules.
 - TrackDirector connected track generation with straight, left/right turn and gap prefab pools, ahead spawning, behind cleanup and reusable segment pools.
+- TrackContentSpawner adds coins and slide/jump hazards to each newly spawned non-gap segment and reuses that content when pooled modules return.
 - Track-aware three-lane RunnerMotor with smooth lane correction, jump, slide, fall detection, safe-position revive and replay reset.
 - SwipeInput touch gestures and keyboard testing.
 - RunnerCamera smooth third-person follow with sphere-cast obstruction handling.
