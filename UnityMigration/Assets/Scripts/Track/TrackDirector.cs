@@ -166,6 +166,7 @@ namespace JungleEscape
                 stack = new Stack<TrackSegment>();
                 pools.Add(prefab, stack);
             }
+            contentSpawner?.ClearSegment(instance);
             instance.gameObject.SetActive(false);
             instance.transform.SetParent(transform);
             stack.Push(instance);
