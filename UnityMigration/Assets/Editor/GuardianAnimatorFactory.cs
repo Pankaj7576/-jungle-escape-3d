@@ -94,7 +94,7 @@ namespace JungleEscape.EditorTools
 
         private static AnimationClip Find(AnimationClip[] clips, string name)
         {
-            return clips.FirstOrDefault(clip => string.Equals(clip.name, name, StringComparison.OrdinalIgnoreCase));
+            return clips.FirstOrDefault(clip => clip.name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private static AnimatorState Add(AnimatorStateMachine machine, string name, AnimationClip clip)
