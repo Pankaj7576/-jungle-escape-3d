@@ -29,7 +29,7 @@ namespace JungleEscape
         private float standingHeight;
         private Vector3 standingCenter;
         private bool inputEnabled = true;
-        private bool hasFallen;
+        private bool hasFallen;\n        private bool runActive = true;\n        private Vector3 lastSafePosition;
 
         public int Lane => lane;
         public float ForwardSpeed => forwardSpeed;
@@ -41,10 +41,10 @@ namespace JungleEscape
         {
             controller = GetComponent<CharacterController>();
             standingHeight = controller.height;
-            standingCenter = controller.center;
+            standingCenter = controller.center;\n            lastSafePosition = transform.position;
         }
 
-        public void SetInputEnabled(bool value) => inputEnabled = value;
+        public void SetInputEnabled(bool value) => inputEnabled = value;\n\n        public void SetRunActive(bool value) => runActive = value;
 
         public void MoveLane(int direction)
         {
@@ -70,7 +70,7 @@ namespace JungleEscape
 
         private void Update()
         {
-            if (hasFallen) return;
+            if (hasFallen || !runActive) return;\n            if (controller.isGrounded && transform.position.y > fallDeathY + 1f) lastSafePosition = transform.position;
 
             if (controller.isGrounded && verticalSpeed < 0f) verticalSpeed = -2f;
             verticalSpeed += gravity * Time.deltaTime;
@@ -110,7 +110,7 @@ namespace JungleEscape
             }
         }
 
-        public void ResetMotor()
+        public void ReviveAtLastSafePosition()\n        {\n            controller.enabled = false;\n            transform.position = lastSafePosition;\n            controller.enabled = true;\n            hasFallen = false;\n            verticalSpeed = 0f;\n            slideRemaining = 0f;\n            runActive = true;\n            inputEnabled = true;\n        }\n\n        public void ResetMotor()
         {
             hasFallen = false;
             inputEnabled = true;
