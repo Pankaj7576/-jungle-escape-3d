@@ -114,6 +114,7 @@ namespace JungleEscape.EditorTools
             Assign(progress, "runner", runner.transform);
             Assign(input, "runner", motor);
             Assign(game, "runner", motor);
+            Assign(game, "runnerAnimation", animation);
             Assign(game, "guardian", chase);
             Assign(game, "runnerCamera", follow);
             Assign(game, "runProgress", progress);
