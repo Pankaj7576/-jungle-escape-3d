@@ -213,9 +213,11 @@ namespace JungleEscape.EditorTools
             List<Vector3> path = BuildPath(kind);
             AddDeck(root.transform, path, kind == ModuleKind.Gap, stone);
             AddRails(root.transform, path, trim, moss);
-            Transform entry = Anchor(root.transform, "Entry", path[0], path[1] - path[0]);
-            Transform exit = Anchor(root.transform, "Exit", path[path.Count - 1],
-                path[path.Count - 1] - path[path.Count - 2]);
+            Vector3 entryForward = Vector3.forward;
+            Vector3 exitForward = kind == ModuleKind.Left ? Vector3.left :
+                kind == ModuleKind.Right ? Vector3.right : Vector3.forward;
+            Transform entry = Anchor(root.transform, "Entry", path[0], entryForward);
+            Transform exit = Anchor(root.transform, "Exit", path[path.Count - 1], exitForward);
             Transform[] nodes = new Transform[Mathf.Max(0, path.Count - 2)];
             for (int i = 1; i < path.Count - 1; i++)
                 nodes[i - 1] = Anchor(root.transform, "PathNode_" + i.ToString("00"),
@@ -259,8 +261,8 @@ namespace JungleEscape.EditorTools
             while (first < path.Count - 1)
             {
                 int last = path.Count - 1;
-                if (gap && first == 0) last = 7;
-                else if (gap && first == 8) last = 18;
+                if (gap && first == 0) last = 6;
+                else if (gap && first == 11) last = 18;
                 else if (gap) break;
 
                 List<Vector3> sub = path.GetRange(first, last - first + 1);
@@ -278,7 +280,7 @@ namespace JungleEscape.EditorTools
                 collider.sharedMesh = mesh;
 
                 if (!gap) break;
-                first = 8;
+                first = 11;
                 if (last == 18) break;
             }
         }
