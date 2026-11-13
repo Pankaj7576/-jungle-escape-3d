@@ -37,6 +37,20 @@ export class TrackSystem {
     this.distance = 0;
     this.turnCooldown = 0;
     this.serial = 0;
+    this.reset();
+  }
+
+  reset() {
+    for (const piece of this.pieces) {
+      this.scene.remove(piece.group);
+      piece.group.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    }
+    this.pieces.length = 0;
+    this.nextAnchor.set(0, 0, -10);
+    this.heading = 0;
+    this.distance = 0;
+    this.turnCooldown = 0;
+    this.serial = 0;
     for (let i = 0; i < 3; i++) this.addPiece('straight');
   }
 
