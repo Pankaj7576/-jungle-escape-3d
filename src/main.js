@@ -334,6 +334,8 @@ function updateWorld(dt) {
   cameraRig.update(dt, runner.root.position, lanePose.tangent, state.jumpY);
 }
 
+resetRun();
+
 const clock = new THREE.Clock();
 function frame() {
   requestAnimationFrame(frame);
