@@ -826,7 +826,7 @@ namespace JungleEscape.EditorTools
             rect.anchoredPosition = Vector2.zero;
             Text label = go.GetComponent<Text>();
             label.text = text;
-            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.fontSize = size;
             label.alignment = TextAnchor.MiddleCenter;
             label.color = Color.white;
