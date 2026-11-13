@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -283,6 +284,12 @@ namespace JungleEscape.EditorTools
         private static TrackSegment BuildTrackPrefab(string name, ModuleKind kind,
             Material stone, Material trim, Material moss)
         {
+            string importedFile = kind == ModuleKind.Straight ? "Bridge_Straight_18m.fbx" :
+                kind == ModuleKind.Left ? "Bridge_Turn_Left_90.fbx" :
+                kind == ModuleKind.Right ? "Bridge_Turn_Right_90.fbx" : "Bridge_Broken_Gap.fbx";
+            TrackSegment imported = BuildTrackPrefabFromFbx(name, importedFile, kind == ModuleKind.Gap);
+            if (imported != null) return imported;
+
             GameObject root = new GameObject(name);
             List<Vector3> path = BuildPath(kind);
             AddDeck(root.transform, path, kind == ModuleKind.Gap, stone);
@@ -306,6 +313,66 @@ namespace JungleEscape.EditorTools
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, pathName);
             Object.DestroyImmediate(root);
             return prefab.GetComponent<TrackSegment>();
+        }
+
+        private static TrackSegment BuildTrackPrefabFromFbx(string prefabName, string fileName, bool isGap)
+        {
+            string assetPath = "Assets/Environment/Generated/" + fileName;
+            GameObject modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            if (modelAsset == null) return null;
+
+            GameObject root = new GameObject(prefabName);
+            GameObject model = PrefabUtility.InstantiatePrefab(modelAsset) as GameObject;
+            if (model == null)
+            {
+                Object.DestroyImmediate(root);
+                return null;
+            }
+            model.transform.SetParent(root.transform, false);
+
+            Transform entry = FindChildRecursive(root.transform, "Entry");
+            Transform exit = FindChildRecursive(root.transform, "Exit");
+            if (entry == null || exit == null)
+            {
+                Debug.LogWarning("Generated FBX has no Entry/Exit anchors: " + assetPath);
+                Object.DestroyImmediate(root);
+                return null;
+            }
+
+            Transform[] nodes = root.GetComponentsInChildren<Transform>(true)
+                .Where(t => t.name.StartsWith("PathNode_", StringComparison.Ordinal))
+                .OrderBy(t => t.name, StringComparer.Ordinal)
+                .ToArray();
+
+            foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (filter.sharedMesh == null) continue;
+                MeshCollider meshCollider = filter.GetComponent<MeshCollider>();
+                if (meshCollider == null) meshCollider = filter.gameObject.AddComponent<MeshCollider>();
+                meshCollider.sharedMesh = filter.sharedMesh;
+            }
+
+            TrackSegment segment = root.AddComponent<TrackSegment>();
+            Assign(segment, "entry", entry);
+            Assign(segment, "exit", exit);
+            Assign(segment, "pathNodes", nodes);
+            Assign(segment, "isGapSegment", isGap);
+
+            string prefabPath = Prefabs + "/" + prefabName + ".prefab";
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            Object.DestroyImmediate(root);
+            return prefab != null ? prefab.GetComponent<TrackSegment>() : null;
+        }
+
+        private static Transform FindChildRecursive(Transform parent, string childName)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == childName) return child;
+                Transform found = FindChildRecursive(child, childName);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         private static List<Vector3> BuildPath(ModuleKind kind)
