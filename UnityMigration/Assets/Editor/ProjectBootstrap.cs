@@ -141,6 +141,61 @@ namespace JungleEscape.EditorTools
             Debug.Log("Jungle Escape demo scene generated. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.");
         }
 
+        [MenuItem("Tools/Jungle Escape/Validate Generated Scene")]
+        public static void ValidateGeneratedScene()
+        {
+            RunnerMotor runner = Object.FindFirstObjectByType<RunnerMotor>();
+            TrackDirector director = Object.FindFirstObjectByType<TrackDirector>();
+            TrackContentSpawner contents = Object.FindFirstObjectByType<TrackContentSpawner>();
+            GuardianChase guardian = Object.FindFirstObjectByType<GuardianChase>();
+            RunnerCamera camera = Object.FindFirstObjectByType<RunnerCamera>();
+            GameBootstrap game = Object.FindFirstObjectByType<GameBootstrap>();
+            UIFlow ui = Object.FindFirstObjectByType<UIFlow>();
+            EventSystem eventSystem = Object.FindFirstObjectByType<EventSystem>();
+
+            Require(runner != null, "RunnerMotor is missing.");
+            Require(runner != null && runner.GetComponent<CharacterController>() != null,
+                "Runner requires a CharacterController.");
+            Require(director != null, "TrackDirector is missing.");
+            Require(contents != null, "TrackContentSpawner is missing.");
+            Require(guardian != null, "GuardianChase is missing.");
+            Require(camera != null, "RunnerCamera is missing.");
+            Require(game != null, "GameBootstrap is missing.");
+            Require(ui != null, "UIFlow is missing.");
+            Require(eventSystem != null, "EventSystem is missing.");
+
+            if (director != null)
+            {
+                SerializedObject so = new SerializedObject(director);
+                Require(so.FindProperty("startSegmentPrefab").objectReferenceValue != null,
+                    "TrackDirector start segment prefab is not assigned.");
+                Require(so.FindProperty("straightPrefabs").arraySize > 0,
+                    "TrackDirector straight prefab pool is empty.");
+                Require(so.FindProperty("leftTurnPrefabs").arraySize > 0 &&
+                        so.FindProperty("rightTurnPrefabs").arraySize > 0,
+                    "TrackDirector turn prefab pools are incomplete.");
+                Require(so.FindProperty("gapPrefabs").arraySize > 0,
+                    "TrackDirector gap prefab pool is empty.");
+            }
+
+            Require(game != null && runner != null, "Game wiring is incomplete.");
+            if (runner != null && game != null)
+            {
+                SerializedObject gameData = new SerializedObject(game);
+                Require(gameData.FindProperty("runner").objectReferenceValue == runner,
+                    "GameBootstrap Runner reference is incorrect.");
+                Require(gameData.FindProperty("runnerAnimation").objectReferenceValue != null,
+                    "RunnerAnimationDriver reference is missing.");
+            }
+
+            Debug.Log("Jungle Escape scene validation passed. This checks scene wiring only; it is not a gameplay or Android device test.");
+        }
+
+        private static void Require(bool condition, string message)
+        {
+            if (!condition) throw new System.InvalidOperationException("Jungle Escape validation failed: " + message);
+        }
+
         private enum ModuleKind { Straight, Left, Right, Gap }
 
         private static void EnsureFolders()
