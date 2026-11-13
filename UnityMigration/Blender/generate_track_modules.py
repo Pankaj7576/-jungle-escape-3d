@@ -2,6 +2,7 @@
 # Run from Blender > Scripting. Exports four GLB files beside this script.
 # Local Blender convention: +Y forward, +Z up. Reorient/verify anchors in Unity after import.
 # Cloud asset commits rebase against the latest migration branch before pushing.
+# The generator writes to TRACK_OUTPUT_DIR in CI to keep the checkout clean during sync.
 import bpy
 import math
 import random
