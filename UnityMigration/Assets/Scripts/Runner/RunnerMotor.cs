@@ -35,6 +35,7 @@ namespace JungleEscape
         private Vector3 initialPosition;
         private Quaternion initialRotation;
         private Vector3 lastSafePosition;
+        private Quaternion lastSafeRotation;
         private bool inputEnabled = true;
         private bool runActive = true;
         private bool hasFallen;
@@ -54,6 +55,7 @@ namespace JungleEscape
             initialPosition = transform.position;
             initialRotation = transform.rotation;
             lastSafePosition = initialPosition;
+            lastSafeRotation = initialRotation;
         }
 
         public void SetFallHandler(UnityAction handler)
@@ -94,7 +96,10 @@ namespace JungleEscape
             bool safeTrack = track == null || track.CurrentSegment == null ||
                              !track.CurrentSegment.IsGapSegment;
             if (controller.isGrounded && safeTrack && transform.position.y > fallDeathY + 1f)
+            {
                 lastSafePosition = transform.position;
+                lastSafeRotation = transform.rotation;
+            }
 
             forwardSpeed = Mathf.Min(maxForwardSpeed, forwardSpeed + speedRampPerSecond * Time.deltaTime);
             if (controller.isGrounded && verticalSpeed < 0f) verticalSpeed = -2f;
@@ -143,11 +148,14 @@ namespace JungleEscape
         public void ReviveAtLastSafePosition()
         {
             controller.enabled = false;
-            transform.position = lastSafePosition;
+            transform.SetPositionAndRotation(lastSafePosition, lastSafeRotation);
             controller.enabled = true;
             hasFallen = false;
             verticalSpeed = 0f;
             slideRemaining = 0f;
+            IsStumbling = false;
+            controller.height = standingHeight;
+            controller.center = standingCenter;
             runActive = true;
             inputEnabled = true;
         }
@@ -158,6 +166,7 @@ namespace JungleEscape
             transform.SetPositionAndRotation(initialPosition, initialRotation);
             controller.enabled = true;
             lastSafePosition = initialPosition;
+            lastSafeRotation = initialRotation;
             hasFallen = false;
             runActive = true;
             inputEnabled = true;
