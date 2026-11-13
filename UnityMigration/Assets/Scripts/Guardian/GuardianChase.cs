@@ -8,11 +8,14 @@ namespace JungleEscape
         [SerializeField] private Transform runner;
         [SerializeField, Min(0.5f)] private float desiredGap = 5.5f;
         [SerializeField, Min(0.1f)] private float closeRate = 5f;
-        [SerializeField, Min(0.1f)] private float recoverRate = 1.8f;
+        [SerializeField, Min(0.1f)] private float recoverRate = 0.75f;
+        [SerializeField, Min(0.1f)] private float stumbleCloseAmount = 2.3f;
+        [SerializeField, Min(0f)] private float recoveryPauseAfterHit = 2.2f;
         [SerializeField, Min(0.5f)] private float catchDistance = 1.45f;
         [SerializeField] private UnityEvent onCaught = new UnityEvent();
 
         private float gap;
+        private float recoveryPause;
         private bool caught;
         private bool chaseActive;
 
@@ -35,13 +38,15 @@ namespace JungleEscape
         public void OnRunnerStumble(float severity = 1f)
         {
             if (!chaseActive || caught) return;
-            gap = Mathf.Max(0.8f, gap - Mathf.Clamp(severity, 0.2f, 2f) * 1.8f);
+            gap = Mathf.Max(0.75f, gap - Mathf.Clamp(severity, 0.2f, 2f) * stumbleCloseAmount);
+            recoveryPause = recoveryPauseAfterHit;
         }
 
         public void OnRunnerBoost(float seconds = 1f)
         {
             if (!chaseActive || caught) return;
-            gap = Mathf.Min(10f, gap + Mathf.Clamp(seconds, 0.2f, 3f));
+            gap = Mathf.Min(10f, gap + Mathf.Clamp(seconds, 0.2f, 3f) * 2f);
+            recoveryPause = 1.0f;
         }
 
         private void LateUpdate()
@@ -56,7 +61,9 @@ namespace JungleEscape
                 transform.rotation = Quaternion.Slerp(transform.rotation,
                     Quaternion.LookRotation(direction), 1f - Mathf.Exp(-8f * Time.deltaTime));
 
-            gap = Mathf.MoveTowards(gap, desiredGap, recoverRate * Time.deltaTime);
+            recoveryPause = Mathf.Max(0f, recoveryPause - Time.deltaTime);
+            if (recoveryPause <= 0f)
+                gap = Mathf.MoveTowards(gap, desiredGap, recoverRate * Time.deltaTime);
             if (Vector3.Distance(transform.position, runner.position) <= catchDistance)
             {
                 caught = true;
@@ -69,6 +76,7 @@ namespace JungleEscape
         {
             caught = false;
             gap = desiredGap;
+            recoveryPause = 0f;
             if (runner != null)
                 transform.position = runner.position - runner.forward * desiredGap;
             chaseActive = true;
