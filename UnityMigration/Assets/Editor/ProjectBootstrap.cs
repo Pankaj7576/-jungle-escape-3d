@@ -51,6 +51,7 @@ namespace JungleEscape.EditorTools
             RunnerMotor motor = runner.AddComponent<RunnerMotor>();
             RunnerAnimationDriver animation = runner.AddComponent<RunnerAnimationDriver>();
             Assign(animation, "motor", motor);
+            Assign(animation, "animator", runner.GetComponent<Animator>());
 
             GameObject guardian = BuildGuardian(beastMat);
             guardian.transform.position = new Vector3(0f, 0.02f, -3.5f);
@@ -418,18 +419,25 @@ namespace JungleEscape.EditorTools
             controller.height = 1.8f;
             controller.radius = 0.34f;
             controller.center = new Vector3(0f, 0.9f, 0f);
-            AddCapsule("Torso", root.transform, new Vector3(0f, 1.12f, 0f),
-                new Vector3(0.72f, 0.82f, 0.42f), outfit);
-            AddSphere("Head", root.transform, new Vector3(0f, 1.75f, 0.02f),
-                new Vector3(0.38f, 0.43f, 0.36f), skin);
-            AddCubeVisual("Backpack", root.transform, new Vector3(0f, 1.12f, -0.28f),
-                new Vector3(0.48f, 0.62f, 0.25f), outfit);
-            for (int side = -1; side <= 1; side += 2)
+
+            Animator importedAnimator = CharacterAnimatorFactory.AttachHero(root,
+                "Assets/Characters/Explorer_BlackSuit.fbx");
+            if (importedAnimator == null)
             {
-                AddCapsule("Arm", root.transform, new Vector3(side * 0.48f, 1.15f, 0f),
-                    new Vector3(0.22f, 0.68f, 0.22f), outfit);
-                AddCapsule("Leg", root.transform, new Vector3(side * 0.20f, 0.48f, 0f),
-                    new Vector3(0.26f, 0.78f, 0.28f), outfit);
+                // Visible fallback until the black-suit FBX is imported and validated.
+                AddCapsule("Torso", root.transform, new Vector3(0f, 1.12f, 0f),
+                    new Vector3(0.72f, 0.82f, 0.42f), outfit);
+                AddSphere("Head", root.transform, new Vector3(0f, 1.75f, 0.02f),
+                    new Vector3(0.38f, 0.43f, 0.36f), skin);
+                AddCubeVisual("Backpack", root.transform, new Vector3(0f, 1.12f, -0.28f),
+                    new Vector3(0.48f, 0.62f, 0.25f), outfit);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    AddCapsule("Arm", root.transform, new Vector3(side * 0.48f, 1.15f, 0f),
+                        new Vector3(0.22f, 0.68f, 0.22f), outfit);
+                    AddCapsule("Leg", root.transform, new Vector3(side * 0.20f, 0.48f, 0f),
+                        new Vector3(0.26f, 0.78f, 0.28f), outfit);
+                }
             }
             return root;
         }
