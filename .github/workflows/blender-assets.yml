@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: blender-assets-${{ github.ref }}
+  group: generated-assets-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -50,10 +50,12 @@ jobs:
 
       - name: Generate modular bridge assets
         run: |
-          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
-          count=$(find UnityMigration/Assets/Environment/Generated -maxdepth 1 -name "*.fbx" | wc -l)
+          TRACK_OUTPUT_DIR=/tmp/track-generated PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
+          count=$(find /tmp/track-generated -maxdepth 1 -name "*.fbx" | wc -l)
           echo "Generated $count FBX modules"
           test "$count" -eq 4
+          mkdir -p UnityMigration/Assets/Environment/Generated
+          cp -f /tmp/track-generated/* UnityMigration/Assets/Environment/Generated/
 
       - name: Upload generated bridge bundle
         uses: actions/upload-artifact@v4
@@ -67,11 +69,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin "$GITHUB_REF_NAME"
           git add UnityMigration/Assets/Environment/Generated/
           if git diff --cached --quiet; then
             echo "Generated files are already up to date."
             exit 0
           fi
           git commit -m "Generate modular Blender bridge assets"
+          git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:${GITHUB_REF_NAME}"
