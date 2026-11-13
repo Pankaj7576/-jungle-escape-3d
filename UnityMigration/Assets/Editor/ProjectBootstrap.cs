@@ -415,6 +415,16 @@ namespace JungleEscape.EditorTools
                 .OrderBy(t => t.name, StringComparer.Ordinal)
                 .ToArray();
 
+            // A turn without imported centerline nodes would make the runner cut
+            // diagonally across the corner. Fall back to the generated curved module.
+            if (prefabName.IndexOf("Turn", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                nodes.Length < 2)
+            {
+                Debug.LogWarning("Generated FBX turn has no usable PathNode anchors; using procedural fallback: " + assetPath);
+                UnityEngine.Object.DestroyImmediate(root);
+                return null;
+            }
+
             foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(true))
             {
                 if (filter.sharedMesh == null) continue;
