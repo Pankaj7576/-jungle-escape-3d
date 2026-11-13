@@ -70,6 +70,7 @@ namespace JungleEscape.EditorTools
             AnimationClip slideClip = FindClip(clips, "slide", "crouch", "roll");
             AnimationClip stumbleClip = FindClip(clips, "stumble", "hit", "fall");
             AnimationClip fallClip = FindClip(clips, "death", "fall", "die");
+            if (idleClip == null && runClip == null) runClip = clips[0];
 
             AnimatorState idle = AddState(machine, "Idle", idleClip);
             AnimatorState run = AddState(machine, "Run", runClip);
@@ -78,7 +79,8 @@ namespace JungleEscape.EditorTools
             AnimatorState stumble = AddState(machine, "Stumble", stumbleClip);
             AnimatorState fall = AddState(machine, "Fall", fallClip);
 
-            machine.defaultState = idle != null ? idle : run != null ? run :
+            AnimatorState locomotion = run != null ? run : idle;
+            machine.defaultState = idle != null ? idle : locomotion != null ? locomotion :
                 jump != null ? jump : slide != null ? slide : stumble != null ? stumble : fall;
 
             if (idle != null && run != null)
@@ -96,9 +98,12 @@ namespace JungleEscape.EditorTools
                 AnimatorStateTransition jumpTrigger = machine.AddAnyStateTransition(jump);
                 jumpTrigger.hasExitTime = false;
                 jumpTrigger.AddCondition(AnimatorConditionMode.If, 0f, "Jump");
-                AnimatorStateTransition jumpEnd = jump.AddTransition(run != null ? run : idle);
-                jumpEnd.hasExitTime = true;
-                jumpEnd.exitTime = 0.9f;
+                if (locomotion != null)
+                {
+                    AnimatorStateTransition jumpEnd = jump.AddTransition(locomotion);
+                    jumpEnd.hasExitTime = true;
+                    jumpEnd.exitTime = 0.9f;
+                }
             }
 
             if (slide != null)
@@ -106,9 +111,12 @@ namespace JungleEscape.EditorTools
                 AnimatorStateTransition slideTrigger = machine.AddAnyStateTransition(slide);
                 slideTrigger.hasExitTime = false;
                 slideTrigger.AddCondition(AnimatorConditionMode.If, 0f, "Sliding");
-                AnimatorStateTransition slideEnd = slide.AddTransition(run != null ? run : idle);
-                slideEnd.hasExitTime = false;
-                slideEnd.AddCondition(AnimatorConditionMode.IfNot, 0f, "Sliding");
+                if (locomotion != null)
+                {
+                    AnimatorStateTransition slideEnd = slide.AddTransition(locomotion);
+                    slideEnd.hasExitTime = false;
+                    slideEnd.AddCondition(AnimatorConditionMode.IfNot, 0f, "Sliding");
+                }
             }
 
             if (stumble != null)
@@ -116,9 +124,12 @@ namespace JungleEscape.EditorTools
                 AnimatorStateTransition stumbleTrigger = machine.AddAnyStateTransition(stumble);
                 stumbleTrigger.hasExitTime = false;
                 stumbleTrigger.AddCondition(AnimatorConditionMode.If, 0f, "Stumbling");
-                AnimatorStateTransition stumbleEnd = stumble.AddTransition(run != null ? run : idle);
-                stumbleEnd.hasExitTime = false;
-                stumbleEnd.AddCondition(AnimatorConditionMode.IfNot, 0f, "Stumbling");
+                if (locomotion != null)
+                {
+                    AnimatorStateTransition stumbleEnd = stumble.AddTransition(locomotion);
+                    stumbleEnd.hasExitTime = false;
+                    stumbleEnd.AddCondition(AnimatorConditionMode.IfNot, 0f, "Stumbling");
+                }
             }
 
             if (fall != null)
