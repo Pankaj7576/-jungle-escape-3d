@@ -2,6 +2,8 @@
 
 A clean rebuild of the original mobile-first 3D endless runner.
 
+**Current game release: `1.00`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Version `1.00` is preserved at [`versions/1.00`](https://github.com/Pankaj7576/-jungle-escape-3d/tree/versions/1.00).
+
 ## Run locally
 `npm install` then `npm run dev`.
 
