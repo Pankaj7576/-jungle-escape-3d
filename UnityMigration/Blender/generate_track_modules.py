@@ -3,6 +3,7 @@
 # Local Blender convention: +Y forward, +Z up. Reorient/verify anchors in Unity after import.
 import bpy
 import math
+import random
 from mathutils import Vector
 
 OUT = "//"
@@ -11,6 +12,10 @@ DECK_WIDTH = 4.7
 STONE = (0.34, 0.32, 0.27, 1)
 DARK = (0.17, 0.16, 0.14, 1)
 MOSS = (0.10, 0.18, 0.07, 1)
+STONE_LIGHT = (0.43, 0.40, 0.34, 1)
+STONE_COOL = (0.27, 0.29, 0.28, 1)
+WOOD = (0.20, 0.12, 0.07, 1)
+random.seed(27)
 
 def clear_scene():
     bpy.ops.object.select_all(action='SELECT')
@@ -28,6 +33,9 @@ def mat(name, rgba):
 stone = mat("Aged limestone", STONE)
 dark = mat("Deep stone", DARK)
 moss = mat("Jungle moss", MOSS)
+stone_light = mat("Limestone variation light", STONE_LIGHT)
+stone_cool = mat("Limestone variation cool", STONE_COOL)
+wood = mat("Broken support timber", WOOD)
 
 def cube(name, loc, dims, material, yaw=0.0, bevel=0.04):
     bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
@@ -92,6 +100,36 @@ def add_deck_mesh(name, points, gap=None):
     bpy.context.collection.objects.link(obj)
     return obj
 
+def add_paving(points, gap=None):
+    palette = (stone, stone_light, stone_cool, dark)
+    for i in range(0, len(points) - 1, 2):
+        center, tangent = points[i]
+        if gap and gap[0] <= center.y <= gap[1]:
+            continue
+        right = Vector((tangent.y, -tangent.x, 0)).normalized()
+        yaw = math.atan2(-tangent.x, tangent.y) + random.uniform(-0.012, 0.012)
+        for row in range(-2, 3):
+            offset = center + right * (row * 0.92)
+            jittered = offset + tangent * random.uniform(-0.035, 0.035)
+            dims = (random.uniform(0.82, 0.90), 0.13, random.uniform(1.28, 1.40))
+            cube("Hand_cut_paving_stone", (jittered.x, jittered.y, 0.20),
+                 dims, random.choice(palette), yaw, 0.045)
+
+def add_broken_supports(points, gap, material):
+    if not gap:
+        return
+    for i in range(0, len(points), 3):
+        center, tangent = points[i]
+        if gap[0] - 1.2 <= center.y <= gap[0] + 0.3 or gap[1] - 0.3 <= center.y <= gap[1] + 1.2:
+            yaw = math.atan2(-tangent.x, tangent.y)
+            cube("Exposed_broken_crossbeam", (center.x, center.y, -0.48),
+                 (0.28, 4.9, 0.24), material, yaw, 0.04)
+    for edge_y in (gap[0], gap[1]):
+        for side in (-1, 1):
+            cube("Broken_stone_chunk",
+                 (side * (DECK_WIDTH * 0.5 - 0.28), edge_y, 0.18),
+                 (0.55, 0.42, 0.22), dark, random.uniform(-0.15, 0.15), 0.08)
+
 def add_rails(points, gap=None):
     for side in (-1, 1):
         for i in range(0, len(points), 3):
@@ -126,7 +164,9 @@ def add_anchors(points, name):
 def export_module(name, points, gap=None):
     clear_scene()
     add_deck_mesh(name + "_Deck", points, gap)
+    add_paving(points, gap)
     add_rails(points, gap)
+    add_broken_supports(points, gap, wood)
     add_anchors(points, name)
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
