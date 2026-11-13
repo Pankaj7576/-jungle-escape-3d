@@ -39,9 +39,10 @@ namespace JungleEscape
 
         private void Start()
         {
-            if (runner == null || startSegmentPrefab == null)
+            if (runner == null || startSegmentPrefab == null ||
+                startSegmentPrefab.Entry == null || startSegmentPrefab.Exit == null)
             {
-                Debug.LogError("TrackDirector: assign Runner and Start Segment Prefab.", this);
+                Debug.LogError("TrackDirector: assign Runner and a valid Start Segment with Entry/Exit anchors.", this);
                 enabled = false;
                 return;
             }
