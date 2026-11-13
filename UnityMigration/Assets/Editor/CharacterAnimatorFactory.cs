@@ -13,6 +13,11 @@ namespace JungleEscape.EditorTools
         public static Animator AttachHero(GameObject runnerRoot, string fbxPath)
         {
             GameObject modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            if (modelAsset == null)
+            {
+                fbxPath = "Assets/Characters/Animations/KinemIQ/KinemIQ_Mannequin.fbx";
+                modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            }
             if (modelAsset == null) return null;
 
             GameObject model = PrefabUtility.InstantiatePrefab(modelAsset) as GameObject;
