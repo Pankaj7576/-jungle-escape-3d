@@ -79,7 +79,9 @@ namespace JungleEscape
         private void Update()
         {
             if (hasFallen || !runActive) return;
-            if (controller.isGrounded && transform.position.y > fallDeathY + 1f)
+            bool safeTrack = track == null || track.CurrentSegment == null ||
+                             !track.CurrentSegment.IsGapSegment;
+            if (controller.isGrounded && safeTrack && transform.position.y > fallDeathY + 1f)
                 lastSafePosition = transform.position;
 
             if (controller.isGrounded && verticalSpeed < 0f) verticalSpeed = -2f;
