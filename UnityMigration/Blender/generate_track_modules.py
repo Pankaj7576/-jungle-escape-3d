@@ -4,9 +4,14 @@
 import bpy
 import math
 import random
+import os
 from mathutils import Vector
 
-OUT = "//"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
+OUT_DIR = os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Environment", "Generated")
+os.makedirs(OUT_DIR, exist_ok=True)
+OUT = OUT_DIR + os.sep
 WIDTH = 5.4
 DECK_WIDTH = 4.7
 STONE = (0.34, 0.32, 0.27, 1)
@@ -194,7 +199,24 @@ def export_module(name, points, gap=None):
             obj.select_set(True)
     bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
         export_format='GLB', use_selection=True)
-    print("Exported", name + ".glb")
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in bpy.context.scene.objects:
+        if obj.type in {'MESH', 'EMPTY'}:
+            obj.select_set(True)
+    bpy.ops.export_scene.fbx(
+        filepath=OUT + name + ".fbx",
+        use_selection=True,
+        object_types={'MESH', 'EMPTY'},
+        apply_unit_scale=True,
+        axis_forward='-Z',
+        axis_up='Y',
+        add_leaf_bones=False,
+        bake_anim=False,
+        path_mode='COPY',
+        embed_textures=True
+    )
+    print("Exported", name + ".glb and .fbx")
 
 export_module("Bridge_Straight_18m", path_straight(18.0))
 export_module("Bridge_Turn_Left_90", path_turn(True))
