@@ -35,7 +35,8 @@ Without a valid UNITY_LICENSE secret, the workflow will fail before compilation.
 4. Read UNITY_SETUP.md for scene systems and validation.
 5. Read Blender/ASSET_PIPELINE.md for explorer/guardian rigging, animation clips, modular bridge art and mobile budgets.
 6. Read Blender/FREE_ASSET_SOURCES.md for free CC0 models, animation packs and PBR texture sources; licences and mobile optimization requirements are documented there.
-6. Run Blender/generate_track_modules.py in Blender 4.x to generate standalone straight, turn and broken-gap blockout modules.
+6. The Blender Track Assets workflow is configured to generate straight, turn and broken-gap FBX/GLB files remotely; if it fails, use Blender 4.x and run Blender/generate_track_modules.py manually.
+7. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB to a Unity FBX after confirming its licence.
 7. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB into a Unity FBX without modifying the original.
 
 ## Implemented source systems
