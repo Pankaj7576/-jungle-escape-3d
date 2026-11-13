@@ -551,8 +551,13 @@ namespace JungleEscape.EditorTools
                     {
                         GuardianAnimationDriver animation = root.AddComponent<GuardianAnimationDriver>();
                         Assign(animation, "animator", animator);
-                        animatedModel = true;
                     }
+                    else
+                    {
+                        GuardianMotion motion = root.AddComponent<GuardianMotion>();
+                        Assign(motion, "visualRoot", visualRoot.transform);
+                    }
+                    animatedModel = true;
                 }
             }
 
