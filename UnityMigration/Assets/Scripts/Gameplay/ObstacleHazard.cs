@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JungleEscape
 {
-    [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Collider), typeof(Rigidbody))]
     public sealed class ObstacleHazard : MonoBehaviour
     {
         [SerializeField] private GameBootstrap game;
@@ -14,7 +14,13 @@ namespace JungleEscape
         private Collider trigger;
         private Coroutine recovery;
 
-        private void Awake() => trigger = GetComponent<Collider>();
+        private void Awake()
+        {
+            trigger = GetComponent<Collider>();
+            Rigidbody body = GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+        }
 
         private void OnEnable()
         {
@@ -25,6 +31,9 @@ namespace JungleEscape
         private void Reset()
         {
             GetComponent<Collider>().isTrigger = true;
+            Rigidbody body = GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
         }
 
         private void OnTriggerEnter(Collider other)
