@@ -52,6 +52,21 @@ namespace JungleEscape
             UpdateCurrentSegment();
         }
 
+        public void ResetTrack()
+        {
+            for (int i = 0; i < active.Count; i++)
+                if (active[i] != null) Destroy(active[i].gameObject);
+            active.Clear();
+            CurrentSegment = null;
+            TrackSegment first = Instantiate(startSegmentPrefab, transform.position,
+                transform.rotation, transform);
+            if (!Validate(first)) { enabled = false; return; }
+            active.Add(first);
+            nextEntry = first.Exit;
+            for (int i = 1; i < segmentsAhead; i++) SpawnNext();
+            UpdateCurrentSegment();
+        }
+
         private void Update()
         {
             if (runner == null || active.Count == 0) return;
