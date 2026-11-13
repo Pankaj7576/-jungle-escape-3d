@@ -8,13 +8,11 @@ namespace JungleEscape
         [SerializeField] private Transform runner;
         [SerializeField, Min(0f)] private float scorePerMeter = 1f;
 
-        private Vector3 startPosition;
-        private float bestDistance;
-        private int coins;
+        private Vector3 lastPosition;
 
         public float DistanceMeters { get; private set; }
-        public int Coins => coins;
-        public int Score => Mathf.FloorToInt(DistanceMeters * scorePerMeter) + coins * 10;
+        public int Coins { get; private set; }
+        public int Score => Mathf.FloorToInt(DistanceMeters * scorePerMeter) + Coins * 10;
 
         private void Start()
         {
@@ -24,29 +22,27 @@ namespace JungleEscape
                 enabled = false;
                 return;
             }
-            startPosition = runner.position;
+            lastPosition = runner.position;
         }
 
         private void Update()
         {
             if (runner == null) return;
-            // Distance is measured from the start along the runner's actual displacement.
-            // This remains useful for straight and rotated track sections.
-            DistanceMeters = Mathf.Max(bestDistance, Vector3.Distance(startPosition, runner.position));
-            bestDistance = DistanceMeters;
+            // Accumulate traveled distance so 90-degree turns do not undercount the run.
+            DistanceMeters += Vector3.Distance(lastPosition, runner.position);
+            lastPosition = runner.position;
         }
 
         public void AddCoin(int amount = 1)
         {
-            if (amount > 0) coins += amount;
+            if (amount > 0) Coins += amount;
         }
 
         public void ResetRun()
         {
-            if (runner != null) startPosition = runner.position;
+            if (runner != null) lastPosition = runner.position;
             DistanceMeters = 0f;
-            bestDistance = 0f;
-            coins = 0;
+            Coins = 0;
         }
     }
 }
