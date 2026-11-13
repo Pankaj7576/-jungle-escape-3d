@@ -4,6 +4,8 @@ This document is the production asset checklist for the original Jungle Escape a
 
 ## 1. Explorer hero
 
+The repository already includes a black-suit rigged GLB at `../public/models/character_black_suit_rigged.glb`. Import it into Blender first, inspect its skeleton and animation clips, confirm its asset licence/ownership, then export an FBX copy into UnityMigration/Assets/Characters. Do not overwrite the original GLB. If the rig or clips are unsuitable, use the following checklist to repair or replace it.
+
 Target: readable athletic adventurer silhouette, dark/neutral expedition clothing, backpack, boots and restrained high-contrast details. Keep the silhouette clean at a portrait mobile camera distance.
 
 ### Recommended Blender setup
