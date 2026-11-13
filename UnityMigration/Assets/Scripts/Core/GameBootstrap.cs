@@ -5,6 +5,7 @@ namespace JungleEscape
     public sealed class GameBootstrap : MonoBehaviour
     {
         [SerializeField] private RunnerMotor runner;
+        [SerializeField] private RunnerAnimationDriver runnerAnimation;
         [SerializeField] private GuardianChase guardian;
         [SerializeField] private RunnerCamera runnerCamera;
         [SerializeField] private RunProgress runProgress;
@@ -39,6 +40,7 @@ namespace JungleEscape
             gameOver = false;
             reviveUsed = false;
             runner?.ResetMotor();
+            runnerAnimation?.ResetAnimation();
             track?.ResetTrack();
             guardian?.ResetChase();
             foreach (PickupItem pickup in FindObjectsByType<PickupItem>(FindObjectsSortMode.None))
@@ -73,6 +75,7 @@ namespace JungleEscape
             gameOver = true;
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
+            runnerAnimation?.PlayFall();
             guardian?.SetChaseActive(false);
             if (reviveUsed) ui?.ShowGameOver();
             else ui?.ShowRevive();
@@ -85,6 +88,7 @@ namespace JungleEscape
             reviveUsed = true;
             gameOver = false;
             runner?.ReviveAtLastSafePosition();
+            runnerAnimation?.ResetAnimation();
             guardian?.ResetChase();
             ui.ShowHUD();
             return true;
