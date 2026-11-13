@@ -23,20 +23,26 @@ GitHub Actions alone is not a free Unity build machine: Unity licensing and edit
 5. Create a scene with a Plane/ground, a Runner GameObject with CharacterController, a Camera, a Guardian GameObject, and a TrackDirector.
 6. Assign the references in Inspector. Create a segment prefab with a BoxCollider/ground collider and optional visual mesh, then assign it to TrackDirector.
 7. Add SwipeInput to a scene object and assign RunnerMotor. Set Active Input Handling to Input Manager (Old) or Both.
-9. Run the Blender script in Blender 4.x to generate the first bridge module; export/import the resulting GLB and replace the placeholder segment visuals.
-10. Build and test on an Android device. Tune quality only after profiling on the target phone.
+8. Add RunProgress to a scene object and assign the Runner transform. Add PickupItem to coin/boost prefabs; use trigger colliders, assign RunProgress for coins and GameBootstrap for boosts.
+9. Add ObstacleHazard to obstacle prefabs, enable Is Trigger on its collider, and assign GameBootstrap. The first hit disables that trigger and briefly closes the guardian gap; the recovery delay then restores the chase gap.
+10. Run the Blender script in Blender 4.x to generate the first bridge module; export/import the resulting GLB and replace the placeholder segment visuals.
+11. Build and test on an Android device. Tune quality only after profiling on the target phone.
 
-## Phase 1 scope
+## Current source scope (Phase 1 + gameplay systems)
 - Three-lane runner movement, jump, slide, touch swipes and keyboard test input
-- Reusable track segment spawning and cleanup
+- Reusable straight track segment spawning and cleanup
 - Guardian gap/chase response to stumble and boost
 - Smooth follow camera
 - Procedural Blender bridge starter asset
+- Run distance, score and coin counters (`RunProgress`)
+- Trigger-based coin/boost pickups (`PickupItem`)
+- Trigger-based obstacle stumble and timed recovery (`ObstacleHazard`)
 
 ## Not yet implemented / not claimed
 - Production-quality character or beast models and their skeletal animation clips
 - Authored 90-degree junction/turn prefabs and path-following around corners
-- Finished obstacles, coins, powerups, menu/HUD, audio, save system and revive flow
+- Authored 90-degree junction/turn prefabs and path-following around corners
+- Finished production art for obstacles, coins and powerups; menu/HUD, audio, save system and revive flow
 - Verified Android build, device FPS, heat, memory or gameplay test
 
 These are explicit next milestones, not completed features.
