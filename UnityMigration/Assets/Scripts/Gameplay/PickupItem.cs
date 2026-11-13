@@ -47,7 +47,7 @@ namespace JungleEscape
             if (visualRoot != null) visualRoot.SetActive(false);
             if (trigger != null) trigger.enabled = false;
             // Disable rather than Destroy: segment pooling can reactivate this pickup.
-            gameObject.SetActive(false);
+            // Keep this child active so OnEnable resets it when its pooled segment returns.
         }
     }
 }
