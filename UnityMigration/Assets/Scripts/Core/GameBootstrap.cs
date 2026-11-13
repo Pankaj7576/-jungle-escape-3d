@@ -7,7 +7,7 @@ namespace JungleEscape
         [SerializeField] private RunnerMotor runner;
         [SerializeField] private GuardianChase guardian;
         [SerializeField] private RunnerCamera runnerCamera;
-        [SerializeField] private RunProgress runProgress;
+        [SerializeField] private RunProgress runProgress;\n        [SerializeField] private TrackDirector track;
         [SerializeField] private UIFlow ui;
 
         private bool gameOver;
