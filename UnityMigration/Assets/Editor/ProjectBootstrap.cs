@@ -49,6 +49,7 @@ namespace JungleEscape.EditorTools
             runner.transform.position = new Vector3(0f, 0.02f, 2f);
             RunnerMotor motor = runner.AddComponent<RunnerMotor>();
             RunnerAnimationDriver animation = runner.AddComponent<RunnerAnimationDriver>();
+            Assign(animation, "motor", motor);
 
             GameObject guardian = BuildGuardian(beastMat);
             guardian.transform.position = new Vector3(0f, 0.02f, -3.5f);
