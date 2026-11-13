@@ -94,7 +94,7 @@ namespace JungleEscape.EditorTools
             SwipeInput input = manager.AddComponent<SwipeInput>();
             GameBootstrap game = manager.AddComponent<GameBootstrap>();
 
-            if (UnityEngine.Object.FindObjectOfType<EventSystem>() == null)
+            if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() == null)
                 new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
             Canvas canvas = CreateCanvas();
