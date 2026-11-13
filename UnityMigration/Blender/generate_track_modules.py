@@ -92,10 +92,12 @@ def add_deck_mesh(name, points, gap=None):
     bpy.context.collection.objects.link(obj)
     return obj
 
-def add_rails(points):
+def add_rails(points, gap=None):
     for side in (-1, 1):
         for i in range(0, len(points), 3):
             center, tangent = points[i]
+            if gap and gap[0] < center.y < gap[1]:
+                continue
             right = Vector((tangent.y, -tangent.x, 0)).normalized()
             pos = center + right * side * (WIDTH * 0.5 - 0.15)
             yaw = math.atan2(-tangent.x, tangent.y)
@@ -124,7 +126,7 @@ def add_anchors(points, name):
 def export_module(name, points, gap=None):
     clear_scene()
     add_deck_mesh(name + "_Deck", points, gap)
-    add_rails(points)
+    add_rails(points, gap)
     add_anchors(points, name)
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
