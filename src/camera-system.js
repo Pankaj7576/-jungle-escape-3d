@@ -29,7 +29,8 @@ export class RunnerCamera {
     const distance = ray.length();
     this.raycaster.set(runnerPosition.clone().add(new THREE.Vector3(0, 1.7, 0)), ray.normalize());
     this.raycaster.far = distance;
-    const hits = this.raycaster.intersectObjects(this.scene.children, true);
+    const blockers = this.scene.children.filter(object => object.userData.cameraBlocker);
+    const hits = this.raycaster.intersectObjects(blockers, true);
     const obstruction = hits.find(hit => hit.distance > 1.1 && hit.object.visible && !hit.object.userData.noCameraCollision);
     if (obstruction) {
       const safeDistance = Math.max(3.8, obstruction.distance - .65);
