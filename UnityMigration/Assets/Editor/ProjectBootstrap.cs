@@ -87,7 +87,7 @@ namespace JungleEscape.EditorTools
             SwipeInput input = manager.AddComponent<SwipeInput>();
             GameBootstrap game = manager.AddComponent<GameBootstrap>();
 
-            if (Object.FindObjectOfType<EventSystem>() == null)
+            if (UnityEngine.Object.FindObjectOfType<EventSystem>() == null)
                 new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
             Canvas canvas = CreateCanvas();
@@ -100,10 +100,10 @@ namespace JungleEscape.EditorTools
             Assign(contentSpawner, "game", game);
             Assign(contentSpawner, "progress", progress);
             Assign(contentSpawner, "ui", ui);
-            Assign(director, "straightPrefabs", new Object[] { straight });
-            Assign(director, "leftTurnPrefabs", new Object[] { left });
-            Assign(director, "rightTurnPrefabs", new Object[] { right });
-            Assign(director, "gapPrefabs", new Object[] { gap });
+            Assign(director, "straightPrefabs", new UnityEngine.Object[] { straight });
+            Assign(director, "leftTurnPrefabs", new UnityEngine.Object[] { left });
+            Assign(director, "rightTurnPrefabs", new UnityEngine.Object[] { right });
+            Assign(director, "gapPrefabs", new UnityEngine.Object[] { gap });
             Assign(director, "segmentsAhead", 8);
             Assign(director, "keepBehind", 2);
             Assign(director, "turnChance", 0.10f);
@@ -153,14 +153,14 @@ namespace JungleEscape.EditorTools
         [MenuItem("Tools/Jungle Escape/Validate Generated Scene")]
         public static void ValidateGeneratedScene()
         {
-            RunnerMotor runner = Object.FindFirstObjectByType<RunnerMotor>();
-            TrackDirector director = Object.FindFirstObjectByType<TrackDirector>();
-            TrackContentSpawner contents = Object.FindFirstObjectByType<TrackContentSpawner>();
-            GuardianChase guardian = Object.FindFirstObjectByType<GuardianChase>();
-            RunnerCamera camera = Object.FindFirstObjectByType<RunnerCamera>();
-            GameBootstrap game = Object.FindFirstObjectByType<GameBootstrap>();
-            UIFlow ui = Object.FindFirstObjectByType<UIFlow>();
-            EventSystem eventSystem = Object.FindFirstObjectByType<EventSystem>();
+            RunnerMotor runner = UnityEngine.Object.FindFirstObjectByType<RunnerMotor>();
+            TrackDirector director = UnityEngine.Object.FindFirstObjectByType<TrackDirector>();
+            TrackContentSpawner contents = UnityEngine.Object.FindFirstObjectByType<TrackContentSpawner>();
+            GuardianChase guardian = UnityEngine.Object.FindFirstObjectByType<GuardianChase>();
+            RunnerCamera camera = UnityEngine.Object.FindFirstObjectByType<RunnerCamera>();
+            GameBootstrap game = UnityEngine.Object.FindFirstObjectByType<GameBootstrap>();
+            UIFlow ui = UnityEngine.Object.FindFirstObjectByType<UIFlow>();
+            EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
 
             Require(runner != null, "RunnerMotor is missing.");
             Require(runner != null && runner.GetComponent<CharacterController>() != null,
@@ -321,7 +321,7 @@ namespace JungleEscape.EditorTools
 
             string pathName = Prefabs + "/" + name + ".prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, pathName);
-            Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate(root);
             return prefab.GetComponent<TrackSegment>();
         }
 
@@ -335,7 +335,7 @@ namespace JungleEscape.EditorTools
             GameObject model = PrefabUtility.InstantiatePrefab(modelAsset) as GameObject;
             if (model == null)
             {
-                Object.DestroyImmediate(root);
+                UnityEngine.Object.DestroyImmediate(root);
                 return null;
             }
             model.transform.SetParent(root.transform, false);
@@ -345,7 +345,7 @@ namespace JungleEscape.EditorTools
             if (entry == null || exit == null)
             {
                 Debug.LogWarning("Generated FBX has no Entry/Exit anchors: " + assetPath);
-                Object.DestroyImmediate(root);
+                UnityEngine.Object.DestroyImmediate(root);
                 return null;
             }
 
@@ -370,7 +370,7 @@ namespace JungleEscape.EditorTools
 
             string prefabPath = Prefabs + "/" + prefabName + ".prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
-            Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate(root);
             return prefab != null ? prefab.GetComponent<TrackSegment>() : null;
         }
 
@@ -632,7 +632,7 @@ namespace JungleEscape.EditorTools
             visual.transform.localScale = new Vector3(0.48f, 0.07f, 0.48f);
             visual.GetComponent<Renderer>().sharedMaterial = gold;
             Collider visualCollider = visual.GetComponent<Collider>();
-            if (visualCollider != null) Object.DestroyImmediate(visualCollider);
+            if (visualCollider != null) UnityEngine.Object.DestroyImmediate(visualCollider);
             PickupItem pickup = pickupRoot.AddComponent<PickupItem>();
             Assign(pickup, "progress", progress);
             Assign(pickup, "ui", ui);
@@ -787,7 +787,7 @@ namespace JungleEscape.EditorTools
             obj.transform.localPosition = position; obj.transform.localScale = scale;
             obj.GetComponent<Renderer>().sharedMaterial = material;
             Collider collider = obj.GetComponent<Collider>();
-            if (collider != null) Object.DestroyImmediate(collider);
+            if (collider != null) UnityEngine.Object.DestroyImmediate(collider);
         }
 
         private static void AddSphere(string name, Transform parent, Vector3 position, Vector3 scale, Material material)
@@ -797,7 +797,7 @@ namespace JungleEscape.EditorTools
             obj.transform.localPosition = position; obj.transform.localScale = scale;
             obj.GetComponent<Renderer>().sharedMaterial = material;
             Collider collider = obj.GetComponent<Collider>();
-            if (collider != null) Object.DestroyImmediate(collider);
+            if (collider != null) UnityEngine.Object.DestroyImmediate(collider);
         }
 
         private static void AddCubeVisual(string name, Transform parent, Vector3 position, Vector3 scale, Material material)
@@ -807,7 +807,7 @@ namespace JungleEscape.EditorTools
             obj.transform.localPosition = position; obj.transform.localScale = scale;
             obj.GetComponent<Renderer>().sharedMaterial = material;
             Collider collider = obj.GetComponent<Collider>();
-            if (collider != null) Object.DestroyImmediate(collider);
+            if (collider != null) UnityEngine.Object.DestroyImmediate(collider);
         }
 
         private static GameObject CreateCube(string name, Transform parent, Vector3 position,
@@ -823,12 +823,12 @@ namespace JungleEscape.EditorTools
             if (!collider)
             {
                 Collider c = obj.GetComponent<Collider>();
-                if (c != null) Object.DestroyImmediate(c);
+                if (c != null) UnityEngine.Object.DestroyImmediate(c);
             }
             return obj;
         }
 
-        private static void Assign(Object target, string property, Object value)
+        private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -837,7 +837,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, int value)
+        private static void Assign(UnityEngine.Object target, string property, int value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -846,7 +846,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, float value)
+        private static void Assign(UnityEngine.Object target, string property, float value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -855,7 +855,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, bool value)
+        private static void Assign(UnityEngine.Object target, string property, bool value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -864,7 +864,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, Object[] values)
+        private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object[] values)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -874,7 +874,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, HazardAvoidance value)
+        private static void Assign(UnityEngine.Object target, string property, HazardAvoidance value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
@@ -883,7 +883,7 @@ namespace JungleEscape.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void Assign(Object target, string property, PickupKind value)
+        private static void Assign(UnityEngine.Object target, string property, PickupKind value)
         {
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
