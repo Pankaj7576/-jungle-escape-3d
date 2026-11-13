@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace JungleEscape.EditorTools
 {
@@ -24,6 +26,7 @@ namespace JungleEscape.EditorTools
         public static void BuildDemoScene()
         {
             EnsureFolders();
+            EnsureUrpPipeline();
             Material stone = MakeMaterial("Weathered Stone", new Color(0.31f, 0.29f, 0.25f));
             Material trim = MakeMaterial("Carved Stone", new Color(0.20f, 0.19f, 0.17f));
             Material moss = MakeMaterial("Moss", new Color(0.10f, 0.19f, 0.08f));
@@ -138,7 +141,49 @@ namespace JungleEscape.EditorTools
             CreateFolder("Assets", "JungleEscapeGenerated");
             CreateFolder(Root, "Prefabs");
             CreateFolder(Root, "Materials");
+            CreateFolder(Root, "Settings");
             CreateFolder("Assets", "Scenes");
+        }
+
+        private static void EnsureUrpPipeline()
+        {
+            const string pipelinePath = Root + "/Settings/JungleEscape_URP.asset";
+            const string rendererPath = Root + "/Settings/JungleEscape_Renderer.asset";
+            UniversalRenderPipelineAsset pipeline = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(pipelinePath);
+            if (pipeline == null)
+            {
+                pipeline = ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
+                ScriptableRendererData renderer = pipeline.LoadBuiltinRendererData();
+                if (renderer == null)
+                    throw new System.InvalidOperationException("Unity could not create the default URP renderer data.");
+
+                AssetDatabase.CreateAsset(renderer, rendererPath);
+                SerializedObject serialized = new SerializedObject(pipeline);
+                SerializedProperty rendererList = serialized.FindProperty("m_RendererDataList");
+                if (rendererList == null)
+                    throw new System.InvalidOperationException("URP renderer list property is missing.");
+                rendererList.arraySize = 1;
+                rendererList.GetArrayElementAtIndex(0).objectReferenceValue = renderer;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                pipeline.renderScale = 0.9f;
+                pipeline.msaaSampleCount = 2;
+                pipeline.shadowDistance = 35f;
+                pipeline.supportsHDR = false;
+                pipeline.supportsCameraOpaqueTexture = false;
+                pipeline.supportsCameraDepthTexture = false;
+                AssetDatabase.CreateAsset(pipeline, pipelinePath);
+            }
+
+            GraphicsSettings.defaultRenderPipeline = pipeline;
+            int previousQuality = QualitySettings.GetQualityLevel();
+            for (int i = 0; i < QualitySettings.names.Length; i++)
+            {
+                QualitySettings.SetQualityLevel(i, false);
+                QualitySettings.renderPipeline = pipeline;
+            }
+            QualitySettings.SetQualityLevel(previousQuality, false);
+            EditorUtility.SetDirty(pipeline);
+            AssetDatabase.SaveAssets();
         }
 
         private static void CreateFolder(string parent, string child)
