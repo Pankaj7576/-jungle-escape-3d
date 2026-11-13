@@ -1,5 +1,10 @@
 # Jungle Escape 3D — Version History
 
+## 1.001
+- Restored the Temple Run-inspired ancient stone bridge: textured irregular paving and low stone parapets; removed modern steel towers, suspension cables, LED strips and lane markings.
+- Restored the earlier obstacle scale and mix: large rocks, stone walls and overhead branches, with matching jump/slide collision thresholds.
+- Build verification: pending GitHub Actions.
+
 ## 1.00
 - Baseline snapshot: Himalayan valley scenery, modern suspension bridge, and refined jump/slide obstacles.
 - Rollback snapshot branch: `versions/1.00`.
