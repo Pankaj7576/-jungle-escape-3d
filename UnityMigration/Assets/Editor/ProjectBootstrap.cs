@@ -37,10 +37,14 @@ namespace JungleEscape.EditorTools
             Material beastMat = MakeMaterial("Guardian Charcoal Fur", new Color(0.025f, 0.022f, 0.02f));
             Material gold = MakeMaterial("Ancient Gold", new Color(0.85f, 0.55f, 0.10f));
 
-            TrackSegment straight = BuildTrackPrefab("Bridge_Straight", ModuleKind.Straight, stone, trim, moss);
-            TrackSegment left = BuildTrackPrefab("Bridge_Turn_Left_90", ModuleKind.Left, stone, trim, moss);
-            TrackSegment right = BuildTrackPrefab("Bridge_Turn_Right_90", ModuleKind.Right, stone, trim, moss);
-            TrackSegment gap = BuildTrackPrefab("Bridge_Broken_Gap", ModuleKind.Gap, stone, trim, moss);
+            TrackSegment straight = RequireTrackPrefab(
+                BuildTrackPrefab("Bridge_Straight", ModuleKind.Straight, stone, trim, moss), "Bridge_Straight");
+            TrackSegment left = RequireTrackPrefab(
+                BuildTrackPrefab("Bridge_Turn_Left_90", ModuleKind.Left, stone, trim, moss), "Bridge_Turn_Left_90");
+            TrackSegment right = RequireTrackPrefab(
+                BuildTrackPrefab("Bridge_Turn_Right_90", ModuleKind.Right, stone, trim, moss), "Bridge_Turn_Right_90");
+            TrackSegment gap = RequireTrackPrefab(
+                BuildTrackPrefab("Bridge_Broken_Gap", ModuleKind.Gap, stone, trim, moss), "Bridge_Broken_Gap");
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             GameObject trackRoot = new GameObject("TrackDirector");
@@ -214,6 +218,15 @@ namespace JungleEscape.EditorTools
             Debug.Log("Jungle Escape scene validation passed. This checks scene wiring only; it is not a gameplay or Android device test.");
         }
 
+        private static TrackSegment RequireTrackPrefab(TrackSegment prefab, string name)
+        {
+            if (prefab == null)
+                throw new System.InvalidOperationException(
+                    "Demo scene generation failed: prefab '" + name +
+                    "' did not produce a TrackSegment. Check its FBX source or generated prefab.");
+            return prefab;
+        }
+
         private static void Require(bool condition, string message)
         {
             if (!condition) throw new System.InvalidOperationException("Jungle Escape validation failed: " + message);
@@ -333,7 +346,12 @@ namespace JungleEscape.EditorTools
             string pathName = Prefabs + "/" + name + ".prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, pathName);
             UnityEngine.Object.DestroyImmediate(root);
-            return prefab.GetComponent<TrackSegment>();
+            if (prefab == null)
+                throw new System.InvalidOperationException("Unity failed to save generated track prefab: " + pathName);
+            TrackSegment savedSegment = prefab.GetComponent<TrackSegment>();
+            if (savedSegment == null)
+                throw new System.InvalidOperationException("Saved track prefab has no TrackSegment component: " + pathName);
+            return savedSegment;
         }
 
         private static TrackSegment BuildTrackPrefabFromFbx(string prefabName, string fileName, bool isGap)
