@@ -10,13 +10,20 @@ namespace JungleEscape
         [SerializeField, Min(0.1f)] private float closeRate = 5f;
         [SerializeField, Min(0.1f)] private float recoverRate = 1.8f;
         [SerializeField, Min(0.5f)] private float catchDistance = 1.45f;
-        [SerializeField] private UnityEvent onCaught;
+        [SerializeField] private UnityEvent onCaught = new UnityEvent();
 
         private float gap;
         private bool caught;
         private bool chaseActive;
 
         private void Awake() => gap = desiredGap;
+
+        public void SetCaughtHandler(UnityAction handler)
+        {
+            onCaught ??= new UnityEvent();
+            onCaught.RemoveAllListeners();
+            if (handler != null) onCaught.AddListener(handler);
+        }
 
         public void SetChaseActive(bool value)
         {
