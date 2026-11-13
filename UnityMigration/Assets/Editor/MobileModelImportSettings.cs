@@ -27,7 +27,6 @@ namespace JungleEscape.EditorTools
             else if (path.EndsWith("/Characters/Animations/KinemIQ/KinemIQ_Mannequin.fbx"))
             {
                 importer.importAnimation = false;
-                importer.importMesh = true;
                 importer.importCameras = false;
                 importer.importLights = false;
                 importer.isReadable = false;
@@ -40,7 +39,6 @@ namespace JungleEscape.EditorTools
             else if (path.Contains("/Characters/Animations/KinemIQ/"))
             {
                 importer.importAnimation = true;
-                importer.importMesh = false;
                 importer.importCameras = false;
                 importer.importLights = false;
                 importer.meshCompression = ModelImporterMeshCompression.Medium;
