@@ -22,6 +22,14 @@ STONE_COOL = (0.27, 0.29, 0.28, 1)
 WOOD = (0.20, 0.12, 0.07, 1)
 random.seed(27)
 
+# Enable the bundled interchange exporters when Blender ships them as add-ons.
+for addon_name in ("io_scene_gltf2", "io_scene_fbx",
+                   "bl_ext.blender_org.io_scene_gltf2", "bl_ext.blender_org.io_scene_fbx"):
+    try:
+        bpy.ops.preferences.addon_enable(module=addon_name)
+    except Exception:
+        pass
+
 def clear_scene():
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
@@ -197,8 +205,15 @@ def export_module(name, points, gap=None):
     for obj in bpy.context.scene.objects:
         if obj.type in {'MESH', 'EMPTY'}:
             obj.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
-        export_format='GLB', use_selection=True)
+    if hasattr(bpy.ops.export_scene, "gltf"):
+        try:
+            bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
+                export_format='GLB', use_selection=True)
+        except Exception as error:
+            print("GLB export skipped for", name, ":", error)
+
+    if not hasattr(bpy.ops.export_scene, "fbx"):
+        raise RuntimeError("Blender FBX exporter is unavailable; cannot create Unity-native modules.")
 
     bpy.ops.object.select_all(action='DESELECT')
     for obj in bpy.context.scene.objects:
