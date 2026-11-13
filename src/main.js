@@ -111,20 +111,20 @@ function spawnPattern(at) {
       if (lane === safe || Math.random() > .72) continue;
       const kindRoll = Math.random();
       const kind = kindRoll < .43 ? 'rock' : kindRoll < .75 ? 'wall' : 'arch';
-      const p = placeAt(at, lane);
+      const p = track.getPose(at);
       const mesh = makeWorldObstacle(scene, mats, p, laneOffset(lane), kind);
       obstacles.push({ mesh, progress: at, lane, kind, hit: false });
     }
   }
   for (let i = 0; i < 7; i++) {
-    const p = placeAt(at + i * 1.65, safe);
+    const p = track.getPose(at + i * 1.65);
     const mesh = makeCoin(scene, mats, p, laneOffset(safe));
     coinVisuals.push({ mesh, progress: at + i * 1.65, lane: safe, taken: false, power: null });
   }
   if (at - state.lastPowerup > 95 && Math.random() < .72) {
     const type = Math.random() < .55 ? 'magnet' : 'boost';
     const powerLane = (safe + 1 + Math.floor(Math.random() * 2)) % 3;
-    const p = placeAt(at + 13, powerLane);
+    const p = track.getPose(at + 13);
     const mesh = makeCoin(scene, mats, p, laneOffset(powerLane), true, type);
     pickups.push({ mesh, progress: at + 13, lane: powerLane, type, taken: false });
     state.lastPowerup = at;
@@ -167,7 +167,7 @@ function reviveRun() {
   $('controls').classList.remove('hidden');
   const pose = placeAt(state.progress, state.lane);
   runner.root.position.copy(pose.position);
-  beast.update(.016, track.getPose(state.progress - state.chaserGap));
+  { const p = track.getPose(Math.max(0, state.progress - state.chaserGap)); p.position.addScaledVector(p.tangent, -state.chaserGap); beast.update(.016, p); }
 }
 $('revive-continue').onclick = reviveRun;
 $('revive-decline').onclick = () => { $('revive').classList.add('hidden'); gameOver(); };
@@ -184,7 +184,7 @@ function resetRun() {
   track.ensureAhead(0, 240);
   const pose = placeAt(0, 1);
   runner.root.position.copy(pose.position);
-  beast.update(.016, track.getPose(-5.5));
+  { const p = track.getPose(0); p.position.addScaledVector(p.tangent, -5.5); beast.update(.016, p); }
   cameraRig.update(.016, pose.position, pose.tangent);
 }
 function startRun() {
@@ -291,6 +291,7 @@ function updateWorld(dt) {
   runner.update(dt, runnerState, state.speed / 12);
 
   const gap = track.gapAt(state.progress);
+  $('gap-status').classList.toggle('hidden', !gap && !track.pieces.some(p => p.kind === 'gap' && p.gapStart > state.progress && p.gapStart - state.progress < 12));
   if (gap && state.jumpY < 1.05 && state.invulnerable <= 0) {
     failRun(); return;
   }
@@ -308,8 +309,10 @@ function updateWorld(dt) {
 
   const targetGap = 5.5 - (state.stumbleTime > 0 ? 3.1 : 0) + (state.boostTime > 0 ? 1.6 : 0);
   state.chaserGap += (targetGap - state.chaserGap) * Math.min(1, dt * 1.4);
-  const beastProgress = Math.max(-5.5, state.progress - state.chaserGap);
-  beast.update(dt, track.getPose(beastProgress));
+  const beastProgress = Math.max(0, state.progress - state.chaserGap);
+  const beastPose = track.getPose(beastProgress);
+  if (state.progress < state.chaserGap) beastPose.position.addScaledVector(beastPose.tangent, -(state.chaserGap - state.progress));
+  beast.update(dt, beastPose);
   if (state.chaserGap < 1.25 && state.invulnerable <= 0) { failRun(); return; }
 
   for (const item of [...obstacles, ...coinVisuals, ...pickups]) {
