@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: generated-assets-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -45,9 +49,10 @@ jobs:
 
       - name: Generate rigged guardian model and animations
         run: |
-          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/prepare_gorilla.py
-          test -s UnityMigration/Assets/Characters/Guardian_Ape.fbx
-          test -s UnityMigration/Assets/Characters/Guardian_Ape_SOURCE.txt
+          GUARDIAN_OUTPUT_DIR=/tmp/guardian-generated PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/prepare_gorilla.py
+          test -s /tmp/guardian-generated/Guardian_Ape.fbx
+          test -s /tmp/guardian-generated/Guardian_Ape_SOURCE.txt
+          cp -f /tmp/guardian-generated/Guardian_Ape.fbx /tmp/guardian-generated/Guardian_Ape_SOURCE.txt UnityMigration/Assets/Characters/
 
       - name: Upload rigged guardian
         uses: actions/upload-artifact@v4
@@ -63,11 +68,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin "$GITHUB_REF_NAME"
           git add UnityMigration/Assets/Characters/Guardian_Ape.fbx UnityMigration/Assets/Characters/Guardian_Ape_SOURCE.txt
           if git diff --cached --quiet; then
             echo "Guardian asset is already up to date."
             exit 0
           fi
           git commit -m "Generate original rigged temple guardian"
+          git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:${GITHUB_REF_NAME}"
