@@ -40,12 +40,16 @@ namespace JungleEscape.EditorTools
             Material gold = MakeMaterial("Ancient Gold", new Color(0.85f, 0.55f, 0.10f));
 
             Debug.Log("Jungle Escape stage 3: generating track prefabs.");
+            Debug.Log("Jungle Escape stage 3a: building straight track prefab.");
             TrackSegment straight = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Straight", ModuleKind.Straight, stone, trim, moss), "Bridge_Straight");
+            Debug.Log("Jungle Escape stage 3b: building left-turn track prefab.");
             TrackSegment left = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Turn_Left_90", ModuleKind.Left, stone, trim, moss), "Bridge_Turn_Left_90");
+            Debug.Log("Jungle Escape stage 3c: building right-turn track prefab.");
             TrackSegment right = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Turn_Right_90", ModuleKind.Right, stone, trim, moss), "Bridge_Turn_Right_90");
+            Debug.Log("Jungle Escape stage 3d: building broken-gap track prefab.");
             TrackSegment gap = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Broken_Gap", ModuleKind.Gap, stone, trim, moss), "Bridge_Broken_Gap");
 
@@ -261,33 +265,45 @@ namespace JungleEscape.EditorTools
         {
             const string pipelinePath = Root + "/Settings/JungleEscape_URP.asset";
             const string rendererPath = Root + "/Settings/JungleEscape_Renderer.asset";
-            UniversalRenderPipelineAsset pipeline = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(pipelinePath);
-            if (pipeline == null)
-            {
+            UniversalRenderPipelineAsset pipeline =
+                AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(pipelinePath);
+            bool createPipeline = pipeline == null;
+
+            if (createPipeline)
                 pipeline = ScriptableObject.CreateInstance<UniversalRenderPipelineAsset>();
+
+            // Repair partially generated settings too: a previous interrupted build may
+            // have left the pipeline asset without its renderer data asset/reference.
+            SerializedObject serialized = new SerializedObject(pipeline);
+            SerializedProperty rendererList = serialized.FindProperty("m_RendererDataList");
+            if (rendererList == null)
+                throw new System.InvalidOperationException("URP renderer list property is missing.");
+
+            ScriptableRendererData renderer = rendererList.arraySize > 0
+                ? rendererList.GetArrayElementAtIndex(0).objectReferenceValue as ScriptableRendererData
+                : null;
+            if (renderer == null)
+                renderer = AssetDatabase.LoadAssetAtPath<ScriptableRendererData>(rendererPath);
+
+            if (renderer == null)
+            {
                 ScriptableRendererData builtinRenderer = pipeline.LoadBuiltinRendererData();
                 if (builtinRenderer == null)
                     throw new System.InvalidOperationException("Unity could not create the default URP renderer data.");
 
-                // Unity may return its built-in renderer as an asset already stored at
-                // Assets/UniversalRenderer.asset. Never try to add that same object to
-                // a second asset file; clone it into our generated settings folder.
-                ScriptableRendererData renderer =
-                    AssetDatabase.LoadAssetAtPath<ScriptableRendererData>(rendererPath);
-                if (renderer == null)
-                {
-                    renderer = UnityEngine.Object.Instantiate(builtinRenderer);
-                    renderer.name = "JungleEscape_Renderer";
-                    AssetDatabase.CreateAsset(renderer, rendererPath);
-                }
+                // Clone the built-in renderer before saving it in our generated settings folder.
+                renderer = UnityEngine.Object.Instantiate(builtinRenderer);
+                renderer.name = "JungleEscape_Renderer";
+                AssetDatabase.CreateAsset(renderer, rendererPath);
+            }
 
-                SerializedObject serialized = new SerializedObject(pipeline);
-                SerializedProperty rendererList = serialized.FindProperty("m_RendererDataList");
-                if (rendererList == null)
-                    throw new System.InvalidOperationException("URP renderer list property is missing.");
+            if (rendererList.arraySize != 1)
                 rendererList.arraySize = 1;
-                rendererList.GetArrayElementAtIndex(0).objectReferenceValue = renderer;
-                serialized.ApplyModifiedPropertiesWithoutUndo();
+            rendererList.GetArrayElementAtIndex(0).objectReferenceValue = renderer;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            if (createPipeline)
+            {
                 pipeline.renderScale = 0.9f;
                 pipeline.msaaSampleCount = 2;
                 pipeline.shadowDistance = 35f;
@@ -322,6 +338,8 @@ namespace JungleEscape.EditorTools
             if (existing != null) return existing;
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
+            if (shader == null)
+                throw new System.InvalidOperationException("Unity could not find a supported shader for generated material: " + name);
             Material material = new Material(shader);
             material.name = name;
             material.color = color;
@@ -921,6 +939,11 @@ namespace JungleEscape.EditorTools
         private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object[] values)
         {
             EnsureAssignmentTarget(target, property);
+            if (values == null)
+                throw new System.InvalidOperationException("Cannot assign null object array to " + property + ".");
+            for (int i = 0; i < values.Length; i++)
+                if (values[i] == null)
+                    throw new System.InvalidOperationException("Cannot assign null object at index " + i + " to " + property + ".");
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
