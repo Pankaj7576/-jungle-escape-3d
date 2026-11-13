@@ -889,6 +889,32 @@ namespace JungleEscape.EditorTools
             return obj;
         }
 
+        private static SerializedObject CreateAssignmentObject(UnityEngine.Object target, string property)
+        {
+            EnsureAssignmentTarget(target, property);
+            try
+            {
+                return new SerializedObject(target);
+            }
+            catch (System.Exception exception)
+            {
+                throw new System.InvalidOperationException(
+                    "Failed to inspect component '" + target.GetType().FullName +
+                    "' while assigning serialized field '" + property + "'.", exception);
+            }
+        }
+
+        private static SerializedProperty FindRequiredProperty(SerializedObject serialized,
+            UnityEngine.Object target, string property)
+        {
+            SerializedProperty result = serialized.FindProperty(property);
+            if (result == null)
+                throw new System.InvalidOperationException(
+                    "Serialized field '" + property + "' was not found on " +
+                    target.GetType().FullName + ".");
+            return result;
+        }
+
         private static void EnsureAssignmentTarget(UnityEngine.Object target, string property)
         {
             if (target == null)
@@ -898,40 +924,32 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) { Debug.LogWarning("Missing serialized field " + property + " on " + target); return; }
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.objectReferenceValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void Assign(UnityEngine.Object target, string property, int value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.intValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void Assign(UnityEngine.Object target, string property, float value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.floatValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void Assign(UnityEngine.Object target, string property, bool value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.boolValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -944,9 +962,8 @@ namespace JungleEscape.EditorTools
             for (int i = 0; i < values.Length; i++)
                 if (values[i] == null)
                     throw new System.InvalidOperationException("Cannot assign null object at index " + i + " to " + property + ".");
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.arraySize = values.Length;
             for (int i = 0; i < values.Length; i++) p.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             so.ApplyModifiedPropertiesWithoutUndo();
@@ -954,20 +971,16 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, HazardAvoidance value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.enumValueIndex = (int)value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void Assign(UnityEngine.Object target, string property, PickupKind value)
         {
-            EnsureAssignmentTarget(target, property);
-            SerializedObject so = new SerializedObject(target);
-            SerializedProperty p = so.FindProperty(property);
-            if (p == null) return;
+            SerializedObject so = CreateAssignmentObject(target, property);
+            SerializedProperty p = FindRequiredProperty(so, target, property);
             p.enumValueIndex = (int)value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
