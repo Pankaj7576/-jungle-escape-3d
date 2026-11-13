@@ -16,7 +16,7 @@ namespace JungleEscape
         [SerializeField, Min(1)] private int coinValue = 1;
         [SerializeField, Min(0.2f)] private float boostSeconds = 1.5f;
         [SerializeField] private RunProgress progress;
-        [SerializeField] private GameBootstrap game;
+        [SerializeField] private GameBootstrap game;\n        [SerializeField] private UIFlow ui;
         [SerializeField] private GameObject visualRoot;
 
         private bool collected;
