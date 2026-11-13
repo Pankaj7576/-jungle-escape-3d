@@ -12,12 +12,9 @@ const camera = new THREE.PerspectiveCamera(innerHeight > innerWidth ? 64 : 58, i
 camera.position.set(0,4.25,8.8);
 const renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
-const qualityPresets={low:{pixelRatio:1,shadows:false,shadowSize:512},medium:{pixelRatio:1.25,shadows:true,shadowSize:1024},high:{pixelRatio:1.5,shadows:true,shadowSize:1536}};
-const graphicsDefaultVersion='super-smooth-v1';
-if(localStorage.getItem('lostTempleGraphicsDefault')!==graphicsDefaultVersion){localStorage.setItem('lostTempleGraphics','high');localStorage.setItem('lostTempleGraphicsDefault',graphicsDefaultVersion);}
-const savedQuality=localStorage.getItem('lostTempleGraphics');
-let graphicsQuality=Object.hasOwn(qualityPresets,savedQuality)?savedQuality:'high';
-function applyGraphicsQuality(){const q=qualityPresets[graphicsQuality]||qualityPresets.medium;renderer.setPixelRatio(Math.min(devicePixelRatio||1,q.pixelRatio));renderer.shadowMap.enabled=q.shadows;sun.shadow.mapSize.set(q.shadowSize,q.shadowSize);sun.shadow.needsUpdate=true;scene.traverse(o=>{if(o.isMesh&&o.userData.qualityShadow)o.castShadow=q.shadows;});}
+const graphicsQuality='super-smooth';
+const superSmoothGraphics={pixelRatio:1.5,shadows:true,shadowSize:1536};
+function applyGraphicsQuality(){renderer.setPixelRatio(Math.min(devicePixelRatio||1,superSmoothGraphics.pixelRatio));renderer.shadowMap.enabled=superSmoothGraphics.shadows;sun.shadow.mapSize.set(superSmoothGraphics.shadowSize,superSmoothGraphics.shadowSize);sun.shadow.needsUpdate=true;scene.traverse(o=>{if(o.isMesh&&o.userData.qualityShadow)o.castShadow=superSmoothGraphics.shadows;});}
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -62,17 +59,17 @@ function capsuleBetween(parent,material,a,b,radius,radial=12){
  const mesh=new THREE.Mesh(new THREE.CapsuleGeometry(radius,Math.max(.02,delta.length()-radius*2),4,radial),material);
  mesh.position.copy(av).add(bv).multiplyScalar(.5);
  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
- mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+ mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 function lathe(parent,material,x,y,z,profile,segments=32){
  const points=profile.map(([r,h])=>new THREE.Vector2(r,h));
  const mesh=new THREE.Mesh(new THREE.LatheGeometry(points,segments),material);
- mesh.position.set(x,y,z);mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+ mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 function tube(parent,material,points,radius,segments=32,radial=8){
  const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
  const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,segments,radius,radial,false),material);
- mesh.castShadow=graphicsQuality!=='low';mesh.receiveShadow=true;parent.add(mesh);return mesh;
+ mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 const leafShape=new THREE.Shape();
 leafShape.moveTo(0,-.55);leafShape.quadraticCurveTo(.34,-.12,0,.58);leafShape.quadraticCurveTo(-.34,-.12,0,-.55);
@@ -96,7 +93,7 @@ function makeTree(parent,x,z,scale=1){
  for(let i=0;i<7;i++){const a=i*2.399,dx=Math.cos(a),dz=Math.sin(a),h=2.55+(i%3)*.34;const end=[dx*(1.1+(i%2)*.35),h+.7,dz*(1.1+(i%2)*.35)];tube(g,M.bark,[[0,h*.62,0],[dx*.35,h+.15,dz*.35],[dx*.78,h+.48,dz*.78],end],.085-(i%3)*.012,18,7)}
  const count=185,leaves=new THREE.InstancedMesh(leafGeo,leafMat,count),dummy=new THREE.Object3D();leaves.frustumCulled=false;
  for(let i=0;i<count;i++){const a=i*2.399,rad=.55+Math.sqrt((i+.5)/count)*1.65,y=3.45+Math.sin(i*1.73)*.78+Math.cos(a*2)*.18;dummy.position.set(Math.cos(a)*rad,y,Math.sin(a)*rad);dummy.rotation.set((Math.random()-.5)*1.25,a+(Math.random()-.5)*.8,(Math.random()-.5)*1.1);const sz=.42+Math.random()*.52;dummy.scale.set(sz*.68,sz,sz*.08);dummy.updateMatrix();leaves.setMatrixAt(i,dummy.matrix);leaves.setColorAt(i,new THREE.Color().setHSL(.25+Math.random()*.07,.27+Math.random()*.22,.22+Math.random()*.15))}
- leaves.instanceMatrix.needsUpdate=true;if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;leaves.castShadow=graphicsQuality!=='low';leaves.receiveShadow=true;leaves.userData.qualityShadow=true;g.add(leaves);
+ leaves.instanceMatrix.needsUpdate=true;if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;leaves.castShadow=true;leaves.receiveShadow=true;leaves.userData.qualityShadow=true;g.add(leaves);
  for(let i=0;i<4;i++){const a=i*1.57+.2,xx=Math.cos(a),zz=Math.sin(a);tube(g,M.moss,[[xx*.7,4.1,zz*.7],[xx*.9,3.2,zz*.9],[xx*.84,2.3,zz*.84]],.018,12,5)}
  return g;
 }
@@ -125,7 +122,7 @@ function makeTemple(parent,z){
  lathe(g,M.stone,0,8.25,-7.1,[[.18,0],[.23,.1],[.16,.25],[.1,.36],[.16,.45],[.11,.58],[0,.75]],24);
  for(const x of [-1.45,1.45]){box(g,M.stoneDark,x,2.05,-5.17,.72,1.38,.16);box(g,M.stone,x,2.05,-5.06,.52,1.15,.08);sphere(g,M.stoneDark,x,2.15,-4.98,.19,.32,.08,1,true)}
  for(let i=0;i<9;i++){const b=new THREE.Mesh(new THREE.DodecahedronGeometry(.32+Math.random()*.3,1),i%2?M.stone:M.stoneDark);b.position.set(-4.5+Math.random()*9,.22+Math.random()*.12,-1.2-Math.random()*7);b.rotation.set(Math.random(),Math.random(),Math.random());b.castShadow=true;g.add(b)}
- g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});return g;
+ g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.userData.qualityShadow=true}});return g;
 }
 
 function buildSegment(z,index){
@@ -184,7 +181,7 @@ function makeHero(){
  sphere(g,M.skin,0,1.76,-.205,.035,.065,.04);sphere(g,M.leather,0,1.69,-.18,.105,.035,.035);
  for(let i=0;i<7;i++){const x=(i-3)*.055;capsuleBetween(g,M.leather,[x,1.98,.06],[x*.9,1.82,.22],.045)}
  box(g,M.leather,0,1.18,.23,.37,.46,.18);capsuleBetween(g,M.stoneDark,[-.19,1.43,.24],[.19,1.43,.24],.09);
- g.userData.arms=arms;g.userData.legs=legs;g.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});return g;
+ g.userData.arms=arms;g.userData.legs=legs;g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.userData.qualityShadow=true}});return g;
 }
 
 const hero=makeHero();hero.position.set(0,0,2.4);scene.add(hero);
@@ -207,7 +204,7 @@ function attachAnimatedGLB(url,parent,{targetHeight=1.75,position=[0,0,0],rotati
   model.position.x-=center.x;model.position.z-=center.z;model.position.y-=fitted.min.y;
   model.traverse(o=>{
    if(!o.isMesh)return;
-   o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true;o.receiveShadow=false;
+   o.castShadow=true;o.userData.qualityShadow=true;o.receiveShadow=false;
    if(o.material){const materials=Array.isArray(o.material)?o.material:[o.material];for(const material of materials){material.roughness=Math.max(material.roughness??.8,.5);material.metalness=Math.min(material.metalness??0,.35)}}
   });
   holder.add(model);controller.model=model;controller.loaded=true;
@@ -256,7 +253,7 @@ for(const side of [-1,1]){
 }
 for(let i=0;i<9;i++){const x=(i-4)*.105;tube(guardian,M.monster2,[[x,1.95,.16],[x*1.12,2.12,.26],[x*1.25,2.26,.3]],.055,10,6)}
 for(const x of [-.13,.13]){sphere(guardian,M.monsterEye,x,1.83,-.445,.055,.045,.025,1);capsuleBetween(guardian,M.monster,[x-.09,1.93,-.4],[x+.09,1.94,-.4],.065)}
-guardian.traverse(o=>{if(o.isMesh){o.castShadow=graphicsQuality!=='low';o.userData.qualityShadow=true}});guardian.position.set(0,0,7.3);scene.add(guardian);
+guardian.traverse(o=>{if(o.isMesh){o.castShadow=true;o.userData.qualityShadow=true}});guardian.position.set(0,0,7.3);scene.add(guardian);
 
 const guardianController=attachAnimatedGLB('/assets/models/guardian.glb',guardian,{targetHeight:2.05,position:[0,0,0],fallbackChildren:[...guardian.children]});
 applyGraphicsQuality();
@@ -271,7 +268,7 @@ coinInstances.instanceMatrix.setUsage(THREE.DynamicDrawUsage);coinInstances.frus
 const coinDummy=new THREE.Object3D();
 function spawnObstacle(kind,lane,z){
  const g=new THREE.Group();g.position.set(laneX[lane],0,z);obstacleRoot.add(g);
- if(kind==='rock'){const m=new THREE.Mesh(rockGeometry,M.stoneDark);m.position.y=.63;m.scale.set(1,.75,1.1);m.castShadow=graphicsQuality!=='low';m.userData.qualityShadow=true;g.add(m)}
+ if(kind==='rock'){const m=new THREE.Mesh(rockGeometry,M.stoneDark);m.position.y=.63;m.scale.set(1,.75,1.1);m.castShadow=true;m.userData.qualityShadow=true;g.add(m)}
  if(kind==='log'){const m=cyl(g,M.bark,0,.42,0,.27,.27,2.1,10);m.rotation.z=Math.PI/2}
  if(kind==='wall'){box(g,M.stone,0,.72,0,1.9,1.45,.48);for(let i=0;i<3;i++)box(g,M.stoneDark,-.55+i*.55,1.52,0,.13,.14,.52)}
  if(kind==='branch'){cyl(g,M.bark,0,1.95,0,.17,.22,2.3,9).rotation.z=Math.PI/2}
@@ -289,7 +286,7 @@ let audio;
 function beep(f=520,d=.09,type='sine'){try{audio??=new (window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),v=audio.createGain();o.type=type;o.frequency.value=f;v.gain.setValueAtTime(.045,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch{}}
 let lane=1,vy=0,isJumping=false,slide=0,active=false,paused=false,elapsed=0,distance=0,coinCount=0,speed=15,spawnTimer=0,spawnEvery=1.25,best=Number(localStorage.getItem('lostTempleBest')||0);
 $('best').textContent=best;
-const qualitySelect=$('quality');qualitySelect.value=graphicsQuality;qualitySelect.addEventListener('change',()=>{graphicsQuality=qualitySelect.value;localStorage.setItem('lostTempleGraphics',graphicsQuality);applyGraphicsQuality();showToast(`Graphics: ${graphicsQuality.toUpperCase()}`)});
+
 function showToast(t){$('toast').textContent=t;$('toast').style.opacity=1;setTimeout(()=>$('toast').style.opacity=0,800)}
 function action(a){if(!active||paused)return;
  if(a==='left')lane=Math.max(0,lane-1);
