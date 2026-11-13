@@ -63,7 +63,7 @@ namespace JungleEscape
             gameOver = true;
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
-            ui?.ShowRevive();
+            if (reviveUsed) ui?.ShowGameOver();\n            else ui?.ShowRevive();
         }
 
         public bool TryRevive()
