@@ -181,6 +181,7 @@ function resetRun() {
   for (const item of [...obstacles, ...coinVisuals, ...pickups]) scene.remove(item.mesh);
   obstacles.length = 0; coinVisuals.length = 0; pickups.length = 0;
   $('distance').textContent = '0'; $('coins').textContent = '0';
+  track.reset();
   track.ensureAhead(0, 240);
   const pose = placeAt(0, 1);
   runner.root.position.copy(pose.position);
