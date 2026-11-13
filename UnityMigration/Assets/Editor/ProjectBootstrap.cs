@@ -860,8 +860,16 @@ namespace JungleEscape.EditorTools
             return obj;
         }
 
+        private static void EnsureAssignmentTarget(UnityEngine.Object target, string property)
+        {
+            if (target == null)
+                throw new System.InvalidOperationException(
+                    "Scene generation cannot assign '" + property + "' because its target component is missing.");
+        }
+
         private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) { Debug.LogWarning("Missing serialized field " + property + " on " + target); return; }
@@ -871,6 +879,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, int value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
@@ -880,6 +889,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, float value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
@@ -889,6 +899,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, bool value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
@@ -898,6 +909,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, UnityEngine.Object[] values)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
@@ -908,6 +920,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, HazardAvoidance value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
@@ -917,6 +930,7 @@ namespace JungleEscape.EditorTools
 
         private static void Assign(UnityEngine.Object target, string property, PickupKind value)
         {
+            EnsureAssignmentTarget(target, property);
             SerializedObject so = new SerializedObject(target);
             SerializedProperty p = so.FindProperty(property);
             if (p == null) return;
