@@ -10,7 +10,6 @@ namespace JungleEscape
         [SerializeField] private GameBootstrap game;
         [SerializeField, Range(0.2f, 2f)] private float stumbleSeverity = 0.8f;
         [SerializeField, Min(0.1f)] private float recoveryDelay = 0.9f;
-        [SerializeField] private bool disableAfterHit;
 
         private bool triggered;
 
@@ -24,8 +23,10 @@ namespace JungleEscape
         {
             if (triggered || other.GetComponentInParent<RunnerMotor>() == null) return;
             triggered = true;
+
+            Collider ownCollider = GetComponent<Collider>();
+            if (ownCollider != null) ownCollider.enabled = false;
             if (game != null) StartCoroutine(ApplyHit());
-            if (disableAfterHit) gameObject.SetActive(false);
         }
 
         private IEnumerator ApplyHit()
