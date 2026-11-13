@@ -58,6 +58,8 @@ namespace JungleEscape.EditorTools
             GameObject guardian = BuildGuardian(beastMat);
             guardian.transform.position = new Vector3(0f, 0.02f, -3.5f);
             GuardianChase chase = guardian.AddComponent<GuardianChase>();
+            GuardianMotion guardianMotion = guardian.GetComponent<GuardianMotion>();
+            Assign(guardianMotion, "chase", chase);
 
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -514,18 +516,52 @@ namespace JungleEscape.EditorTools
         {
             GameObject root = new GameObject("Temple_Guardian");
             root.layer = 2;
-            AddSphere("Shoulders", root.transform, new Vector3(0f, 1.35f, 0f),
-                new Vector3(1.35f, 0.9f, 0.72f), fur);
-            AddSphere("Head", root.transform, new Vector3(0f, 1.85f, 0.35f),
-                new Vector3(0.72f, 0.72f, 0.68f), fur);
-            AddCapsule("Left_Arm", root.transform, new Vector3(-0.85f, 0.82f, 0.15f),
-                new Vector3(0.38f, 1.1f, 0.38f), fur);
-            AddCapsule("Right_Arm", root.transform, new Vector3(0.85f, 0.82f, 0.15f),
-                new Vector3(0.38f, 1.1f, 0.38f), fur);
-            AddCapsule("Left_Leg", root.transform, new Vector3(-0.38f, 0.35f, -0.08f),
-                new Vector3(0.38f, 0.75f, 0.42f), fur);
-            AddCapsule("Right_Leg", root.transform, new Vector3(0.38f, 0.35f, -0.08f),
-                new Vector3(0.38f, 0.75f, 0.42f), fur);
+            GameObject visualRoot = new GameObject("VisualRoot");
+            visualRoot.transform.SetParent(root.transform, false);
+
+            GameObject modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Characters/Guardian_Ape.fbx");
+            if (modelAsset != null)
+            {
+                GameObject model = PrefabUtility.InstantiatePrefab(modelAsset) as GameObject;
+                if (model != null)
+                {
+                    model.name = "CC0_Silverback_Gorilla";
+                    model.transform.SetParent(visualRoot.transform, false);
+                    model.transform.localPosition = Vector3.zero;
+                    model.transform.localRotation = Quaternion.identity;
+                    Renderer[] renderers = model.GetComponentsInChildren<Renderer>();
+                    if (renderers.Length > 0)
+                    {
+                        Bounds bounds = renderers[0].bounds;
+                        for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                        float scale = 1.5f / Mathf.Max(0.01f, bounds.size.y);
+                        model.transform.localScale = Vector3.one * scale;
+                        bounds = renderers[0].bounds;
+                        for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                        model.transform.localPosition += Vector3.up * -bounds.min.y;
+                    }
+                }
+            }
+            else
+            {
+                // Fallback until the CC0 gorilla FBX has been generated/imported.
+                AddSphere("Shoulders", visualRoot.transform, new Vector3(0f, 1.05f, 0f),
+                    new Vector3(1.35f, 0.9f, 0.72f), fur);
+                AddSphere("Head", visualRoot.transform, new Vector3(0f, 1.55f, 0.35f),
+                    new Vector3(0.72f, 0.72f, 0.68f), fur);
+                AddCapsule("Left_Arm", visualRoot.transform, new Vector3(-0.85f, 0.62f, 0.15f),
+                    new Vector3(0.38f, 1.1f, 0.38f), fur);
+                AddCapsule("Right_Arm", visualRoot.transform, new Vector3(0.85f, 0.62f, 0.15f),
+                    new Vector3(0.38f, 1.1f, 0.38f), fur);
+                AddCapsule("Left_Leg", visualRoot.transform, new Vector3(-0.38f, 0.18f, -0.08f),
+                    new Vector3(0.38f, 0.75f, 0.42f), fur);
+                AddCapsule("Right_Leg", visualRoot.transform, new Vector3(0.38f, 0.18f, -0.08f),
+                    new Vector3(0.38f, 0.75f, 0.42f), fur);
+            }
+
+            GuardianMotion motion = root.AddComponent<GuardianMotion>();
+            Assign(motion, "visualRoot", visualRoot.transform);
             return root;
         }
 
