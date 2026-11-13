@@ -201,10 +201,7 @@ def create_action(name, frames, pose_callback, loop=False):
             pose_bone.keyframe_insert(data_path="rotation_euler", frame=frame, group=pose_bone.name)
             if pose_bone.name == "pelvis":
                 pose_bone.keyframe_insert(data_path="location", frame=frame, group=pose_bone.name)
-    action.frame_range = (frames[0], frames[-1])
-    if loop:
-        for curve in action.fcurves:
-            curve.modifiers.new("CYCLES")
+    # Unity sets Loop Time on Idle and Run clips during import.
     return action
 
 def idle_pose(frame):
@@ -253,6 +250,8 @@ def fall_pose(frame):
         armature.pose.bones["upperarm." + suffix].rotation_euler[1] = sign * 0.55 * intensity
         armature.pose.bones["thigh." + suffix].rotation_euler[0] = -0.25 * intensity
 
+bpy.ops.object.select_all(action="DESELECT")
+armature.select_set(True)
 bpy.context.view_layer.objects.active = armature
 bpy.ops.object.mode_set(mode="POSE")
 create_action("Guardian_Idle", [1, 30, 60], idle_pose, loop=True)
