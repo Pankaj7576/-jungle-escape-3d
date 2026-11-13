@@ -18,6 +18,7 @@ export class RunnerCharacter {
     this.state = 'run';
     this.phase = 0;
     this.fallback = this.buildFallback();
+    this.visual = this.fallback;
     this.root.add(this.fallback);
     this.loadPremiumModel();
   }
@@ -62,11 +63,13 @@ export class RunnerCharacter {
       model.scale.setScalar(scale);
       model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
       model.rotation.y = Math.PI;
+      this.visualBaseScale = model.scale.clone();
       model.traverse(node => {
         if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; }
       });
       this.root.remove(this.fallback);
       this.root.add(model);
+      this.visual = model;
       this.fallback = null;
       if (gltf.animations?.length) {
         this.mixer = new THREE.AnimationMixer(model);
@@ -93,6 +96,14 @@ export class RunnerCharacter {
     this.play(state);
     this.phase += dt * (8 + speed * 1.6);
     if (this.mixer) this.mixer.update(dt);
+    if (!this.fallback && this.visual) {
+      const hasSpecificClip = Boolean(this.actions[state]);
+      const base = this.visualBaseScale || new THREE.Vector3(1, 1, 1);
+      this.visual.scale.set(base.x, base.y * (state === 'slide' && !hasSpecificClip ? .72 : 1), base.z);
+      this.visual.rotation.x = state === 'slide' && !hasSpecificClip ? -.42 : state === 'jump' && !hasSpecificClip ? .06 : 0;
+      this.visual.position.y = state === 'jump' && !hasSpecificClip ? .08 : state === 'run' && !hasSpecificClip ? Math.abs(Math.sin(this.phase)) * .035 : 0;
+      return;
+    }
     if (!this.fallback) return;
     const joints = this.fallback.userData.joints;
     const running = state === 'run';
@@ -124,6 +135,21 @@ export class TempleBeast {
     part(this.root, new THREE.SphereGeometry(.58, 18, 14), fur, [0, 1.15, 0]).scale.set(1, 1.15, .78);
     part(this.root, new THREE.SphereGeometry(.43, 16, 12), furMid, [0, 1.95, -.1]);
     part(this.root, new THREE.SphereGeometry(.28, 14, 10), hide, [0, 1.82, -.43]).scale.set(1.2, .8, .7);
+    const jaw = part(this.root, new THREE.SphereGeometry(.22, 14, 10), hide, [0, 1.62, -.39]);
+    jaw.scale.set(1.15, .58, .82);
+    const fangMaterial = new THREE.MeshStandardMaterial({ color: 0xe5ddc7, roughness: .55 });
+    for (const side of [-1, 1]) {
+      const fang = part(this.root, new THREE.ConeGeometry(.055, .2, 7), fangMaterial, [side * .19, 1.69, -.59]);
+      fang.rotation.z = Math.PI;
+    }
+    // Short layered fur tufts break up the silhouette without expensive hair simulation.
+    for (let i = 0; i < 18; i++) {
+      const angle = i * 2.399;
+      const tuft = part(this.root, new THREE.ConeGeometry(.075 + (i % 3) * .018, .28 + (i % 4) * .045, 5), i % 3 ? fur : furMid,
+        [Math.cos(angle) * .48, 1.05 + (i % 5) * .22, .22 + Math.sin(angle) * .22]);
+      tuft.rotation.z = Math.cos(angle) * .55;
+      tuft.rotation.x = Math.sin(angle) * .4;
+    }
     for (const side of [-1, 1]) {
       part(this.root, new THREE.SphereGeometry(.075, 10, 8), eye, [side * .16, 2.02, -.48]);
       const arm = new THREE.Group(); arm.position.set(side * .52, 1.45, 0); this.root.add(arm);
