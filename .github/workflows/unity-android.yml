@@ -1,0 +1,34 @@
+name: Unity Android APK (Unity Migration)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: UnityMigration
+          targetPlatform: Android
+          buildMethod: JungleEscape.EditorTools.AndroidBuild.Build
+          allowDirtyBuild: true
+          customParameters: -nographics
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jungle-Escape-Unity-Android-APK
+          path: UnityMigration/Builds/Android/JungleEscape.apk
+          if-no-files-found: error
+          retention-days: 14
