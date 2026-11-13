@@ -17,6 +17,14 @@ namespace JungleEscape
         private Collider trigger;
         private Coroutine recovery;
 
+        public void Configure(GameBootstrap bootstrap, HazardAvoidance avoidance)
+        {
+            game = bootstrap;
+            avoidedBy = avoidance;
+            if (trigger == null) trigger = GetComponent<Collider>();
+            if (trigger != null) trigger.isTrigger = true;
+        }
+
         private void Awake() => trigger = GetComponent<Collider>();
 
         private void OnEnable()
