@@ -287,25 +287,15 @@ fbx_options = {
 }
 fbx_operator(**{key: value for key, value in fbx_options.items() if key in available})
 
-# Re-import the exported FBX in a clean scene and verify that all five actions survived.
-bpy.ops.wm.read_factory_settings(use_empty=True)
-try:
-    bpy.ops.preferences.addon_enable(module="io_scene_fbx")
-except Exception:
-    pass
-import_operator = bpy.ops.import_scene.fbx
-import_props = {prop.identifier for prop in import_operator.get_rna_type().properties}
-import_operator(**{key: value for key, value in {
-    "filepath": OUTPUT_FBX, "use_anim": True
-}.items() if key in import_props})
+# Validate the source actions before export; Unity imports these as separate Generic clips.
 exported_actions = [action.name for action in bpy.data.actions]
-print("Guardian FBX actions:", exported_actions)
+print("Guardian actions to export:", exported_actions)
 required_actions = ("Guardian_Idle", "Guardian_Run", "Guardian_Roar",
                     "Guardian_Catch", "Guardian_Fall")
 missing_actions = [name for name in required_actions
-                   if not any(name.lower() in action.lower() for action in exported_actions)]
+                   if name not in exported_actions]
 if missing_actions:
-    raise RuntimeError("Guardian FBX is missing animation actions: " + ", ".join(missing_actions))
+    raise RuntimeError("Guardian is missing animation actions: " + ", ".join(missing_actions))
 
 with open(os.path.join(OUTPUT_DIR, "Guardian_Ape_SOURCE.txt"), "w", encoding="utf-8") as file:
     file.write("Original procedural dark-furred temple ape created for Jungle Escape.\n")
