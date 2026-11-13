@@ -13,6 +13,7 @@ namespace JungleEscape
         [SerializeField] private Transform runner;
         [SerializeField] private TrackSegment startSegmentPrefab;
         [SerializeField] private TrackContentSpawner contentSpawner;
+        [SerializeField] private RunProgress progress;
         [SerializeField] private TrackSegment[] straightPrefabs;
         [SerializeField] private TrackSegment[] leftTurnPrefabs;
         [SerializeField] private TrackSegment[] rightTurnPrefabs;
@@ -173,7 +174,10 @@ namespace JungleEscape
         private TrackSegment ChoosePrefab()
         {
             double roll = random.NextDouble();
-            if (turnCooldown == 0 && roll < turnChance)
+            float difficulty = progress != null ? Mathf.Clamp01(progress.DistanceMeters / 1200f) : 0f;
+            float activeTurnChance = Mathf.Min(0.20f, turnChance + difficulty * 0.06f);
+            float activeGapChance = Mathf.Min(0.16f, gapChance + difficulty * 0.06f);
+            if (turnCooldown == 0 && roll < activeTurnChance)
             {
                 TrackSegment turn = Pick(random.Next(2) == 0 ? leftTurnPrefabs : rightTurnPrefabs);
                 if (turn != null)
@@ -183,7 +187,7 @@ namespace JungleEscape
                 }
             }
 
-            if (roll >= turnChance && roll < turnChance + gapChance)
+            if (roll >= activeTurnChance && roll < activeTurnChance + activeGapChance)
             {
                 TrackSegment gap = Pick(gapPrefabs);
                 if (gap != null)
