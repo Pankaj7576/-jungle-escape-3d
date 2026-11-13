@@ -23,6 +23,7 @@ WOOD = (0.20, 0.12, 0.07, 1)
 random.seed(27)
 print("Generating Jungle Escape modules with Blender", bpy.app.version_string)
 # Unity imports the FBX versions directly; GLB export remains a portable interchange copy when available.
+# The CI runner pins Blender 4.2 LTS to keep the FBX exporter API stable.
 
 # Enable the bundled interchange exporters when Blender ships them as add-ons.
 for addon_name in ("io_scene_gltf2", "io_scene_fbx",
