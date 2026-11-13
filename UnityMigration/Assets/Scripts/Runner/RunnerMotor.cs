@@ -29,7 +29,7 @@ namespace JungleEscape
         private float standingHeight;
         private Vector3 standingCenter;
         private bool inputEnabled = true;
-        private bool hasFallen;\n        private bool runActive = true;\n        private Vector3 lastSafePosition;
+        private bool hasFallen;\n        private bool runActive = true;\n        private Vector3 lastSafePosition;\n        private Vector3 initialPosition;\n        private Quaternion initialRotation;
 
         public int Lane => lane;
         public float ForwardSpeed => forwardSpeed;
@@ -41,7 +41,7 @@ namespace JungleEscape
         {
             controller = GetComponent<CharacterController>();
             standingHeight = controller.height;
-            standingCenter = controller.center;\n            lastSafePosition = transform.position;
+            standingCenter = controller.center;\n            initialPosition = transform.position;\n            initialRotation = transform.rotation;\n            lastSafePosition = transform.position;
         }
 
         public void SetInputEnabled(bool value) => inputEnabled = value;\n\n        public void SetRunActive(bool value) => runActive = value;
