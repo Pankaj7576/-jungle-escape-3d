@@ -7,7 +7,8 @@ The repository now contains a Unity 6 project skeleton and an Editor tool that c
 1. Install Unity Hub and a Unity 6 LTS editor with Android Build Support (SDK, NDK and OpenJDK) on a Windows/Linux desktop or legitimate cloud workstation.
 2. Open the UnityMigration folder itself as the Unity project. Let Package Manager install URP and uGUI.
 3. Ensure Active Input Handling is **Input Manager (Old)** or **Both**; the current swipe script uses the legacy Input API.
-4. In Unity, choose **Tools > Jungle Escape > Generate Demo Scene**.
+4. In GitHub Actions, check **Generate Blender Track Assets**; after a successful run, the FBX modules should appear in Assets/Environment/Generated. The same files can be generated locally with Blender/generate_track_modules.py.
+5. In Unity, choose **Tools > Jungle Escape > Generate Demo Scene**.
 5. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.
 6. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
 
