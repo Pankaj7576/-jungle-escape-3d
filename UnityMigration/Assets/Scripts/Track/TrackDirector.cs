@@ -12,6 +12,7 @@ namespace JungleEscape
         [Header("References")]
         [SerializeField] private Transform runner;
         [SerializeField] private TrackSegment startSegmentPrefab;
+        [SerializeField] private TrackContentSpawner contentSpawner;
         [SerializeField] private TrackSegment[] straightPrefabs;
         [SerializeField] private TrackSegment[] leftTurnPrefabs;
         [SerializeField] private TrackSegment[] rightTurnPrefabs;
@@ -128,6 +129,7 @@ namespace JungleEscape
                 return;
             }
             active.Add(instance);
+            contentSpawner?.Populate(instance);
             nextEntry = instance.Exit;
         }
 
