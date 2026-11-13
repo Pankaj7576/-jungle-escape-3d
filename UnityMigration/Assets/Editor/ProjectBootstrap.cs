@@ -433,6 +433,7 @@ namespace JungleEscape.EditorTools
             GameObject revive = Panel("RevivePanel", parent);
             GameObject over = Panel("GameOverPanel", parent);
             menu.SetActive(true); hud.SetActive(false); revive.SetActive(false); over.SetActive(false);
+            hud.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
 
             Text title = Label("JUNGLE ESCAPE", menu.transform, 58, new Vector2(0.5f, 0.76f));
             title.color = new Color(0.92f, 0.78f, 0.42f);
