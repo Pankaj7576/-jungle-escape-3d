@@ -77,14 +77,8 @@ namespace JungleEscape
             {
                 TrackSegment segment = active[i];
                 if (segment == null) continue;
-                Vector3 origin = segment.Entry.position;
-                Vector3 axis = segment.Forward;
-                float length = Vector3.Distance(segment.Entry.position, segment.Exit.position);
-                float along = Vector3.Dot(runner.position - origin, axis);
-                float clamped = Mathf.Clamp(along, 0f, length);
-                Vector3 projected = origin + axis * clamped;
-                float outside = along - clamped;
-                float score = outside * outside + (runner.position - projected).sqrMagnitude * 0.05f;
+                segment.EvaluateFrame(runner.position, out Vector3 center, out Vector3 forward);
+                float score = (runner.position - center).sqrMagnitude;
                 if (score < bestScore) { bestScore = score; best = segment; }
             }
             if (best != null) CurrentSegment = best;
@@ -150,6 +144,18 @@ namespace JungleEscape
                 return false;
             }
             return true;
+        }
+
+        public void GetTrackFrame(Vector3 position, out Vector3 center, out Vector3 forward, out Vector3 right)
+        {
+            if (CurrentSegment != null)
+                CurrentSegment.EvaluateFrame(position, out center, out forward);
+            else
+            {
+                center = position;
+                forward = transform.forward;
+            }
+            right = Vector3.Cross(Vector3.up, forward).normalized;
         }
 
         public Vector3 GetForward() => CurrentSegment != null ? CurrentSegment.Forward : transform.forward;
