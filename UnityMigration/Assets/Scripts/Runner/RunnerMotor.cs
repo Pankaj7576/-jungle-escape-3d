@@ -28,8 +28,12 @@ namespace JungleEscape
         private float slideRemaining;
         private float standingHeight;
         private Vector3 standingCenter;
+        private Vector3 initialPosition;
+        private Quaternion initialRotation;
+        private Vector3 lastSafePosition;
         private bool inputEnabled = true;
-        private bool hasFallen;\n        private bool runActive = true;\n        private Vector3 lastSafePosition;\n        private Vector3 initialPosition;\n        private Quaternion initialRotation;
+        private bool runActive = true;
+        private bool hasFallen;
 
         public int Lane => lane;
         public float ForwardSpeed => forwardSpeed;
@@ -41,10 +45,14 @@ namespace JungleEscape
         {
             controller = GetComponent<CharacterController>();
             standingHeight = controller.height;
-            standingCenter = controller.center;\n            initialPosition = transform.position;\n            initialRotation = transform.rotation;\n            lastSafePosition = transform.position;
+            standingCenter = controller.center;
+            initialPosition = transform.position;
+            initialRotation = transform.rotation;
+            lastSafePosition = initialPosition;
         }
 
-        public void SetInputEnabled(bool value) => inputEnabled = value;\n\n        public void SetRunActive(bool value) => runActive = value;
+        public void SetInputEnabled(bool value) => inputEnabled = value;
+        public void SetRunActive(bool value) => runActive = value;
 
         public void MoveLane(int direction)
         {
@@ -70,7 +78,9 @@ namespace JungleEscape
 
         private void Update()
         {
-            if (hasFallen || !runActive) return;\n            if (controller.isGrounded && transform.position.y > fallDeathY + 1f) lastSafePosition = transform.position;
+            if (hasFallen || !runActive) return;
+            if (controller.isGrounded && transform.position.y > fallDeathY + 1f)
+                lastSafePosition = transform.position;
 
             if (controller.isGrounded && verticalSpeed < 0f) verticalSpeed = -2f;
             verticalSpeed += gravity * Time.deltaTime;
@@ -81,11 +91,15 @@ namespace JungleEscape
                 controller.center = standingCenter;
             }
 
-            Vector3 forward;
-            Vector3 right;
-            Vector3 center;
-            if (track != null) track.GetTrackFrame(transform.position, out center, out forward, out right);
-            else { forward = transform.forward; right = transform.right; center = transform.position; }
+            Vector3 forward, right, center;
+            if (track != null)
+                track.GetTrackFrame(transform.position, out center, out forward, out right);
+            else
+            {
+                forward = transform.forward;
+                right = transform.right;
+                center = transform.position;
+            }
 
             float targetLaneOffset = (lane - (laneCount - 1) * 0.5f) * laneWidth;
             float currentOffset = Vector3.Dot(transform.position - center, right);
@@ -106,13 +120,31 @@ namespace JungleEscape
             {
                 hasFallen = true;
                 inputEnabled = false;
+                runActive = false;
                 onFall?.Invoke();
             }
         }
 
-        public void ReviveAtLastSafePosition()\n        {\n            controller.enabled = false;\n            transform.position = lastSafePosition;\n            controller.enabled = true;\n            hasFallen = false;\n            verticalSpeed = 0f;\n            slideRemaining = 0f;\n            runActive = true;\n            inputEnabled = true;\n        }\n\n        public void ResetMotor()
+        public void ReviveAtLastSafePosition()
         {
+            controller.enabled = false;
+            transform.position = lastSafePosition;
+            controller.enabled = true;
             hasFallen = false;
+            verticalSpeed = 0f;
+            slideRemaining = 0f;
+            runActive = true;
+            inputEnabled = true;
+        }
+
+        public void ResetMotor()
+        {
+            controller.enabled = false;
+            transform.SetPositionAndRotation(initialPosition, initialRotation);
+            controller.enabled = true;
+            lastSafePosition = initialPosition;
+            hasFallen = false;
+            runActive = true;
             inputEnabled = true;
             lane = 1;
             verticalSpeed = 0f;
