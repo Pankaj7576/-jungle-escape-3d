@@ -9,19 +9,19 @@ namespace JungleEscape
     {
         [Header("Track frame")]
         [SerializeField] private TrackDirector track;
-        [SerializeField, Min(0.5f)] private float laneWidth = 2.15f;
+        [SerializeField, Min(0.5f)] private float laneWidth = 2.0f;
         [SerializeField, Min(1f)] private float laneChangeSpeed = 12f;
         [SerializeField, Min(2)] private int laneCount = 3;
 
         [Header("Movement")]
-        [SerializeField, Min(0f)] private float forwardSpeed = 10f;
+        [SerializeField, Min(0f)] private float forwardSpeed = 9.5f;
         [SerializeField, Min(0f)] private float stumbleSpeedMultiplier = 0.72f;
-        [SerializeField, Min(1f)] private float jumpVelocity = 7.2f;
-        [SerializeField] private float gravity = -22f;
+        [SerializeField, Min(1f)] private float jumpVelocity = 7.3f;
+        [SerializeField] private float gravity = -21f;
         [SerializeField, Min(0.1f)] private float slideDuration = 0.78f;
         [SerializeField, Min(0.5f)] private float slideHeight = 1.0f;
         [SerializeField] private float fallDeathY = -12f;
-        [SerializeField] private UnityEvent onFall;
+        [SerializeField] private UnityEvent onFall = new UnityEvent();
 
         private CharacterController controller;
         private int lane = 1;
@@ -50,6 +50,13 @@ namespace JungleEscape
             initialPosition = transform.position;
             initialRotation = transform.rotation;
             lastSafePosition = initialPosition;
+        }
+
+        public void SetFallHandler(UnityAction handler)
+        {
+            onFall ??= new UnityEvent();
+            onFall.RemoveAllListeners();
+            if (handler != null) onFall.AddListener(handler);
         }
 
         public void SetInputEnabled(bool value) => inputEnabled = value;
