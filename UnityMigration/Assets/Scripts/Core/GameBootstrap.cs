@@ -41,6 +41,10 @@ namespace JungleEscape
             runner?.ResetMotor();
             track?.ResetTrack();
             guardian?.ResetChase();
+            foreach (PickupItem pickup in FindObjectsByType<PickupItem>(FindObjectsSortMode.None))
+                pickup.ResetPickup();
+            foreach (ObstacleHazard hazard in FindObjectsByType<ObstacleHazard>(FindObjectsSortMode.None))
+                hazard.ResetHazard();
             runProgress?.ResetRun();
             ui?.ShowHUD();
         }
