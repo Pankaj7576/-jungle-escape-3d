@@ -44,6 +44,8 @@ namespace JungleEscape
             animator.ResetTrigger(Roar);
             animator.ResetTrigger(Catch);
             animator.ResetTrigger(Fall);
+            int runState = Animator.StringToHash("Run");
+            if (animator.HasState(0, runState)) animator.Play(runState, 0, 0f);
         }
     }
 }
