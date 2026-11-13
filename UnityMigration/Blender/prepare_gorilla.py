@@ -13,6 +13,7 @@ SOURCE_FBX = os.environ.get("GORILLA_SOURCE",
 OUTPUT_DIR = os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Characters")
 OUTPUT_FBX = os.path.join(OUTPUT_DIR, "Guardian_Ape.fbx")
 MAX_TRIANGLES = 50000
+# CI runs this script with the CC0 light FBX and system NumPy installed.
 
 try:
     bpy.ops.preferences.addon_enable(module="io_scene_fbx")
