@@ -27,6 +27,13 @@ namespace JungleEscape
 
         private void Awake() => trigger = GetComponent<Collider>();
 
+        public void ResetHazard()
+        {
+            triggered = false;
+            if (trigger == null) trigger = GetComponent<Collider>();
+            if (trigger != null) trigger.enabled = true;
+        }
+
         private void OnEnable()
         {
             triggered = false;
