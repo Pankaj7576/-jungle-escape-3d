@@ -1,0 +1,61 @@
+name: Generate Blender Track Assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - unity-migration/phase-1
+    paths:
+      - 'UnityMigration/Blender/generate_track_modules.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-assets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+
+      - name: Install Blender runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-6 libxxf86vm1 libxfixes3 libxi6 libxrender1 libxkbcommon0 libsm6 libice6 libgl1 libglu1-mesa libxkbcommon-x11-0 xz-utils
+
+      - name: Download Blender 4.2.3
+        run: |
+          curl -L --fail --retry 3 https://download.blender.org/release/Blender4.2/blender-4.2.3-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          tar -xf /tmp/blender.tar.xz -C /tmp
+
+      - name: Generate modular bridge assets
+        run: |
+          /tmp/blender-4.2.3-linux-x64/blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
+
+      - name: Upload generated asset bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jungle-Escape-Blender-Track-Assets
+          path: UnityMigration/Assets/Environment/Generated/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Commit generated Unity assets to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add UnityMigration/Assets/Environment/Generated/
+          if git diff --cached --quiet; then
+            echo "Generated files are already up to date."
+            exit 0
+          fi
+          git commit -m "Generate modular Blender bridge assets"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
