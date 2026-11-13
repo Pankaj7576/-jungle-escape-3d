@@ -218,7 +218,7 @@ namespace JungleEscape.EditorTools
             GameObject root = new GameObject(name);
             List<Vector3> path = BuildPath(kind);
             AddDeck(root.transform, path, kind == ModuleKind.Gap, stone);
-            AddRails(root.transform, path, trim, moss);
+            AddRails(root.transform, path, trim, moss, kind == ModuleKind.Gap);
             Vector3 entryForward = Vector3.forward;
             Vector3 exitForward = kind == ModuleKind.Left ? Vector3.left :
                 kind == ModuleKind.Right ? Vector3.right : Vector3.forward;
@@ -314,10 +314,11 @@ namespace JungleEscape.EditorTools
             return mesh;
         }
 
-        private static void AddRails(Transform root, List<Vector3> path, Material trim, Material moss)
+        private static void AddRails(Transform root, List<Vector3> path, Material trim, Material moss, bool gap)
         {
             for (int i = 0; i < path.Count; i += 2)
             {
+                if (gap && path[i].z > 6f && path[i].z < 11f) continue;
                 Vector3 tangent = (i == path.Count - 1 ? path[i] - path[i - 1] : path[Mathf.Min(i + 1, path.Count - 1)] - path[i]).normalized;
                 Quaternion rotation = Quaternion.LookRotation(tangent, Vector3.up);
                 Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
