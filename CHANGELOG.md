@@ -6,7 +6,7 @@
 - Added articulated black-suit adventurer control with available GLB animation clips plus procedural jump/slide fallback; upgraded the dark-furred guardian with articulated limbs, glowing eyes and layered fur details.
 - Added lane obstacles (rocks, walls, slide arches), coin trails, magnet and speed-boost pickups, stumble/chaser catch-up, and a one-time 5-gem revive modal.
 - Reworked the title screen, HUD, touch controls, pause and revive overlays for portrait mobile play.
-- Verification: JavaScript syntax check and Vite production build passed. Android APK build is running for the final release commit; device gameplay/performance testing is still required.
+- Verification: JavaScript syntax check, Vite production build, Android debug APK build and GitHub Pages deployment succeeded. Android APK artifact was uploaded by workflow run 43372122727; device gameplay/performance testing is still required.
 
 ## 1.001
 - Restored the Temple Run-inspired ancient stone bridge: textured irregular paving and low stone parapets; removed modern steel towers, suspension cables, LED strips and lane markings.
