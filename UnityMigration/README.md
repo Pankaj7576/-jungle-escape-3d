@@ -7,7 +7,7 @@ This is a separate Unity project track. It does not replace the existing Three.j
 - Assets/Editor/ProjectBootstrap.cs generates a playable greybox scene, straight/left-turn/right-turn/broken-gap track prefabs, URP settings, basic UI, coins/gems and tutorial hazards. In Unity, run **Tools > Jungle Escape > Generate Demo Scene**.
 - Assets/Editor/AndroidBuild.cs generates the demo scene and builds an ARM64 portrait APK.
 - .github/workflows/blender-assets.yml runs Blender headlessly in GitHub Actions and has successfully generated and committed four FBX/GLB modules (straight, left turn, right turn and broken gap) to Assets/Environment/Generated.
-- .github/workflows/unity-android.yml provides a manual GitHub Actions build. It requires a valid Unity Personal/Pro license file stored as the repository Actions secret UNITY_LICENSE.
+- .github/workflows/unity-android.yml provides a manual GitHub Actions build. It now checks for UNITY_LICENSE, UNITY_EMAIL and UNITY_PASSWORD secrets before starting, without printing their values.
 
 ## Target toolchain and licensing
 - Unity 6 LTS-compatible editor with Android Build Support (SDK, NDK, OpenJDK)
@@ -18,15 +18,21 @@ This is a separate Unity project track. It does not replace the existing Three.j
 Scripts, generators and the demo scene are free. Unity Personal is free for eligible creators subject to Unity's current terms; external asset licences must also be checked. No paid asset is required by this source scaffold.
 
 ## Android-only limitation and APK workflow
-Unity Editor and Blender are desktop authoring applications. A normal Android phone can install/test an APK but cannot author, rig or build this Unity project. GitHub Actions can run the build remotely, but Unity still requires a valid license activation. Do not commit license files, passwords or secrets to the repository.
+Unity Editor and Blender are desktop authoring applications. A normal Android phone can install/test an APK but cannot author, rig or build this Unity project. GitHub Actions can run the build remotely, but Unity CI licensing is a separate requirement. Do not commit license files, passwords or secrets to the repository.
 
-To enable the APK workflow:
-1. Activate Unity Personal (or another valid Unity license) in Unity Hub on a supported desktop/cloud workstation.
-2. Copy the activated Unity license file contents into GitHub repository Settings → Secrets and variables → Actions → New repository secret. Name it exactly UNITY_LICENSE.
-3. Open the repository Actions tab, choose **Unity Android APK (Unity Migration)**, and tap **Run workflow** on branch unity-migration/phase-1.
-4. If the run succeeds, download the artifact named **Jungle-Escape-Unity-Android-APK** and install JungleEscape.apk on Android.
+**Important version note:** `UnityMigration/ProjectSettings/ProjectVersion.txt` pins this project to Unity `6000.0.60f1` (Unity 6.0). The Unity Hub app version `3.22.6` is not the Editor version, and the Unity 6.6 Editor shown in Hub is not the version currently pinned by this project. Do not download Unity 6.6 for this branch unless the project is deliberately upgraded and validated.
 
-Without a valid UNITY_LICENSE secret, the workflow will fail before compilation. A GitHub Actions workflow file is not itself proof that an APK has built.
+### GitHub Actions licensing status
+The build workflow now expects these repository Actions secrets:
+- `UNITY_LICENSE` — license data accepted by the GameCI Unity Builder.
+- `UNITY_EMAIL` — the Unity account email.
+- `UNITY_PASSWORD` — the Unity account password.
+
+Never send these values in chat or commit them to files. Add them only in GitHub → repository Settings → Secrets and variables → Actions. The workflow checks that all three secret names are present before attempting a build.
+
+Important limitation: signing in to Unity Hub and seeing a Personal Activation Date confirms the local Hub Personal activation; it does **not** automatically create a CI license secret. GameCI's current activation guide describes a legacy `.alf` → `.ulf` manual Personal-license path, while also warning that Unity no longer supports manual Personal activation. Therefore a supported Personal CI license may not be obtainable through that legacy route. We must not promise that the Unity APK build will work until a real build verifies the license. Do not use browser developer-tools workarounds or share your Unity password with anyone.
+
+If a valid CI license is available, open the repository Actions tab, choose **Unity Android APK (Unity Migration)**, and run it on branch `unity-migration/phase-1`. Only a successful run with the `Jungle-Escape-Unity-Android-APK` artifact proves an APK was built.
 
 ## Start here
 1. Open this UnityMigration folder as the Unity project on a desktop/cloud workstation.
