@@ -25,6 +25,11 @@ jobs:
           allowDirtyBuild: true
           customParameters: -nographics
 
+      - name: Verify APK output
+        run: |
+          test -s UnityMigration/Builds/Android/JungleEscape.apk
+          sha256sum UnityMigration/Builds/Android/JungleEscape.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
