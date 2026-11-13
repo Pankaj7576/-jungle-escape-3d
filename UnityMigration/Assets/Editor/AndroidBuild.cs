@@ -15,11 +15,14 @@ namespace JungleEscape.EditorTools
             EditorUserBuildSettings.buildAppBundle = false;
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.jungleescape.losttemple");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            PlayerSettings.companyName = "Jungle Escape Studio";
+            PlayerSettings.productName = "Jungle Escape 3D - The Lost Temple";
+            PlayerSettings.bundleVersion = "0.1.0";
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.stripEngineCode = true;
 
-            string output = Path.GetFullPath("Builds/Android/JungleEscape.apk");
+            string output = Path.GetFullPath(Path.Combine(Application.dataPath, "../Builds/Android/JungleEscape.apk"));
             Directory.CreateDirectory(Path.GetDirectoryName(output));
 
             BuildPlayerOptions options = new BuildPlayerOptions
