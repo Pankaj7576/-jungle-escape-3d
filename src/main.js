@@ -1,9 +1,12 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 const $=id=>document.getElementById(id),canvas=$('world');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x91a7ad);scene.fog=new THREE.Fog(0x91a7ad,48,155);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,130);camera.position.set(0,6.1,10.8);
-// Graphics are permanently locked to the Super Smooth profile. No quality selector or user override is exposed.\nconst GRAPHICS={pixelRatio:1.5,shadows:true,shadowMap:THREE.PCFSoftShadowMap,toneMapping:THREE.ACESFilmicToneMapping,exposure:1.05};\nconst renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=GRAPHICS.shadows;renderer.shadowMap.type=GRAPHICS.shadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=GRAPHICS.toneMapping;renderer.toneMappingExposure=GRAPHICS.exposure;renderer.setClearColor(0x91a7ad);
+// Graphics are permanently locked to the Super Smooth profile. No quality selector or user override is exposed.
+const GRAPHICS={pixelRatio:1.5,shadows:true,shadowMap:THREE.PCFSoftShadowMap,toneMapping:THREE.ACESFilmicToneMapping,exposure:1.05};
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=GRAPHICS.shadows;renderer.shadowMap.type=GRAPHICS.shadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=GRAPHICS.toneMapping;renderer.toneMappingExposure=GRAPHICS.exposure;renderer.setClearColor(0x91a7ad);
 scene.add(new THREE.HemisphereLight(0xc5d4d6,0x202a24,1.15));const sun=new THREE.DirectionalLight(0xffe0b2,2.0);sun.position.set(-14,28,12);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=28;sun.shadow.camera.bottom=-18;scene.add(sun);
 const mat=(c,r=.9,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const mats={ground:mat(0x18251d),path:mat(0x493b2c),stone:mat(0x777064),dark:mat(0x292a25),bark:mat(0x302017),leaf:mat(0x183626),leaf2:mat(0x304a30),gold:mat(0xb78a43,.42,.35),hero:mat(0x303d35),skin:mat(0x79553d),cloth:mat(0x202522),monster:mat(0x18271e),bridgeWood:mat(0x49301f,.88),bridgeEdge:mat(0x6b5135,.78),iron:mat(0x292e2d,.38,.78),rope:mat(0x6a5135),rock:mat(0x55564f),eye:new THREE.MeshBasicMaterial({color:0xffb34d})};
@@ -27,7 +30,34 @@ for(let n=0;n<6;n++)tree(g,side*(10+Math.random()*9),-n*5-2,.9+Math.random()*.7)
 for(let n=0;n<13;n++)for(let l=0;l<3;l++)if(Math.random()>.12)block(g,(n+l)%4?mats.stone:mats.dark,lanes[l],.19,-n*2.1-1,2.18,.08,1.95);if(i%3===0)temple(g);return g}
 for(let i=0;i<7;i++)segments.push(segment(-i*25,i));
 function heroModel(){const g=new THREE.Group();mesh(g,sphereGeo,mats.hero,[0,1.12,0],[.34,.48,.23]);mesh(g,sphereGeo,mats.skin,[0,1.78,-.01],[.21,.26,.19]);mesh(g,sphereGeo,mats.dark,[0,1.96,.02],[.22,.1,.2]);for(const x of [-.16,.16]){mesh(g,new THREE.CapsuleGeometry(.11,.38,4,8),mats.cloth,[x,.42,0],[1,1,1]);mesh(g,new THREE.CapsuleGeometry(.09,.35,4,8),mats.hero,[x*2,1.15,0],[1,1,1])}return g}
-const hero=heroModel();hero.position.set(0,.22,2.5);scene.add(hero);
+let hero=heroModel();hero.position.set(0,.22,2.5);scene.add(hero);
+let heroMixer=null,heroRunAction=null,heroModelLoaded=false;
+const heroLoader=new GLTFLoader();
+heroLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
+  const model=gltf.scene;
+  model.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(model);
+  const size=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  const height=Math.max(size.y,.001);
+  model.scale.setScalar(1.85/height);
+  model.position.set(-center.x*model.scale.x,-bounds.min.y*model.scale.y,-center.z*model.scale.z);
+  model.rotation.y=Math.PI;
+  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
+  const replacement=new THREE.Group();
+  replacement.add(model);
+  replacement.position.set(0,.22,2.5);
+  scene.add(replacement);
+  scene.remove(hero);
+  hero=replacement;
+  heroModelLoaded=true;
+  if(gltf.animations&&gltf.animations.length){
+    heroMixer=new THREE.AnimationMixer(model);
+    const runClip=gltf.animations.find(clip=>/run|walk|jog/i.test(clip.name))||gltf.animations[0];
+    heroRunAction=heroMixer.clipAction(runClip);
+    heroRunAction.play();
+  }
+},undefined,error=>console.warn('Black suit hero model could not be loaded; using fallback character.',error));
 const guardian=new THREE.Group();mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);for(const x of [-.15,.15])mesh(guardian,sphereGeo,mats.eye,[x,2.02,-.43],[.06,.045,.025],false);guardian.position.set(0,0,7.8);scene.add(guardian);
 const obstacleGroup=new THREE.Group();scene.add(obstacleGroup);const obstacles=[],coins=[];let lane=1,jump=0,slide=0,active=false,paused=false,elapsed=0,distance=0,coinCount=0,spawn=0,best=Number(localStorage.getItem('jungleBest')||0);$('best').textContent=best;
 function obstacle(l,z){const g=new THREE.Group();g.position.set(lanes[l],0,z);obstacleGroup.add(g);const type=Math.random();if(type<.45)mesh(g,new THREE.DodecahedronGeometry(.75,1),mats.dark,[0,.65,0],[1,.8,1]);else if(type<.8)block(g,mats.stone,0,.7,0,1.8,1.4,.55);else block(g,mats.bark,0,1.85,0,2.2,.3,.3);g.userData={kind:type<.45?'rock':type<.8?'wall':'branch',hit:false};obstacles.push(g)}
@@ -38,5 +68,5 @@ document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointe
 function reset(){for(const o of obstacles)obstacleGroup.remove(o);obstacles.length=0;coins.length=0;lane=1;jump=0;slide=0;elapsed=0;distance=0;coinCount=0;spawn=0;hero.position.set(0,.22,2.5);guardian.position.set(0,.22,7.8);segments.forEach((s,i)=>s.position.z=-i*25)}
 function finish(){active=false;best=Math.max(best,Math.floor(distance));localStorage.setItem('jungleBest',best);$('best').textContent=best;$('message').textContent='The guardian caught you! Distance: '+Math.floor(distance)+' m · Coins: '+coinCount;$('play').textContent='RUN AGAIN';$('menu').classList.remove('hidden');$('hud').classList.add('hidden');$('controls').classList.add('hidden')}
 $('play').onclick=()=>{reset();active=true;paused=false;$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('controls').classList.remove('hidden')};$('pause').onclick=()=>{if(!active)return;paused=!paused;$('message').textContent=paused?'Run paused.':'Run through ancient ruins, dodge deadly traps and escape the temple guardian.';$('play').textContent=paused?'RESUME':'START RUN';$('menu').classList.toggle('hidden',!paused)};
-const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>25)s.position.z-=175}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
+const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer)heroMixer.update(dt);elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>25)s.position.z-=175}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio))});
