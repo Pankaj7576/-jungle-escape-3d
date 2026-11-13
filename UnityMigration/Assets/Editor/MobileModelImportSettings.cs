@@ -36,7 +36,9 @@ namespace JungleEscape.EditorTools
             }
             else if (path.EndsWith("/Characters/Guardian_Ape.fbx"))
             {
-                importer.importAnimation = false;
+                importer.importAnimation = true;
+                importer.animationType = ModelImporterAnimationType.Generic;
+                importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
                 importer.importCameras = false;
                 importer.importLights = false;
                 importer.isReadable = false;
