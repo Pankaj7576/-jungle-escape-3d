@@ -67,3 +67,9 @@ assert.ok(html.includes('name="viewport"') && html.includes('viewport-fit=cover'
 assert.ok(main.includes('innerHeight>innerWidth?64:58'),
   'camera must retain the portrait-oriented mobile field of view');
 console.log('PASS: portrait mobile layout configuration is present');
+
+assert.ok(main.includes("const graphicsQuality='super-smooth';"), 'Super Smooth must be the only graphics mode');
+assert.ok(main.includes('pixelRatio:1.5,shadows:true,shadowSize:1536'), 'Super Smooth quality settings must remain enabled');
+assert.ok(!/qualityPresets|qualitySelect|lostTempleGraphics|value="low"|value="medium"|value="high"/.test(main + html), 'other graphics presets and selectors must be removed');
+assert.ok(html.includes('GRAPHICS · SUPER SMOOTH') && !html.includes('<select'), 'start screen must show only the fixed Super Smooth mode');
+console.log('PASS: graphics are locked to Super Smooth with no alternate presets');
