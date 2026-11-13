@@ -4,8 +4,7 @@ using UnityEngine.UI;
 namespace JungleEscape
 {
     /// <summary>
-    /// Lightweight uGUI flow. Wire the panel and Text references in the Inspector.
-    /// Gems are a local prototype currency; connect a real economy only after backend design.
+    /// Lightweight uGUI flow. Gems are local PlayerPrefs prototype currency, not a payment wallet.
     /// </summary>
     public sealed class UIFlow : MonoBehaviour
     {
@@ -23,32 +22,35 @@ namespace JungleEscape
         [SerializeField] private Text coinText;
         [SerializeField] private Text gemText;
 
-        [Header("Revive")]
+        [Header("Buttons and references")]
         [SerializeField] private Text reviveMessage;
         [SerializeField] private Button reviveButton;
-        [SerializeField] private Button playButton;\n        [SerializeField] private Button giveUpButton;\n        [SerializeField] private Button restartButton;
+        [SerializeField] private Button playButton;
+        [SerializeField] private Button giveUpButton;
+        [SerializeField] private Button restartButton;
         [SerializeField] private GameBootstrap game;
         [SerializeField] private RunProgress progress;
 
         private void Awake()
         {
             if (playButton != null) playButton.onClick.AddListener(() => game?.StartRun());
-            if (reviveButton != null) reviveButton.onClick.AddListener(() => game?.TryRevive());\n            if (giveUpButton != null) giveUpButton.onClick.AddListener(() => game?.EndRun());\n            if (restartButton != null) restartButton.onClick.AddListener(() => game?.StartRun());
+            if (reviveButton != null) reviveButton.onClick.AddListener(() => game?.TryRevive());
+            if (giveUpButton != null) giveUpButton.onClick.AddListener(() => game?.EndRun());
+            if (restartButton != null) restartButton.onClick.AddListener(() => game?.StartRun());
         }
 
         private void Update()
         {
-            if (hudPanel != null && hudPanel.activeSelf && progress != null)
-            {
-                if (scoreText != null) scoreText.text = progress.Score.ToString("N0");
-                if (distanceText != null) distanceText.text = Mathf.FloorToInt(progress.DistanceMeters) + " m";
-                if (coinText != null) coinText.text = progress.Coins.ToString();
-                if (gemText != null) gemText.text = GetGems().ToString();
-            }
+            if (hudPanel == null || !hudPanel.activeSelf || progress == null) return;
+            if (scoreText != null) scoreText.text = progress.Score.ToString("N0");
+            if (distanceText != null) distanceText.text = Mathf.FloorToInt(progress.DistanceMeters) + " m";
+            if (coinText != null) coinText.text = progress.Coins.ToString();
+            if (gemText != null) gemText.text = GetGems().ToString();
         }
 
         public void ShowMainMenu() => SetPanels(true, false, false, false);
         public void ShowHUD() => SetPanels(false, true, false, false);
+
         public void ShowRevive()
         {
             SetPanels(false, true, true, false);
@@ -59,6 +61,7 @@ namespace JungleEscape
                     : "NO GEMS LEFT\nRun over!";
             if (reviveButton != null) reviveButton.interactable = gems > 0;
         }
+
         public void ShowGameOver() => SetPanels(false, false, false, true);
 
         private void SetPanels(bool menu, bool hud, bool revive, bool over)
