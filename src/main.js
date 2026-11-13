@@ -313,7 +313,7 @@ function updateWorld(dt) {
   const beastProgress = Math.max(0, state.progress - state.chaserGap);
   const beastPose = track.getPose(beastProgress);
   if (state.progress < state.chaserGap) beastPose.position.addScaledVector(beastPose.tangent, -(state.chaserGap - state.progress));
-  beast.update(dt, beastPose);
+  beast.update(dt, beastPose, state.stumbleTime > 0 ? 1 : 0);
   if (state.chaserGap < 1.25 && state.invulnerable <= 0) { failRun(); return; }
 
   for (const item of [...obstacles, ...coinVisuals, ...pickups]) {
