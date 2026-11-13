@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace JungleEscape
 {
@@ -9,6 +10,7 @@ namespace JungleEscape
         [SerializeField] private float closeRate = 5f;
         [SerializeField] private float recoverRate = 1.8f;
         [SerializeField] private float catchDistance = 1.45f;
+        [SerializeField] private UnityEvent onCaught;
 
         private float gap;
         private bool caught;
@@ -41,7 +43,7 @@ namespace JungleEscape
             if (Vector3.Distance(transform.position, runner.position) <= catchDistance)
             {
                 caught = true;
-                SendMessage("OnRunnerCaught", SendMessageOptions.DontRequireReceiver);
+                onCaught?.Invoke();
             }
         }
 
