@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace JungleEscape.EditorTools
@@ -7,10 +8,19 @@ namespace JungleEscape.EditorTools
     {
         public static void PreExport()
         {
-            Debug.Log("Jungle Escape: generating the demo scene for Unity Build Automation.");
-            ProjectBootstrap.BuildDemoScene();
-            ProjectBootstrap.ValidateGeneratedScene();
-            Debug.Log("Jungle Escape: demo scene is ready for Android export.");
+            Debug.Log("Jungle Escape: PreExport started; generating the demo scene.");
+            try
+            {
+                ProjectBootstrap.BuildDemoScene();
+                Debug.Log("Jungle Escape: demo scene generation completed; validating scene.");
+                ProjectBootstrap.ValidateGeneratedScene();
+                Debug.Log("Jungle Escape: demo scene is ready for Android export.");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("Jungle Escape PreExport failed with full exception details:\n" + exception);
+                throw;
+            }
         }
     }
 }
