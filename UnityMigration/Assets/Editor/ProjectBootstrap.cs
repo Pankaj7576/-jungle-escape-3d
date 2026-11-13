@@ -63,9 +63,12 @@ namespace JungleEscape.EditorTools
             guardian.transform.position = new Vector3(0f, 0.02f, -3.5f);
             GuardianChase chase = guardian.AddComponent<GuardianChase>();
             GuardianMotion guardianMotion = guardian.GetComponent<GuardianMotion>();
-            Assign(guardianMotion, "chase", chase);
+            if (guardianMotion != null)
+                Assign(guardianMotion, "chase", chase);
+
             GuardianAnimationDriver guardianAnimation = guardian.GetComponent<GuardianAnimationDriver>();
-            Assign(guardianAnimation, "chase", chase);
+            if (guardianAnimation != null)
+                Assign(guardianAnimation, "chase", chase);
 
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
