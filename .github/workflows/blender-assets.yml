@@ -49,7 +49,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Jungle-Escape-Blender-Track-Assets
-          path: UnityMigration/Assets/Environment/Generated/
+          path: |
+            UnityMigration/Assets/Environment/Generated/
+            UnityMigration/Assets/Characters/Animations/KinemIQ/
           if-no-files-found: error
           retention-days: 14
 
@@ -57,7 +59,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add UnityMigration/Assets/Environment/Generated/ UnityMigration/Assets/Characters/Animations/KinemIQ/
+          git add UnityMigration/Assets/Environment/Generated/ UnityMigration/Assets/Characters/Animations/
           if git diff --cached --quiet; then
             echo "Generated files are already up to date."
             exit 0
