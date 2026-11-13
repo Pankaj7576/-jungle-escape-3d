@@ -497,8 +497,22 @@ namespace JungleEscape.EditorTools
             controller.radius = 0.34f;
             controller.center = new Vector3(0f, 0.9f, 0f);
 
+            bool usingMannequinFallback = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Characters/Explorer_BlackSuit.fbx") == null;
             Animator importedAnimator = CharacterAnimatorFactory.AttachHero(root,
                 "Assets/Characters/Explorer_BlackSuit.fbx");
+            if (importedAnimator != null && usingMannequinFallback)
+            {
+                foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+                {
+                    Material[] materials = renderer.sharedMaterials;
+                    for (int i = 0; i < materials.Length; i++) materials[i] = outfit;
+                    renderer.sharedMaterials = materials;
+                }
+                AddCubeVisual("Expedition_Backpack", root.transform,
+                    new Vector3(0f, 1.08f, -0.28f), new Vector3(0.42f, 0.58f, 0.24f), outfit);
+            }
+
             if (importedAnimator == null)
             {
                 // Visible fallback until the black-suit FBX is imported and validated.
