@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -40,10 +41,8 @@ namespace JungleEscape.EditorTools
 
         private static AnimatorController CreateHeroController(string fbxPath)
         {
-            AnimationClip[] clips = AssetDatabase.LoadAllAssetsAtPath(fbxPath)
-                .OfType<AnimationClip>()
-                .Where(clip => clip != null && !clip.name.StartsWith("__preview__", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+            AnimationClip[] clips = LoadCharacterClips();
+
             if (clips.Length == 0)
             {
                 Debug.LogWarning("No animation clips found in " + fbxPath + ". Add/retarget Idle, Run, Jump, Slide and Fall clips.");
@@ -67,7 +66,7 @@ namespace JungleEscape.EditorTools
             AnimationClip idleClip = FindClip(clips, "idle", "stand");
             AnimationClip runClip = FindClip(clips, "run", "sprint", "jog", "walk");
             AnimationClip jumpClip = FindClip(clips, "jump", "leap");
-            AnimationClip slideClip = FindClip(clips, "slide", "crouch", "roll");
+            AnimationClip slideClip = FindClip(clips, "slide", "roll", "crouch");
             AnimationClip stumbleClip = FindClip(clips, "stumble", "hit", "fall");
             AnimationClip fallClip = FindClip(clips, "death", "fall", "die");
             if (idleClip == null && runClip == null) runClip = clips[0];
@@ -142,6 +141,23 @@ namespace JungleEscape.EditorTools
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
             return controller;
+        }
+
+        private static AnimationClip[] LoadCharacterClips()
+        {
+            List<AnimationClip> clips = new List<AnimationClip>();
+            string[] modelGuids = AssetDatabase.FindAssets("t:Model", new[] { "Assets/Characters" });
+            foreach (string guid in modelGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(path))
+                {
+                    if (asset is AnimationClip clip &&
+                        !clip.name.StartsWith("__preview__", StringComparison.OrdinalIgnoreCase))
+                        clips.Add(clip);
+                }
+            }
+            return clips.Distinct().ToArray();
         }
 
         private static AnimatorState AddState(AnimatorStateMachine machine, string name, AnimationClip clip)
