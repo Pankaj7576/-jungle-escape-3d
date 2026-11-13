@@ -1,31 +1,9 @@
 {
-  "name": "jungle-escape-3d",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "android:add": "npx cap add android",
-    "android:sync": "npm run build && npx cap sync android",
-    "android:open": "npx cap open android",
-    "check": "node --check src/main.js && node --check src/hero-animation.js && node --check src/pbr-textures.js && node --check scripts/check-assets.mjs && node scripts/check-gameplay.mjs",
-    "assets:check": "node scripts/check-assets.mjs",
-    "assets:inspect:hero": "gltf-transform inspect public/assets/models/hero-source.glb",
-    "assets:inspect:guardian": "gltf-transform inspect public/assets/models/guardian-source.glb",
-    "assets:optimize:hero": "gltf-transform optimize public/assets/models/hero-source.glb public/assets/models/hero.glb --compress quantize --texture-compress webp --texture-size 1024 --simplify false",
-    "assets:optimize:guardian": "gltf-transform optimize public/assets/models/guardian-source.glb public/assets/models/guardian.glb --compress quantize --texture-compress webp --texture-size 1024 --simplify false",
-    "assets:optimize:all": "npm run assets:optimize:hero && npm run assets:optimize:guardian"
-  },
-  "dependencies": {
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
-    "three": "^0.180.0"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^7.4.3",
-    "vite": "^6.4.1",
-    "@gltf-transform/cli": "^4.5.1"
-  }
+  "name":"jungle-escape-3d",
+  "version":"2.0.0",
+  "private":true,
+  "type":"module",
+  "scripts":{"dev":"vite --host 0.0.0.0","build":"vite build","preview":"vite preview --host 0.0.0.0","check":"node --check src/main.js"},
+  "dependencies":{"@capacitor/android":"^7.4.3","@capacitor/core":"^7.4.3","three":"^0.180.0"},
+  "devDependencies":{"@capacitor/cli":"^7.4.3","vite":"^6.4.1"}
 }

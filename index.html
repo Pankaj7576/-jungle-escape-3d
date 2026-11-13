@@ -1,34 +1,3 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#10251d">
-<title>Jungle Escape 3D — The Lost Temple</title>
-</head>
-<body>
-<div id="app">
-  <div id="hud" class="hidden">
-    <div class="hud-left"><span>🏃 <b id="distance">0</b> m</span><span>🪙 <b id="coins">0</b></span></div>
-    <button id="pause" class="glass icon-button" aria-label="Pause">Ⅱ</button>
-  </div>
-  <div id="overlay">
-    <section class="panel">
-      <div class="eyebrow">AN INDIAN JUNGLE ADVENTURE</div>
-      <h1>JUNGLE ESCAPE <em>3D</em></h1>
-      <h2>THE LOST TEMPLE</h2>
-      <p id="intro">Run through forgotten stone temples and dense jungle paths while escaping the ancient guardian.</p>
-      <div class="best">BEST DISTANCE <b id="best">0</b> m</div>
-      <div class="quality-label" aria-label="Graphics mode">GRAPHICS · SUPER SMOOTH</div><button id="play" class="primary">START RUN</button>
-      <p class="help">Swipe ← → to change lanes · Swipe ↑ to jump · Swipe ↓ to slide</p>
-    </section>
-  </div>
-  <div id="touch-controls" class="hidden">
-    <div><button data-action="left">◀</button><button data-action="right">▶</button></div>
-    <div><button data-action="jump">▲</button><button data-action="slide">▼</button></div>
-  </div>
-  <div id="toast"></div>
-</div>
-<script type="module" src="/src/main.js"></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#10251d"><title>Jungle Escape 3D — The Lost Temple</title></head>
+<body><main id="game"><canvas id="world"></canvas><header id="hud" class="hidden"><span> DISTANCE <b id="distance">0</b> m</span><span> COINS <b id="coins">0</b></span><button id="pause">Ⅱ</button></header><section id="menu"><div class="panel"><small>AN ORIGINAL INDIAN JUNGLE ADVENTURE</small><h1>JUNGLE ESCAPE <i>3D</i></h1><h2>THE LOST TEMPLE</h2><p id="message">Run through ancient ruins, dodge deadly traps and escape the temple guardian.</p><div class="stats">BEST RUN <b id="best">0</b> m</div><button id="play">START RUN</button><p class="hint">Swipe left/right to move · Up to jump · Down to slide</p></div></section><nav id="controls" class="hidden"><div><button data-action="left">◀</button><button data-action="right">▶</button></div><div><button data-action="jump">▲</button><button data-action="slide">▼</button></div></nav></main><script type="module" src="/src/main.js"></script></body></html>

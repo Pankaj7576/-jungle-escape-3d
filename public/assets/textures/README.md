@@ -1,3 +1,0 @@
-The runtime currently generates small original tileable stone, soil, bark and moss PBR-like textures in src/pbr-textures.js. No downloaded image files are bundled.
-
-Verified CC0 candidate for a future real scan: ambientCG Rock 024, https://ambientcg.com/view?id=Rock024 (CC0 1.0; 1K JPG archive listed as 8 MB). Download the individual archive from the official asset page, record the actual map filenames and license in ASSET_CREDITS.md, and use 1K maps on Android.
