@@ -1,5 +1,12 @@
 # Jungle Escape 3D — Version History
 
+## 1.003
+- Hardened lane input: canvas swipes are handled as one primary-pointer gesture with a 36 px dead zone and ambiguous-diagonal rejection.
+- Isolated on-screen control presses from canvas swipes and ignored keyboard auto-repeat so holding a direction cannot continuously move lanes.
+- Added automated Node regression tests for tap jitter, left/right swipes, jump/slide swipes and ambiguous diagonals.
+- Android workflow now runs the input regression tests before building the portrait debug APK.
+
+
 ## 1.002
 - Rebuilt gameplay around a procedural modular track system that generates and recycles straight, 90-degree left/right turn, and broken-gap sections.
 - Added curved world-space lane positioning, low stone guardrails, canyon/mountain scenery, and a spring-arm camera with collision checks.

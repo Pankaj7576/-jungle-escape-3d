@@ -3,6 +3,7 @@ import './style.css';
 import { TrackSystem, makeWorldObstacle, makeCoin } from './track-system.js';
 import { RunnerCharacter, TempleBeast } from './character-system.js';
 import { RunnerCamera } from './camera-system.js';
+import { bindGameInput } from './input-system.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('world');
@@ -217,25 +218,11 @@ function action(name) {
     state.slideTime = .82; runner.play('slide');
   }
 }
-document.querySelectorAll('[data-action]').forEach(button => {
-  button.addEventListener('pointerdown', event => { event.preventDefault(); action(button.dataset.action); });
-});
-let touchX = 0, touchY = 0;
-canvas.addEventListener('touchstart', event => {
-  touchX = event.changedTouches[0].clientX; touchY = event.changedTouches[0].clientY;
-}, { passive: true });
-canvas.addEventListener('touchend', event => {
-  const dx = event.changedTouches[0].clientX - touchX;
-  const dy = event.changedTouches[0].clientY - touchY;
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
-  action(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy < 0 ? 'jump' : 'slide'));
-}, { passive: true });
-addEventListener('keydown', event => {
-  if (event.key === 'ArrowLeft' || event.key === 'a') action('left');
-  if (event.key === 'ArrowRight' || event.key === 'd') action('right');
-  if (event.key === 'ArrowUp' || event.key === ' ') action('jump');
-  if (event.key === 'ArrowDown' || event.key === 's') action('slide');
-  if (event.key === 'Escape') $('pause').click();
+bindGameInput({
+  canvas,
+  controlsRoot: $('controls'),
+  action,
+  onPause: () => $('pause').click()
 });
 
 function collectCoins(dt, runnerPose) {
