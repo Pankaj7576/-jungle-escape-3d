@@ -3,10 +3,13 @@ using UnityEngine;
 
 namespace JungleEscape
 {
-    [RequireComponent(typeof(Collider), typeof(Rigidbody))]
+    public enum HazardAvoidance { None, Slide, Jump }
+
+    [RequireComponent(typeof(Collider))]
     public sealed class ObstacleHazard : MonoBehaviour
     {
         [SerializeField] private GameBootstrap game;
+        [SerializeField] private HazardAvoidance avoidedBy = HazardAvoidance.None;
         [SerializeField, Range(0.2f, 2f)] private float stumbleSeverity = 0.8f;
         [SerializeField, Min(0.1f)] private float recoveryDelay = 0.9f;
 
@@ -14,13 +17,7 @@ namespace JungleEscape
         private Collider trigger;
         private Coroutine recovery;
 
-        private void Awake()
-        {
-            trigger = GetComponent<Collider>();
-            Rigidbody body = GetComponent<Rigidbody>();
-            body.isKinematic = true;
-            body.useGravity = false;
-        }
+        private void Awake() => trigger = GetComponent<Collider>();
 
         private void OnEnable()
         {
@@ -31,14 +28,16 @@ namespace JungleEscape
         private void Reset()
         {
             GetComponent<Collider>().isTrigger = true;
-            Rigidbody body = GetComponent<Rigidbody>();
-            body.isKinematic = true;
-            body.useGravity = false;
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (triggered || other.GetComponentInParent<RunnerMotor>() == null) return;
+            if (triggered) return;
+            RunnerMotor motor = other.GetComponentInParent<RunnerMotor>();
+            if (motor == null) return;
+            if (avoidedBy == HazardAvoidance.Slide && motor.IsSliding) return;
+            if (avoidedBy == HazardAvoidance.Jump && !motor.IsGrounded) return;
+
             triggered = true;
             if (trigger != null) trigger.enabled = false;
             if (game != null) recovery = StartCoroutine(ApplyHit());
