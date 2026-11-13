@@ -206,12 +206,13 @@ def export_module(name, points, gap=None):
     for obj in bpy.context.scene.objects:
         if obj.type in {'MESH', 'EMPTY'}:
             obj.select_set(True)
-    if hasattr(bpy.ops.export_scene, "gltf"):
-        try:
+    try:
+        import numpy  # The Blender glTF exporter requires NumPy in some packaged builds.
+        if hasattr(bpy.ops.export_scene, "gltf"):
             bpy.ops.export_scene.gltf(filepath=OUT + name + ".glb",
                 export_format='GLB', use_selection=True)
-        except Exception as error:
-            print("GLB export skipped for", name, ":", error)
+    except Exception as error:
+        print("Optional GLB export skipped for", name, ":", error)
 
     if not hasattr(bpy.ops.export_scene, "fbx"):
         raise RuntimeError("Blender FBX exporter is unavailable; cannot create Unity-native modules.")
