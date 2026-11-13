@@ -64,13 +64,18 @@ See Blender/ASSET_PIPELINE.md for skeletons, clip naming, export settings, mobil
 
 ## F. Android APK build
 
-The repository includes .github/workflows/unity-android.yml. It runs only when manually started and needs a valid Unity license file in repository Actions secret UNITY_LICENSE:
-1. Activate Unity Personal in Unity Hub on a desktop/cloud workstation.
-2. Add the activated .ulf file contents as repository secret UNITY_LICENSE.
-3. GitHub → Actions → Unity Android APK (Unity Migration) → Run workflow on unity-migration/phase-1.
-4. Download the Jungle-Escape-Unity-Android-APK artifact only after the run reports success.
+The repository includes .github/workflows/unity-android.yml. It runs only when manually started. The project is pinned to Unity `6000.0.60f1` in ProjectSettings/ProjectVersion.txt; Unity Hub `3.22.6` is only the Hub app version, and Unity 6.6 is not the currently pinned Editor version.
 
-The build script targets portrait ARM64 IL2CPP. If Unity licensing is not configured, the remote build cannot start successfully. Do not share passwords or commit license files.
+The workflow checks for these repository Actions secrets before building:
+- `UNITY_LICENSE` — CI license data accepted by GameCI.
+- `UNITY_EMAIL` — Unity account email.
+- `UNITY_PASSWORD` — Unity account password.
+
+Add secrets only in GitHub → repository Settings → Secrets and variables → Actions. Never put them in source files or send them in chat. The workflow then uses GameCI Unity Builder, verifies the APK, and uploads `Jungle-Escape-Unity-Android-APK`.
+
+Important: Unity Hub showing a Personal Activation Date confirms local Hub activation, but does not automatically provide the CI license secret. GameCI's current Personal activation documentation describes the older `.alf`/`.ulf` manual flow and warns that Unity no longer supports manual Personal activation. So the Unity APK is not confirmed buildable until a valid CI license is accepted by an actual workflow run. Do not use unsupported browser developer-tools workarounds.
+
+The build script targets portrait ARM64 IL2CPP. A successful workflow run and uploaded APK artifact are required before claiming that an APK exists.
 
 ## G. Validation order
 
