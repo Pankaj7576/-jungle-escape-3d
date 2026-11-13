@@ -43,6 +43,7 @@ namespace JungleEscape.EditorTools
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             GameObject trackRoot = new GameObject("TrackDirector");
             TrackDirector director = trackRoot.AddComponent<TrackDirector>();
+            TrackContentSpawner contentSpawner = trackRoot.AddComponent<TrackContentSpawner>();
 
             GameObject runner = BuildHero(heroMat, skin);
             runner.name = "Runner_Explorer";
@@ -87,6 +88,10 @@ namespace JungleEscape.EditorTools
 
             Assign(director, "runner", runner.transform);
             Assign(director, "startSegmentPrefab", straight);
+            Assign(director, "contentSpawner", contentSpawner);
+            Assign(contentSpawner, "game", game);
+            Assign(contentSpawner, "progress", progress);
+            Assign(contentSpawner, "ui", ui);
             Assign(director, "straightPrefabs", new Object[] { straight });
             Assign(director, "leftTurnPrefabs", new Object[] { left });
             Assign(director, "rightTurnPrefabs", new Object[] { right });
