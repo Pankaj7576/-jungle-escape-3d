@@ -24,7 +24,7 @@ GitHub Actions alone is not a free Unity build machine: Unity licensing and edit
 
 ## Implemented source systems
 - TrackSegment entry/exit anchors and ordered centerline path nodes for curved modules.
-- TrackDirector connected modular track generation with straight, left-turn, right-turn and gap prefab pools, ahead spawning and old-segment cleanup.
+- TrackDirector connected modular track generation with straight, left-turn, right-turn and gap prefab pools, ahead spawning, behind cleanup and reusable segment object pools.
 - Track-aware three-lane RunnerMotor with smooth lane correction, jump, slide, fall detection, start/replay reset and safe-position revive.
 - SwipeInput for touch gestures and keyboard testing.
 - RunnerCamera smooth third-person follow with sphere-cast obstruction handling.
