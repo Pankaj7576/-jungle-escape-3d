@@ -18,6 +18,19 @@ namespace JungleEscape
         private bool collected;
         private Collider trigger;
 
+        public void Configure(PickupKind pickupKind, int pickupValue, RunProgress runProgress,
+            GameBootstrap bootstrap, UIFlow flow, GameObject visual)
+        {
+            kind = pickupKind;
+            value = Mathf.Max(1, pickupValue);
+            progress = runProgress;
+            game = bootstrap;
+            ui = flow;
+            visualRoot = visual;
+            if (trigger == null) trigger = GetComponent<Collider>();
+            if (trigger != null) trigger.isTrigger = true;
+        }
+
         private void Awake()
         {
             trigger = GetComponent<Collider>();
