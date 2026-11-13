@@ -123,6 +123,7 @@ namespace JungleEscape.EditorTools
             Assign(game, "runner", motor);
             Assign(game, "runnerAnimation", animation);
             Assign(game, "guardian", chase);
+            Assign(game, "guardianAnimation", guardianAnimation);
             Assign(game, "runnerCamera", follow);
             Assign(game, "runProgress", progress);
             Assign(game, "track", director);
@@ -204,6 +205,9 @@ namespace JungleEscape.EditorTools
                     "GameBootstrap Runner reference is incorrect.");
                 Require(gameData.FindProperty("runnerAnimation").objectReferenceValue != null,
                     "RunnerAnimationDriver reference is missing.");
+                if (guardian.GetComponent<GuardianAnimationDriver>() != null)
+                    Require(gameData.FindProperty("guardianAnimation").objectReferenceValue == guardian.GetComponent<GuardianAnimationDriver>(),
+                        "GuardianAnimationDriver reference is missing or incorrect.");
             }
 
             Debug.Log("Jungle Escape scene validation passed. This checks scene wiring only; it is not a gameplay or Android device test.");
