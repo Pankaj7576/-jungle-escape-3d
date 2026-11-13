@@ -35,6 +35,8 @@ jobs:
       - name: Generate modular bridge assets
         run: |
           blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
+          count=$(find UnityMigration/Assets/Environment/Generated -maxdepth 1 -name "*.fbx" | wc -l)
+          test "$count" -eq 4
 
       - name: Upload generated asset bundle
         uses: actions/upload-artifact@v4
