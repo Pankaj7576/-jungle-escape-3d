@@ -21,6 +21,7 @@ namespace JungleEscape.EditorTools
                 Debug.LogError("Jungle Escape PreExport exception type: " + exception.GetType().FullName);
                 Debug.LogError("Jungle Escape PreExport exception message: " + exception.Message);
                 Debug.LogError("Jungle Escape PreExport stack trace:\n" + exception.StackTrace);
+                Debug.LogException(exception);
                 throw;
             }
         }
