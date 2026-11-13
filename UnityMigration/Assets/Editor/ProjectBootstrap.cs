@@ -60,6 +60,8 @@ namespace JungleEscape.EditorTools
             GuardianChase chase = guardian.AddComponent<GuardianChase>();
             GuardianMotion guardianMotion = guardian.GetComponent<GuardianMotion>();
             Assign(guardianMotion, "chase", chase);
+            GuardianAnimationDriver guardianAnimation = guardian.GetComponent<GuardianAnimationDriver>();
+            Assign(guardianAnimation, "chase", chase);
 
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -521,12 +523,13 @@ namespace JungleEscape.EditorTools
 
             GameObject modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Assets/Characters/Guardian_Ape.fbx");
+            bool animatedModel = false;
             if (modelAsset != null)
             {
                 GameObject model = PrefabUtility.InstantiatePrefab(modelAsset) as GameObject;
                 if (model != null)
                 {
-                    model.name = "CC0_Silverback_Gorilla";
+                    model.name = "Original_Rigged_Temple_Ape";
                     model.transform.SetParent(visualRoot.transform, false);
                     model.transform.localPosition = Vector3.zero;
                     model.transform.localRotation = Quaternion.identity;
@@ -535,17 +538,27 @@ namespace JungleEscape.EditorTools
                     {
                         Bounds bounds = renderers[0].bounds;
                         for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-                        float scale = 1.5f / Mathf.Max(0.01f, bounds.size.y);
+                        float scale = 1.55f / Mathf.Max(0.01f, bounds.size.y);
                         model.transform.localScale = Vector3.one * scale;
                         bounds = renderers[0].bounds;
                         for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
                         model.transform.localPosition += Vector3.up * -bounds.min.y;
                     }
+
+                    Animator animator = GuardianAnimatorFactory.Attach(root,
+                        "Assets/Characters/Guardian_Ape.fbx");
+                    if (animator != null)
+                    {
+                        GuardianAnimationDriver animation = root.AddComponent<GuardianAnimationDriver>();
+                        Assign(animation, "animator", animator);
+                        animatedModel = true;
+                    }
                 }
             }
-            else
+
+            if (!animatedModel)
             {
-                // Fallback until the CC0 gorilla FBX has been generated/imported.
+                // Visible fallback until the procedural rigged guardian FBX is imported.
                 AddSphere("Shoulders", visualRoot.transform, new Vector3(0f, 1.05f, 0f),
                     new Vector3(1.35f, 0.9f, 0.72f), fur);
                 AddSphere("Head", visualRoot.transform, new Vector3(0f, 1.55f, 0.35f),
@@ -558,10 +571,10 @@ namespace JungleEscape.EditorTools
                     new Vector3(0.38f, 0.75f, 0.42f), fur);
                 AddCapsule("Right_Leg", visualRoot.transform, new Vector3(0.38f, 0.18f, -0.08f),
                     new Vector3(0.38f, 0.75f, 0.42f), fur);
+                GuardianMotion motion = root.AddComponent<GuardianMotion>();
+                Assign(motion, "visualRoot", visualRoot.transform);
             }
 
-            GuardianMotion motion = root.AddComponent<GuardianMotion>();
-            Assign(motion, "visualRoot", visualRoot.transform);
             return root;
         }
 
