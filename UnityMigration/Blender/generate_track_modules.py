@@ -220,19 +220,23 @@ def export_module(name, points, gap=None):
     for obj in bpy.context.scene.objects:
         if obj.type in {'MESH', 'EMPTY'}:
             obj.select_set(True)
-    bpy.ops.export_scene.fbx(
-        filepath=OUT + name + ".fbx",
-        use_selection=True,
-        object_types={'MESH', 'EMPTY'},
-        apply_unit_scale=True,
-        axis_forward='-Z',
-        axis_up='Y',
-        add_leaf_bones=False,
-        bake_anim=False,
-        path_mode='COPY',
-        embed_textures=True
-    )
-    print("Exported", name + ".glb and .fbx")
+    fbx_operator = bpy.ops.export_scene.fbx
+    available = {prop.identifier for prop in fbx_operator.get_rna_type().properties}
+    fbx_options = {
+        "filepath": OUT + name + ".fbx",
+        "use_selection": True,
+        "object_types": {'MESH', 'EMPTY'},
+        "apply_unit_scale": True,
+        "axis_forward": "-Z",
+        "axis_up": "Y",
+        "add_leaf_bones": False,
+        "bake_anim": False,
+        "path_mode": "COPY",
+        "embed_textures": True
+    }
+    # Blender exporter options vary between LTS and newer releases.
+    fbx_operator(**{key: value for key, value in fbx_options.items() if key in available})
+    print("Exported", name + ".fbx (GLB is optional)")
 
 export_module("Bridge_Straight_18m", path_straight(18.0))
 export_module("Bridge_Turn_Left_90", path_turn(True))
