@@ -245,7 +245,7 @@ function collectCoins(dt, runnerPose) {
       const target = runnerPose.position.clone().add(new THREE.Vector3(0, 1.05, 0));
       coin.mesh.position.lerp(target, 1 - Math.exp(-dt * 5));
     }
-    if (Math.abs(distance) < 1.05 && coin.lane === state.lane) {
+    if (Math.abs(distance) < 1.05 && (coin.lane === state.lane || state.magnetTime > 0)) {
       coin.taken = true; scene.remove(coin.mesh); state.coins++;
     }
   }
