@@ -6,7 +6,7 @@ This is a separate Unity project track. It does not replace the existing Three.j
 - A Unity 6 project skeleton is now included in this folder (ProjectSettings, Packages, runtime scripts and Editor tools).
 - Assets/Editor/ProjectBootstrap.cs generates a playable greybox scene, straight/left-turn/right-turn/broken-gap track prefabs, URP settings, basic UI, coins/gems and tutorial hazards. In Unity, run **Tools > Jungle Escape > Generate Demo Scene**.
 - Assets/Editor/AndroidBuild.cs generates the demo scene and builds an ARM64 portrait APK.
-- .github/workflows/blender-assets.yml runs Blender headlessly in GitHub Actions and is configured to commit generated bridge FBX/GLB files to this branch when the generator changes; its first successful run is still pending.
+- .github/workflows/blender-assets.yml runs Blender headlessly in GitHub Actions and has successfully generated and committed four FBX/GLB modules (straight, left turn, right turn and broken gap) to Assets/Environment/Generated.
 - .github/workflows/unity-android.yml provides a manual GitHub Actions build. It requires a valid Unity Personal/Pro license file stored as the repository Actions secret UNITY_LICENSE.
 
 ## Target toolchain and licensing
