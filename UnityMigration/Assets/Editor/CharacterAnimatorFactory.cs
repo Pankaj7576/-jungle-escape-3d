@@ -23,17 +23,17 @@ namespace JungleEscape.EditorTools
             model.transform.localScale = Vector3.one;
 
             Animator animator = runnerRoot.AddComponent<Animator>();
-            Avatar avatar = AssetDatabase.LoadAllAssetsAtPath(fbxPath)
-                .OfType<Avatar>().FirstOrDefault(candidate => candidate != null && candidate.isValid && candidate.isHuman);
-            if (avatar == null)
-                avatar = model.GetComponentInChildren<Animator>()?.avatar;
+            Avatar[] avatars = AssetDatabase.LoadAllAssetsAtPath(fbxPath).OfType<Avatar>().ToArray();
+            Avatar avatar = avatars.FirstOrDefault(candidate => candidate != null && candidate.isValid && candidate.isHuman)
+                ?? avatars.FirstOrDefault(candidate => candidate != null && candidate.isValid)
+                ?? model.GetComponentInChildren<Animator>()?.avatar;
             animator.avatar = avatar;
             animator.applyRootMotion = false;
 
             AnimatorController controller = CreateHeroController(fbxPath);
             if (controller != null) animator.runtimeAnimatorController = controller;
             if (avatar == null)
-                Debug.LogWarning("Explorer FBX imported but no valid Humanoid Avatar was found. Set Rig > Humanoid in the FBX importer.", model);
+                Debug.LogWarning("Explorer FBX imported but no valid Avatar was found. Check the FBX Rig tab and avatar mapping.", model);
 
             return animator;
         }
