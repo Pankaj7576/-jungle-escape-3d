@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 namespace JungleEscape
 {
-    [RequireComponent(typeof(CharacterController))]
+    [DefaultExecutionOrder(100)]\n    [RequireComponent(typeof(CharacterController))]
     public sealed class RunnerMotor : MonoBehaviour
     {
         [Header("Track frame")]
