@@ -220,6 +220,9 @@ namespace JungleEscape.EditorTools
 
                 List<Vector3> sub = path.GetRange(first, last - first + 1);
                 Mesh mesh = RibbonMesh(sub, 4.7f, 0f);
+                string meshPath = Root + "/" + root.name + "_Deck_" + first + ".asset";
+                if (AssetDatabase.LoadAssetAtPath<Mesh>(meshPath) != null) AssetDatabase.DeleteAsset(meshPath);
+                AssetDatabase.CreateAsset(mesh, meshPath);
                 GameObject deck = new GameObject("Walkable_Deck_" + first);
                 deck.transform.SetParent(root, false);
                 MeshFilter filter = deck.AddComponent<MeshFilter>();
