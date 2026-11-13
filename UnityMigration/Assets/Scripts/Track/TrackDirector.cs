@@ -57,8 +57,7 @@ namespace JungleEscape
                 if (active[i] != null) Destroy(active[i].gameObject);
             active.Clear();
             CurrentSegment = null;
-            TrackSegment first = Instantiate(startSegmentPrefab, transform.position,
-                transform.rotation, transform);
+            TrackSegment first = CreateAligned(startSegmentPrefab, transform);
             if (!Validate(first)) { enabled = false; return; }
             active.Add(first);
             nextEntry = first.Exit;
