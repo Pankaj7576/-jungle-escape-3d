@@ -45,6 +45,7 @@ namespace JungleEscape
         public bool IsSliding => slideRemaining > 0f;
         public bool IsGrounded => controller != null && controller.isGrounded;
         public bool IsStumbling { get; private set; }
+        public bool IsRunActive => runActive;
 
         private void Awake()
         {
