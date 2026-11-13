@@ -33,7 +33,9 @@ Export one FBX for rig + mesh + actions, or GLB if the Unity importer pipeline i
 
 ## 2. Temple gorilla guardian
 
-Target: original intimidating dark-furred temple guardian with broad shoulders, long forearms, heavy hands, powerful legs, expressive brow and readable face. Avoid an over-detailed silhouette that becomes noisy on a phone.
+Run Blender/prepare_gorilla.py to generate the original rigged guardian FBX in Assets/Characters/Guardian_Ape.fbx. The cloud workflow installs Blender and runs this script; no external model download or paid tool is needed.
+
+Target: original intimidating dark-furred temple guardian with broad shoulders, long forearms, heavy hands, powerful legs, expressive brow and readable face. The current Blender generator creates a procedural articulated ape blockout with a Generic armature and Idle/Run/Roar/Catch/Fall actions. It is original source art, not a professionally sculpted or photorealistic final creature.
 
 - Use a dedicated humanoid-like quadruped/biped hybrid rig; do not force a human Humanoid avatar if bone proportions do not fit.
 - Suggested bones: root, pelvis, spine, chest, neck, head, paired clavicle/upper-arm/forearm/hand and thigh/shin/foot chains.
