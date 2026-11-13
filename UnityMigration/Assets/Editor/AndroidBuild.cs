@@ -10,6 +10,7 @@ namespace JungleEscape.EditorTools
         public static void Build()
         {
             ProjectBootstrap.BuildDemoScene();
+            ProjectBootstrap.ValidateGeneratedScene();
 
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
             EditorUserBuildSettings.buildAppBundle = false;
