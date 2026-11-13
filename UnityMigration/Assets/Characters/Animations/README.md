@@ -1,6 +1,6 @@
 # CC0 Humanoid Animation Clips
 
-The GitHub Actions workflow named **Import CC0 Humanoid Animations** downloads KinemIQ's 35-clip humanoid FBX pack into the KinemIQ subfolder. It can run automatically after this README changes or manually from the Actions tab.
+The GitHub Actions workflow named **Import CC0 Humanoid Animations** downloads KinemIQ's 35-clip humanoid FBX pack into the KinemIQ subfolder. It can run automatically after this README changes or manually from the Actions tab. The workflow extracts into a temporary folder before committing, so repeated imports do not overwrite the active checkout.
 
 Source: https://huggingface.co/datasets/Kinemiq/free-game-animations
 Archive: KinemIQ_Free_Animations_CC0_FBX.zip
