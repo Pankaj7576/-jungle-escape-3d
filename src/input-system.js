@@ -13,7 +13,7 @@ export function classifySwipe(startX, startY, endX, endY) {
   const dominant = Math.max(absX, absY);
   const minor = Math.min(absX, absY);
 
-  if (dominant < SWIPE_THRESHOLD || dominant < minor * AXIS_DOMINANCE) return null;
+  if (dominant < SWIPE_THRESHOLD || dominant <= minor * AXIS_DOMINANCE) return null;
   if (absX >= absY) return dx < 0 ? 'left' : 'right';
   return dy < 0 ? 'jump' : 'slide';
 }
