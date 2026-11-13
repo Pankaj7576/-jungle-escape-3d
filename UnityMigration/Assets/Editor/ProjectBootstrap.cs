@@ -27,7 +27,9 @@ namespace JungleEscape.EditorTools
         [MenuItem("Tools/Jungle Escape/Generate Demo Scene")]
         public static void BuildDemoScene()
         {
+            Debug.Log("Jungle Escape stage 1: creating folders.");
             EnsureFolders();
+            Debug.Log("Jungle Escape stage 2: configuring URP.");
             EnsureUrpPipeline();
             Material stone = MakeMaterial("Weathered Stone", new Color(0.31f, 0.29f, 0.25f));
             Material trim = MakeMaterial("Carved Stone", new Color(0.20f, 0.19f, 0.17f));
@@ -37,6 +39,7 @@ namespace JungleEscape.EditorTools
             Material beastMat = MakeMaterial("Guardian Charcoal Fur", new Color(0.025f, 0.022f, 0.02f));
             Material gold = MakeMaterial("Ancient Gold", new Color(0.85f, 0.55f, 0.10f));
 
+            Debug.Log("Jungle Escape stage 3: generating track prefabs.");
             TrackSegment straight = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Straight", ModuleKind.Straight, stone, trim, moss), "Bridge_Straight");
             TrackSegment left = RequireTrackPrefab(
@@ -46,11 +49,13 @@ namespace JungleEscape.EditorTools
             TrackSegment gap = RequireTrackPrefab(
                 BuildTrackPrefab("Bridge_Broken_Gap", ModuleKind.Gap, stone, trim, moss), "Bridge_Broken_Gap");
 
+            Debug.Log("Jungle Escape stage 4: creating demo scene.");
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             GameObject trackRoot = new GameObject("TrackDirector");
             TrackDirector director = trackRoot.AddComponent<TrackDirector>();
             TrackContentSpawner contentSpawner = trackRoot.AddComponent<TrackContentSpawner>();
 
+            Debug.Log("Jungle Escape stage 5: creating runner.");
             GameObject runner = BuildHero(heroMat, skin);
             runner.name = "Runner_Explorer";
             runner.transform.position = new Vector3(0f, 0.02f, 2f);
@@ -59,6 +64,7 @@ namespace JungleEscape.EditorTools
             Assign(animation, "motor", motor);
             Assign(animation, "animator", runner.GetComponent<Animator>());
 
+            Debug.Log("Jungle Escape stage 6: creating guardian.");
             GameObject guardian = BuildGuardian(beastMat);
             guardian.transform.position = new Vector3(0f, 0.02f, -3.5f);
             GuardianChase chase = guardian.AddComponent<GuardianChase>();
@@ -70,6 +76,7 @@ namespace JungleEscape.EditorTools
             if (guardianAnimation != null)
                 Assign(guardianAnimation, "chase", chase);
 
+            Debug.Log("Jungle Escape stage 7: creating camera and lighting.");
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
             Camera camera = cameraObject.AddComponent<Camera>();
@@ -88,6 +95,7 @@ namespace JungleEscape.EditorTools
             RenderSettings.fogColor = new Color(0.28f, 0.32f, 0.29f);
             RenderSettings.fogDensity = 0.008f;
 
+            Debug.Log("Jungle Escape stage 8: creating managers and UI.");
             GameObject manager = new GameObject("GameManager");
             RunProgress progress = manager.AddComponent<RunProgress>();
             Assign(director, "progress", progress);
@@ -101,6 +109,7 @@ namespace JungleEscape.EditorTools
             UIFlow ui = canvas.gameObject.AddComponent<UIFlow>();
             BuildUI(canvas.transform, ui, game, progress);
 
+            Debug.Log("Jungle Escape stage 9: wiring scene components.");
             Assign(director, "runner", runner.transform);
             Assign(director, "startSegmentPrefab", straight);
             Assign(director, "contentSpawner", contentSpawner);
@@ -141,10 +150,12 @@ namespace JungleEscape.EditorTools
             motor.SetFallHandler(game.OnRunnerCaught);
             chase.SetCaughtHandler(game.OnRunnerCaught);
 
+            Debug.Log("Jungle Escape stage 10: creating pickups and hazards.");
             BuildDemoPickups(progress, ui, game, gold);
             BuildDemoHazard(game, trim);
             BuildEnvironmentDressing(stone, moss);
 
+            Debug.Log("Jungle Escape stage 11: saving generated scene and build settings.");
             string scenePath = Scenes + "/JungleEscape_Demo.unity";
             EditorSceneManager.SaveScene(scene, scenePath);
             EditorBuildSettings.scenes = new[]
