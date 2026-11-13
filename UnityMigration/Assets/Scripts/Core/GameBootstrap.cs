@@ -20,6 +20,8 @@ namespace JungleEscape
             QualitySettings.vSyncCount = 0;
             Screen.orientation = ScreenOrientation.Portrait;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            runner?.SetFallHandler(OnRunnerCaught);
+            guardian?.SetCaughtHandler(OnRunnerCaught);
             if (runnerCamera != null && runner != null)
                 runnerCamera.SetTarget(runner.transform);
         }
