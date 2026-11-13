@@ -22,17 +22,11 @@ Unity Editor and Blender are desktop authoring applications. A normal Android ph
 
 **Important version note:** `UnityMigration/ProjectSettings/ProjectVersion.txt` pins this project to Unity `6000.0.60f1` (Unity 6.0). The Unity Hub app version `3.22.6` is not the Editor version, and the Unity 6.6 Editor shown in Hub is not the version currently pinned by this project. Do not download Unity 6.6 for this branch unless the project is deliberately upgraded and validated.
 
-### GitHub Actions licensing status
-The build workflow now expects these repository Actions secrets:
-- `UNITY_LICENSE` — license data accepted by the GameCI Unity Builder.
-- `UNITY_EMAIL` — the Unity account email.
-- `UNITY_PASSWORD` — the Unity account password.
+### Preferred APK route: Unity Build Automation
+Use the official Unity Build Automation service rather than trying to export a Personal `.ulf` file to GitHub Actions. Read [`UNITY_CLOUD_BUILD.md`](UNITY_CLOUD_BUILD.md) for the exact configuration. The free Unity Cloud Personal tier currently includes 200 Windows build minutes per month and 5 GB DevOps storage; monitor usage and do not opt into paid overages. Configure the project subfolder as `UnityMigration`, branch as `unity-migration/phase-1`, auto-detect the editor version from `ProjectVersion.txt`, and choose Android APK.
 
-Never send these values in chat or commit them to files. Add them only in GitHub → repository Settings → Secrets and variables → Actions. The workflow checks that all three secret names are present before attempting a build.
-
-Important limitation: signing in to Unity Hub and seeing a Personal Activation Date confirms the local Hub Personal activation; it does **not** automatically create a CI license secret. GameCI's current activation guide describes a legacy `.alf` → `.ulf` manual Personal-license path, while also warning that Unity no longer supports manual Personal activation. Therefore a supported Personal CI license may not be obtainable through that legacy route. We must not promise that the Unity APK build will work until a real build verifies the license. Do not use browser developer-tools workarounds or share your Unity password with anyone.
-
-If a valid CI license is available, open the repository Actions tab, choose **Unity Android APK (Unity Migration)**, and run it on branch `unity-migration/phase-1`. Only a successful run with the `Jungle-Escape-Unity-Android-APK` artifact proves an APK was built.
+### Optional GitHub Actions route (not the current recommended path)
+The existing `.github/workflows/unity-android.yml` is retained for a future supported CI license arrangement. It checks for `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` secrets. Do not create these by guessing, do not use browser developer-tools workarounds, and never share passwords or license data in chat. Unity's current documentation says Unity Personal is activated through Unity Hub sign-in and does not support the legacy manual activation flow. A Hub Personal Activation Date is not itself a GitHub Actions license secret. Do not expect this optional workflow to build until a supported CI license has been verified.
 
 ## Start here
 1. Open this UnityMigration folder as the Unity project on a desktop/cloud workstation.
@@ -40,6 +34,7 @@ If a valid CI license is available, open the repository Actions tab, choose **Un
 3. Run **Tools > Jungle Escape > Generate Demo Scene** in Unity.
 4. Open Assets/Scenes/JungleEscape_Demo.unity and press Play. Keyboard: arrows/A-D, Space/Up, Down/S. On Android: swipe left/right/up/down.
 5. Read UNITY_SETUP.md for scene systems and validation.
+6. Read UNITY_CLOUD_BUILD.md for the recommended free cloud APK build.
 6. Read Blender/ASSET_PIPELINE.md for explorer/guardian rigging, animation clips, modular bridge art and mobile budgets.
 7. Read Blender/FREE_ASSET_SOURCES.md for free CC0 models, animation packs and PBR texture sources.
 8. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB into a Unity FBX after confirming its licence; re-run the scene generator to use it.
