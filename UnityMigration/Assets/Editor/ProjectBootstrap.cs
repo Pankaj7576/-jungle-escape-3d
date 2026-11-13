@@ -112,6 +112,8 @@ namespace JungleEscape.EditorTools
             Assign(game, "ui", ui);
             Assign(ui, "game", game);
             Assign(ui, "progress", progress);
+            motor.SetFallHandler(game.OnRunnerCaught);
+            chase.SetCaughtHandler(game.OnRunnerCaught);
 
             BuildDemoPickups(progress, ui, game, gold);
             BuildDemoHazard(game, trim);
@@ -331,21 +333,40 @@ namespace JungleEscape.EditorTools
         {
             for (int i = 0; i < 8; i++)
             {
-                GameObject coin = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                coin.name = "Coin_" + i;
-                coin.transform.position = new Vector3((i % 3 - 1) * 2f, 0.85f, 6f + i * 1.25f);
-                coin.transform.localScale = new Vector3(0.48f, 0.07f, 0.48f);
-                coin.GetComponent<Renderer>().sharedMaterial = gold;
-                Collider col = coin.GetComponent<Collider>();
-                col.isTrigger = true;
-                Rigidbody body = coin.AddComponent<Rigidbody>();
-                body.isKinematic = true;
-                PickupItem pickup = coin.AddComponent<PickupItem>();
-                Assign(pickup, "progress", progress);
-                Assign(pickup, "ui", ui);
-                Assign(pickup, "game", game);
-                Assign(pickup, "kind", PickupKind.Coin);
+                int lane = i % 3 - 1;
+                CreatePickup("Coin_" + i, new Vector3(lane * 2f, 0.9f, 5.5f + i * 1.25f),
+                    PickupKind.Coin, 1, progress, ui, game, gold);
             }
+            CreatePickup("Gem_01", new Vector3(-2f, 0.9f, 9.5f),
+                PickupKind.Gem, 1, progress, ui, game, gold);
+            CreatePickup("Gem_02", new Vector3(2f, 0.9f, 15.5f),
+                PickupKind.Gem, 1, progress, ui, game, gold);
+        }
+
+        private static void CreatePickup(string name, Vector3 position, PickupKind kind, int value,
+            RunProgress progress, UIFlow ui, GameBootstrap game, Material gold)
+        {
+            GameObject pickupRoot = new GameObject(name);
+            pickupRoot.transform.position = position;
+            SphereCollider trigger = pickupRoot.AddComponent<SphereCollider>();
+            trigger.radius = 0.42f;
+            trigger.isTrigger = true;
+            Rigidbody body = pickupRoot.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            visual.name = "Visual";
+            visual.transform.SetParent(pickupRoot.transform, false);
+            visual.transform.localScale = new Vector3(0.48f, 0.07f, 0.48f);
+            visual.GetComponent<Renderer>().sharedMaterial = gold;
+            Collider visualCollider = visual.GetComponent<Collider>();
+            if (visualCollider != null) Object.DestroyImmediate(visualCollider);
+            PickupItem pickup = pickupRoot.AddComponent<PickupItem>();
+            Assign(pickup, "progress", progress);
+            Assign(pickup, "ui", ui);
+            Assign(pickup, "game", game);
+            Assign(pickup, "kind", kind);
+            Assign(pickup, "value", value);
+            Assign(pickup, "visualRoot", visual);
         }
 
         private static void BuildDemoHazard(GameBootstrap game, Material stone)
@@ -361,6 +382,20 @@ namespace JungleEscape.EditorTools
             body.isKinematic = true;
             ObstacleHazard obstacle = hazard.AddComponent<ObstacleHazard>();
             Assign(obstacle, "game", game);
+            Assign(obstacle, "avoidedBy", HazardAvoidance.Slide);
+
+            GameObject jumpBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            jumpBlock.name = "Jump_Over_Stone_Block";
+            jumpBlock.transform.position = new Vector3(2f, 0.55f, 16.5f);
+            jumpBlock.transform.localScale = new Vector3(1.1f, 1.1f, 0.8f);
+            jumpBlock.GetComponent<Renderer>().sharedMaterial = stone;
+            BoxCollider jumpTrigger = jumpBlock.GetComponent<BoxCollider>();
+            jumpTrigger.isTrigger = true;
+            Rigidbody jumpBody = jumpBlock.AddComponent<Rigidbody>();
+            jumpBody.isKinematic = true;
+            ObstacleHazard jumpHazard = jumpBlock.AddComponent<ObstacleHazard>();
+            Assign(jumpHazard, "game", game);
+            Assign(jumpHazard, "avoidedBy", HazardAvoidance.Jump);
         }
 
         private static void BuildEnvironmentDressing(Material stone, Material moss)
@@ -562,6 +597,15 @@ namespace JungleEscape.EditorTools
             if (p == null) return;
             p.arraySize = values.Length;
             for (int i = 0; i < values.Length; i++) p.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void Assign(Object target, string property, HazardAvoidance value)
+        {
+            SerializedObject so = new SerializedObject(target);
+            SerializedProperty p = so.FindProperty(property);
+            if (p == null) return;
+            p.enumValueIndex = (int)value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
