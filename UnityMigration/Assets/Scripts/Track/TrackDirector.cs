@@ -7,7 +7,7 @@ namespace JungleEscape
     {
         [SerializeField] private Transform runner;
         [SerializeField] private GameObject straightSegmentPrefab;
-        [SerializeField, Min(5f)] private float segmentLength = 30f;
+        [SerializeField, Min(5f)] private float segmentLength = 18f;
         [SerializeField, Min(2)] private int segmentsAhead = 7;
         [SerializeField, Min(1)] private int keepBehind = 2;
 
