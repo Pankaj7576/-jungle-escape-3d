@@ -51,7 +51,7 @@ Without a valid UNITY_LICENSE secret, the workflow will fail before compilation.
 - GameBootstrap main-menu start, game-over, once-per-run gem revive and replay reset.
 - UIFlow uGUI controller for PLAY menu, HUD, revive overlay and game-over panel.
 - RunnerAnimationDriver Animator parameter bridge.
-- Blender straight/turn/gap environment blockout generator and character/guardian asset pipeline guide.
+- Blender straight/turn/gap environment generator; a procedural rigged guardian generator; automatic hero Animator setup from the imported black-suit FBX and CC0 animation pack.
 - Editor-generated greybox scene and repeatable Android build entry point.
 
 ## Not finished / not claimed
