@@ -25,7 +25,7 @@ namespace JungleEscape
 
         private void Update()
         {
-            if (animator == null || motor == null) return;
+            if (animator == null || motor == null || animator.runtimeAnimatorController == null) return;
             bool grounded = motor.IsGrounded;
             animator.SetFloat(MoveSpeed, motor.IsRunActive ? motor.ForwardSpeed : 0f, dampTime, Time.deltaTime);
             animator.SetBool(Grounded, grounded);
@@ -37,7 +37,7 @@ namespace JungleEscape
 
         public void PlayFall()
         {
-            if (animator == null) return;
+            if (animator == null || animator.runtimeAnimatorController == null) return;
             animator.SetBool(Dead, true);
             animator.SetTrigger(Fall);
         }
