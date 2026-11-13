@@ -56,6 +56,38 @@ namespace JungleEscape
             forward.Normalize();
         }
 
+        public void SamplePath(float normalizedDistance, out Vector3 center, out Vector3 forward)
+        {
+            center = entry != null ? entry.position : transform.position;
+            forward = Forward;
+            if (entry == null || exit == null) return;
+
+            float total = 0f;
+            for (int i = 0; i < PathCount - 1; i++)
+                total += Vector3.Distance(GetPathPoint(i), GetPathPoint(i + 1));
+            if (total < 0.001f) return;
+
+            float remaining = Mathf.Clamp01(normalizedDistance) * total;
+            for (int i = 0; i < PathCount - 1; i++)
+            {
+                Vector3 a = GetPathPoint(i);
+                Vector3 b = GetPathPoint(i + 1);
+                Vector3 delta = b - a;
+                float length = delta.magnitude;
+                if (length < 0.001f) continue;
+                if (remaining <= length || i == PathCount - 2)
+                {
+                    float t = Mathf.Clamp01(remaining / length);
+                    center = Vector3.Lerp(a, b, t);
+                    forward = delta / length;
+                    forward.y = 0f;
+                    if (forward.sqrMagnitude > 0.001f) forward.Normalize();
+                    return;
+                }
+                remaining -= length;
+            }
+        }
+
         public Vector3 GetLanePosition(Vector3 worldPosition, float laneOffset)
         {
             EvaluateFrame(worldPosition, out Vector3 center, out Vector3 forward);
