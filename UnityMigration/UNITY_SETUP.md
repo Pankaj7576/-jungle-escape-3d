@@ -10,7 +10,7 @@ The repository now contains a Unity 6 project skeleton and an Editor tool that c
 4. In GitHub Actions, check **Generate Blender Track Assets**; after a successful run, the FBX modules should appear in Assets/Environment/Generated. The same files can be generated locally with Blender/generate_track_modules.py.
 5. In Unity, choose **Tools > Jungle Escape > Generate Demo Scene**.
 6. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.
-6. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
+7. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
 
 The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, a greybox explorer and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. If Assets/Characters/Explorer_BlackSuit.fbx exists, it imports that model and builds a basic Animator Controller from the clips found in the FBX; otherwise it uses the primitive explorer placeholder. Later spawned straight/turn modules receive extra procedural coin rows and a slide-or-jump hazard; gap modules remain clear for the jump. It also creates a mobile URP asset. These are prototype visuals, not final art.
 
