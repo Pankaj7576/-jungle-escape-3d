@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace JungleEscape.EditorTools
 {
@@ -73,6 +74,9 @@ namespace JungleEscape.EditorTools
             SwipeInput input = manager.AddComponent<SwipeInput>();
             GameBootstrap game = manager.AddComponent<GameBootstrap>();
 
+            if (Object.FindObjectOfType<EventSystem>() == null)
+                new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+
             Canvas canvas = CreateCanvas();
             UIFlow ui = canvas.gameObject.AddComponent<UIFlow>();
             BuildUI(canvas.transform, ui, game, progress);
@@ -93,7 +97,6 @@ namespace JungleEscape.EditorTools
             Assign(motor, "forwardSpeed", 9.5f);
             Assign(motor, "jumpVelocity", 7.3f);
             Assign(motor, "gravity", -21f);
-            Assign(motor, "onFall", new UnityEngine.Events.UnityEvent());
 
             Assign(chase, "runner", runner.transform);
             Assign(chase, "desiredGap", 5.8f);
@@ -352,7 +355,7 @@ namespace JungleEscape.EditorTools
             hazard.transform.position = new Vector3(0f, 1.15f, 13f);
             hazard.transform.localScale = new Vector3(2.1f, 0.35f, 0.5f);
             hazard.GetComponent<Renderer>().sharedMaterial = stone;
-            BoxCollider trigger = hazard.AddComponent<BoxCollider>();
+            BoxCollider trigger = hazard.GetComponent<BoxCollider>();
             trigger.isTrigger = true;
             Rigidbody body = hazard.AddComponent<Rigidbody>();
             body.isKinematic = true;
