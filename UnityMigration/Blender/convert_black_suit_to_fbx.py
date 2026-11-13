@@ -31,13 +31,7 @@ if not armatures or not meshes:
         "The GLB did not import both a mesh and an armature. Inspect the model manually before exporting."
     )
 
-# Apply transforms to mesh objects only; preserve the armature hierarchy.
-for obj in meshes:
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    obj.select_set(False)
-
+# Keep the imported mesh/armature object transforms intact so skinning is not offset.
 bpy.ops.object.select_all(action="DESELECT")
 for obj in armatures + meshes:
     obj.select_set(True)
