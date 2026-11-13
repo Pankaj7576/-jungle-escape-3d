@@ -7,6 +7,7 @@ namespace JungleEscape
         [SerializeField] private RunnerMotor runner;
         [SerializeField] private GuardianChase guardian;
         [SerializeField] private RunnerCamera runnerCamera;
+        [SerializeField] private RunProgress runProgress;
 
         private bool gameOver;
 
@@ -54,6 +55,7 @@ namespace JungleEscape
                 runner.SetStumble(false);
             }
             guardian?.ResetChase();
+            runProgress?.ResetRun();
         }
     }
 }
