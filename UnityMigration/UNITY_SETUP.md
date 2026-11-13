@@ -11,7 +11,7 @@ The repository now contains a Unity 6 project skeleton and an Editor tool that c
 5. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.
 6. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
 
-The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, a greybox explorer and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. It also creates a mobile URP asset. These are prototype visuals, not final art.
+The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, a greybox explorer and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. Later spawned straight/turn modules receive extra procedural coin rows and a slide-or-jump hazard; gap modules remain clear for the jump. It also creates a mobile URP asset. These are prototype visuals, not final art.
 
 ## B. Track module authoring
 
