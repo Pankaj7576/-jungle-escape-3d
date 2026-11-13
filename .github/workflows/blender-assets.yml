@@ -29,8 +29,9 @@ jobs:
       - name: Install Blender
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
           blender --version
+          python3 -c "import numpy; print(\"System NumPy\", numpy.__version__)"
 
       - name: Patch Blender 5 FBX exporter compatibility issue
         run: |
@@ -49,7 +50,7 @@ jobs:
 
       - name: Generate modular bridge assets
         run: |
-          blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
+          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/generate_track_modules.py
           count=$(find UnityMigration/Assets/Environment/Generated -maxdepth 1 -name "*.fbx" | wc -l)
           echo "Generated $count FBX modules"
           test "$count" -eq 4
