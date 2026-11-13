@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace JungleEscape
 {
-    /// <summary>Trigger-based obstacle response. Place on the obstacle root.</summary>
     [RequireComponent(typeof(Collider))]
     public sealed class ObstacleHazard : MonoBehaviour
     {
@@ -12,21 +11,28 @@ namespace JungleEscape
         [SerializeField, Min(0.1f)] private float recoveryDelay = 0.9f;
 
         private bool triggered;
+        private Collider trigger;
+        private Coroutine recovery;
+
+        private void Awake() => trigger = GetComponent<Collider>();
+
+        private void OnEnable()
+        {
+            triggered = false;
+            if (trigger != null) trigger.enabled = true;
+        }
 
         private void Reset()
         {
-            Collider trigger = GetComponent<Collider>();
-            trigger.isTrigger = true;
+            GetComponent<Collider>().isTrigger = true;
         }
 
         private void OnTriggerEnter(Collider other)
         {
             if (triggered || other.GetComponentInParent<RunnerMotor>() == null) return;
             triggered = true;
-
-            Collider ownCollider = GetComponent<Collider>();
-            if (ownCollider != null) ownCollider.enabled = false;
-            if (game != null) StartCoroutine(ApplyHit());
+            if (trigger != null) trigger.enabled = false;
+            if (game != null) recovery = StartCoroutine(ApplyHit());
         }
 
         private IEnumerator ApplyHit()
@@ -34,6 +40,13 @@ namespace JungleEscape
             game.NotifyStumble(stumbleSeverity);
             yield return new WaitForSeconds(recoveryDelay);
             if (game != null) game.NotifyRecovered();
+            recovery = null;
+        }
+
+        private void OnDisable()
+        {
+            if (recovery != null) StopCoroutine(recovery);
+            recovery = null;
         }
     }
 }
