@@ -174,6 +174,7 @@ export class TrackSystem {
 
 export function makeWorldObstacle(scene, materials, pose, lane, kind) {
   const group = new THREE.Group();
+  group.userData.cameraBlocker = true;
   group.position.copy(pose.position);
   group.position.y = 0;
   group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), pose.tangent);
