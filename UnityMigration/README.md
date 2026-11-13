@@ -23,8 +23,8 @@ GitHub Actions alone is not a free Unity build machine: Unity licensing and edit
 5. Create a scene with a Plane/ground, a Runner GameObject with CharacterController, a Camera, a Guardian GameObject, and a TrackDirector.
 6. Assign the references in Inspector. Create a segment prefab with a BoxCollider/ground collider and optional visual mesh, then assign it to TrackDirector.
 7. Add SwipeInput to a scene object and assign RunnerMotor. Set Active Input Handling to Input Manager (Old) or Both.
-8. Run the Blender script in Blender 4.x to generate the first bridge module; export/import the resulting GLB and replace the placeholder segment visuals.
-9. Build and test on an Android device. Tune quality only after profiling on the target phone.
+9. Run the Blender script in Blender 4.x to generate the first bridge module; export/import the resulting GLB and replace the placeholder segment visuals.
+10. Build and test on an Android device. Tune quality only after profiling on the target phone.
 
 ## Phase 1 scope
 - Three-lane runner movement, jump, slide, touch swipes and keyboard test input
