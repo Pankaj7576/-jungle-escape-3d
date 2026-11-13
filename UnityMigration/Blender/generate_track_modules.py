@@ -25,10 +25,10 @@ print("Generating Jungle Escape modules with Blender", bpy.app.version_string)
 # Unity imports the FBX versions directly; GLB export remains a portable interchange copy when available.
 # The CI workflow patches the runner FBX exporter when Blender 5 omits its legacy space-transform property.
 # Track module outputs are imported as Unity prefabs by ProjectBootstrap.
+# The CI runner adds system NumPy to Blender's Python path for FBX export.
 
 # Enable the bundled interchange exporters when Blender ships them as add-ons.
-for addon_name in ("io_scene_gltf2", "io_scene_fbx",
-                   "bl_ext.blender_org.io_scene_gltf2", "bl_ext.blender_org.io_scene_fbx"):
+for addon_name in ("io_scene_gltf2", "io_scene_fbx"):
     try:
         bpy.ops.preferences.addon_enable(module=addon_name)
     except Exception:
