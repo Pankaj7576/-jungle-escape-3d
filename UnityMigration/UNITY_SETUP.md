@@ -1,99 +1,84 @@
 # Unity Scene & Prefab Setup
 
-This guide turns the source scripts in this folder into a playable vertical slice. The repository contains scripts and Blender generators, not a ready-made Unity project or finished art assets.
+The repository now contains a Unity 6 project skeleton and an Editor tool that creates a playable greybox scene automatically. The scene uses placeholder geometry so mechanics can be tested before professional art is imported.
 
-## A. Create the Unity project
+## A. Open and generate the project
 
-1. Install Unity Hub on a Windows/Linux desktop or a legitimate cloud workstation. Install a Unity 6 LTS editor with Android Build Support (SDK, NDK and OpenJDK).
-2. Create a 3D URP project. Install/enable Unity UI (uGUI) if it is not included in the template.
-3. Copy UnityMigration/Assets/Scripts into the project's Assets/Scripts folder.
-4. Set Package Name to com.jungleescape.losttemple, orientation Portrait, scripting backend IL2CPP for release, and ARM64 architecture.
-5. Set Active Input Handling to Input Manager (Old) or Both. The swipe script uses the legacy Input API.
-6. Create a scene and save it as Assets/Scenes/Run.unity.
+1. Install Unity Hub and a Unity 6 LTS editor with Android Build Support (SDK, NDK and OpenJDK) on a Windows/Linux desktop or legitimate cloud workstation.
+2. Open the UnityMigration folder itself as the Unity project. Let Package Manager install URP and uGUI.
+3. Ensure Active Input Handling is **Input Manager (Old)** or **Both**; the current swipe script uses the legacy Input API.
+4. In Unity, choose **Tools > Jungle Escape > Generate Demo Scene**.
+5. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.
+6. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
 
-## B. Build the track prefabs
+The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, a greybox explorer and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. It also creates a mobile URP asset. These are prototype visuals, not final art.
 
-Every module root needs TrackSegment. Make these child transforms:
-- Entry: exact beginning connection point; its local +Z points into the module.
-- Exit: exact end connection point; its local +Z points out in the next travel direction.
-- Path Nodes: optional ordered centerline transforms between Entry and Exit. Essential for curved 90-degree turns; order them from Entry to Exit.
+## B. Track module authoring
 
-Create at least:
-- Start segment (straight, safe).
-- One or more straight modules.
-- Left and right quarter-turn modules. Exit heading must be rotated exactly 90 degrees relative to Entry.
-- Broken-gap module. Remove the floor mesh AND floor collider across the gap; retain colliders on take-off and landing decks.
+Every module root needs TrackSegment and these child transforms:
+- Entry: exact beginning connection point; local +Z points into the module.
+- Exit: exact end connection point; local +Z points out in the next travel direction.
+- Path Nodes: ordered centerline transforms between Entry and Exit. Required for smooth 90-degree turns.
 
-Set the module root pivot consistently. Use the Blender generator as a blockout source, then import and orient each prefab so Unity local +Z is forward and +Y is up. Assign Entry, Exit and Path Nodes in the TrackSegment Inspector.
+Module types:
+- Straight: 18 m long, 5.4 m overall width.
+- Left/right turns: quarter-circle centerline, exact 90-degree Exit orientation.
+- Broken gap: safe take-off and landing decks with a 5 m collider-free gap. Tune jump physics against actual device frame rate and speed.
 
-## C. Scene objects and references
+Keep a separate low-poly deck collider from decorative stone art. Railings must stay outside the three-lane collision envelope. Align all prefabs to the same scale and local axes.
+
+## C. Runner, guardian and camera
 
 ### Runner
-- Create Runner GameObject at the center lane on the start module.
-- Add CharacterController (height about 1.8, radius 0.35, center Y about 0.9).
-- Add RunnerMotor and RunnerAnimationDriver.
-- Assign TrackDirector to RunnerMotor after creating the director.
-- Add a rigged explorer mesh with Animator as a child. Disable Apply Root Motion.
-- Assign Animator and RunnerMotor to RunnerAnimationDriver.
-
-### Track
-- Add an empty TrackDirector object at the first module's Entry pose.
-- Add TrackDirector component; assign Runner, Start Segment Prefab, Straight Prefabs, Left Turn Prefabs, Right Turn Prefabs and Gap Prefabs.
-- Start with 8 segments ahead, 2 kept behind, 0.10–0.12 turn chance and 0.08–0.10 gap chance. Lower these until the modules are validated.
-- Add the TrackDirector reference to RunnerMotor.
+- CharacterController: height about 1.8 m, radius about 0.34 m, center Y about 0.9 m.
+- RunnerMotor handles movement and track-relative lane offsets.
+- Keep character animation in-place; disable Animator Apply Root Motion.
+- Connect RunnerMotor fall handler to GameBootstrap.OnRunnerCaught (the generated demo scene does this automatically).
 
 ### Guardian
-- Add Guardian GameObject behind the start runner, with a simplified capsule collider and the guardian mesh as a child.
-- Add GuardianChase, assign Runner Transform.
-- In GuardianChase On Caught UnityEvent, add GameBootstrap.OnRunnerCaught.
-- Use a Generic Animator for a non-human guardian rig. Keep its run clip in-place.
+- GuardianChase follows behind the runner, closes the gap after stumbles and falls back after boosts/clean movement.
+- Keep the gameplay collider simple (capsule); the visual guardian can use a Generic rig.
+- Connect its caught event to GameBootstrap.OnRunnerCaught (the generated demo scene does this automatically).
 
 ### Camera
-- Add RunnerCamera to the Main Camera and assign Runner target (GameBootstrap can also assign it at runtime).
-- Set Obstruction Mask to environment-only layers; exclude Runner and Guardian layers to prevent the camera sphere cast from hitting the characters.
-- Tune offset around (0, 4.2, -7.5), collision radius around 0.22 and look height around 1.25.
+- RunnerCamera uses a smoothed follow arm and SphereCast obstruction checks.
+- Exclude Runner and Guardian layers from the obstruction mask; use environment-only collision layers in production.
+- Tune around offset (0, 4.2, -7.5), collision radius 0.22 and look height 1.25.
 
-### Game state and UI
-- Add GameBootstrap to a GameManager object. Assign Runner, Guardian, RunnerCamera, RunProgress, TrackDirector and UIFlow.
-- Add RunProgress to GameManager and assign Runner Transform.
-- Create Canvas (Screen Space - Overlay) with MainMenu, HUD, ReviveModal and GameOver panels.
-- Add Text fields for score, distance, coins, gems and revive message; add PLAY, REVIVE, GIVE UP and RESTART buttons.
-- Add UIFlow to Canvas. Assign panels, text fields, buttons, GameBootstrap and RunProgress.
-- Add SwipeInput to GameManager and assign RunnerMotor.
-- Wire RunnerMotor On Fall UnityEvent to GameBootstrap.OnRunnerCaught.
-- On GameBootstrap start, main menu appears and runner is paused. PLAY starts a fresh run. The revive modal spends one locally stored gem; one revive is allowed per run. GIVE UP ends the run. Gems are local PlayerPrefs prototype currency, not purchases or a secure online wallet.
+## D. UI, revive, obstacles and pickups
 
-## D. Obstacles and pickups
+- Main menu: PLAY starts a fresh run.
+- HUD: score, distance, coins and local prototype gems.
+- Revive: one gem can be spent once per run. If no gem is available, the revive button is disabled.
+- Game over: Give Up or Run Again.
+- Slide hazard: configure HazardAvoidance.Slide.
+- Jump hazard: configure HazardAvoidance.Jump.
+- PickupItem kinds: Coin, Gem and Boost. Assign RunProgress, UIFlow and GameBootstrap references as applicable.
 
-- Obstacle prefab: add trigger collider and ObstacleHazard; assign GameBootstrap. The trigger closes the guardian gap and then recovers.
-- Coin prefab: add trigger collider and PickupItem; set Kind = Coin and assign RunProgress.
-- Gem prefab: set Kind = Gem and assign UIFlow.
-- Boost prefab: set Kind = Boost and assign GameBootstrap.
-- Keep trigger volumes narrow enough to avoid collecting adjacent lanes.
+The gem count is local PlayerPrefs prototype currency. It is not an online wallet, secure economy or payment integration.
 
-## E. Animator Controller
+## E. Blender character and guardian pipeline
 
-Hero Animator parameters (exact case):
-- MoveSpeed (float)
-- Grounded (bool)
-- Sliding (bool)
-- Stumbling (bool)
-- Dead (bool)
-- Jump (trigger)
-- Fall (trigger)
+See Blender/ASSET_PIPELINE.md for skeletons, clip naming, export settings, mobile budgets and modular bridge modelling. Required hero clips: Idle, Run, Jump, Slide, Fall/Death and optional Stumble. Guardian clips: Idle, Run, Roar, Catch and Fall. Keep movement clips in-place and let Unity drive locomotion.
 
-Use Idle/Run blend, Jump state, Slide state, Stumble overlay and Fall/Death state. The RunnerAnimationDriver updates the parameters; connect its PlayFall method to the RunnerMotor On Fall event if you want a dedicated fall clip before the revive modal.
+## F. Android APK build
 
-Guardian: use a separate Generic Animator controller with Idle, Run, Roar, Catch and Fall clips. Drive locomotion from the chase movement; add a small driver or animation events for Roar/Catch.
+The repository includes .github/workflows/unity-android.yml. It runs only when manually started and needs a valid Unity license file in repository Actions secret UNITY_LICENSE:
+1. Activate Unity Personal in Unity Hub on a desktop/cloud workstation.
+2. Add the activated .ulf file contents as repository secret UNITY_LICENSE.
+3. GitHub → Actions → Unity Android APK (Unity Migration) → Run workflow on unity-migration/phase-1.
+4. Download the Jungle-Escape-Unity-Android-APK artifact only after the run reports success.
 
-## F. Validation order
+The build script targets portrait ARM64 IL2CPP. If Unity licensing is not configured, the remote build cannot start successfully. Do not share passwords or commit license files.
+
+## G. Validation order
 
 1. Straight-only run, three lanes, jump and slide.
 2. Coin/gem/boost triggers and score updates.
-3. Obstacle stumble and guardian catch distance.
-4. One left turn, then one right turn; verify every Path Node and Exit orientation.
-5. One short gap; tune jump speed, gravity and gap length.
+3. Slide/jump hazard avoidance and guardian catch distance.
+4. Left and right turns; inspect camera pan, lane offsets and railing clearance.
+5. Broken gap; tune take-off timing, jump velocity and landing deck.
 6. Camera collision around inner/outer turn walls.
 7. Repeated 5–10 minute runs; inspect GC allocations, draw calls, memory, heat and frame pacing on the target phone.
 
-Do not raise segment variety or visual quality until the previous step is stable. A real AAA-quality result requires professional modelling, animation, lighting, sound, level design, device profiling and repeated playtesting; scripts alone cannot supply that polish.
+A genuine AAA-quality result requires realistic production models, skeletal animation, detailed materials, lighting, sound, level design, device profiling and extensive playtesting. Scripts and greybox primitives cannot supply that polish by themselves.
