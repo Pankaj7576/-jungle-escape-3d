@@ -1,4 +1,4 @@
-name: Prepare CC0 Gorilla Model
+name: Generate Rigged Temple Guardian
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  prepare:
+  generate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -25,7 +25,7 @@ jobs:
       - name: Install Blender and NumPy
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender python3-numpy curl
+          sudo apt-get install -y blender python3-numpy
           blender --version
           python3 -c "import numpy; print(numpy.__version__)"
 
@@ -43,27 +43,23 @@ jobs:
           print("Patched", path)
           PY
 
-      - name: Download CC0 light gorilla source
+      - name: Generate rigged guardian model and animations
         run: |
-          curl -L --fail --retry 3 https://grab3d.com/dl/gorilla/gorilla-light.fbx -o /tmp/gorilla-light.fbx
-          test -s /tmp/gorilla-light.fbx
-
-      - name: Decimate and export Unity FBX
-        run: |
-          GORILLA_SOURCE=/tmp/gorilla-light.fbx PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/prepare_gorilla.py
+          PYTHONPATH=/usr/lib/python3/dist-packages blender --background --factory-startup --python UnityMigration/Blender/prepare_gorilla.py
           test -s UnityMigration/Assets/Characters/Guardian_Ape.fbx
+          test -s UnityMigration/Assets/Characters/Guardian_Ape_SOURCE.txt
 
-      - name: Upload optimized guardian
+      - name: Upload rigged guardian
         uses: actions/upload-artifact@v4
         with:
-          name: Jungle-Escape-CC0-Guardian
+          name: Jungle-Escape-Rigged-Guardian
           path: |
             UnityMigration/Assets/Characters/Guardian_Ape.fbx
             UnityMigration/Assets/Characters/Guardian_Ape_SOURCE.txt
           if-no-files-found: error
           retention-days: 14
 
-      - name: Commit optimized guardian to this branch
+      - name: Commit guardian model to this branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -73,5 +69,5 @@ jobs:
             echo "Guardian asset is already up to date."
             exit 0
           fi
-          git commit -m "Import optimized CC0 gorilla guardian"
+          git commit -m "Generate original rigged temple guardian"
           git push origin "HEAD:${GITHUB_REF_NAME}"
