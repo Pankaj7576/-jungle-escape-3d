@@ -176,6 +176,17 @@ namespace JungleEscape.EditorTools
                     "TrackDirector turn prefab pools are incomplete.");
                 Require(so.FindProperty("gapPrefabs").arraySize > 0,
                     "TrackDirector gap prefab pool is empty.");
+                TrackSegment leftTurn = so.FindProperty("leftTurnPrefabs").GetArrayElementAtIndex(0).objectReferenceValue as TrackSegment;
+                TrackSegment rightTurn = so.FindProperty("rightTurnPrefabs").GetArrayElementAtIndex(0).objectReferenceValue as TrackSegment;
+                TrackSegment gapModule = so.FindProperty("gapPrefabs").GetArrayElementAtIndex(0).objectReferenceValue as TrackSegment;
+                Require(leftTurn != null && Mathf.Abs(Mathf.Abs(Vector3.SignedAngle(
+                    leftTurn.Entry.forward, leftTurn.Exit.forward, Vector3.up)) - 90f) < 1f,
+                    "Left turn prefab must rotate exactly 90 degrees.");
+                Require(rightTurn != null && Mathf.Abs(Mathf.Abs(Vector3.SignedAngle(
+                    rightTurn.Entry.forward, rightTurn.Exit.forward, Vector3.up)) - 90f) < 1f,
+                    "Right turn prefab must rotate exactly 90 degrees.");
+                Require(gapModule != null && gapModule.IsGapSegment,
+                    "Gap prefab must be marked as a gap segment.");
             }
 
             Require(game != null && runner != null, "Game wiring is incomplete.");
