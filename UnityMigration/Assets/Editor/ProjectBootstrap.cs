@@ -242,7 +242,20 @@ namespace JungleEscape.EditorTools
                 throw new System.InvalidOperationException(
                     "Demo scene generation failed: prefab '" + name +
                     "' did not produce a TrackSegment. Check its FBX source or generated prefab.");
-            return prefab;
+
+            // Always use the persisted prefab asset, never a transient scene instance.
+            string assetPath = AssetDatabase.GetAssetPath(prefab);
+            if (string.IsNullOrEmpty(assetPath))
+                throw new System.InvalidOperationException(
+                    "Demo scene generation failed: prefab '" + name + "' is not a saved asset.");
+
+            GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            TrackSegment saved = asset != null ? asset.GetComponent<TrackSegment>() : null;
+            if (saved == null || saved.Entry == null || saved.Exit == null)
+                throw new System.InvalidOperationException(
+                    "Demo scene generation failed: saved prefab '" + name +
+                    "' is missing TrackSegment, Entry, or Exit. Asset: " + assetPath);
+            return saved;
         }
 
         private static void Require(bool condition, string message)
@@ -376,13 +389,8 @@ namespace JungleEscape.EditorTools
             Assign(segment, "isGapSegment", kind == ModuleKind.Gap);
 
             string pathName = Prefabs + "/" + name + ".prefab";
-            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, pathName);
+            TrackSegment savedSegment = SaveTrackPrefabAsset(root, pathName);
             UnityEngine.Object.DestroyImmediate(root);
-            if (prefab == null)
-                throw new System.InvalidOperationException("Unity failed to save generated track prefab: " + pathName);
-            TrackSegment savedSegment = prefab.GetComponent<TrackSegment>();
-            if (savedSegment == null)
-                throw new System.InvalidOperationException("Saved track prefab has no TrackSegment component: " + pathName);
             return savedSegment;
         }
 
@@ -440,9 +448,43 @@ namespace JungleEscape.EditorTools
             Assign(segment, "isGapSegment", isGap);
 
             string prefabPath = Prefabs + "/" + prefabName + ".prefab";
-            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            TrackSegment savedSegment = SaveTrackPrefabAsset(root, prefabPath);
             UnityEngine.Object.DestroyImmediate(root);
-            return prefab != null ? prefab.GetComponent<TrackSegment>() : null;
+            return savedSegment;
+        }
+
+        private static TrackSegment SaveTrackPrefabAsset(GameObject root, string prefabPath)
+        {
+            if (root == null)
+                throw new System.InvalidOperationException(
+                    "Cannot save track prefab because its source GameObject is null: " + prefabPath);
+
+            // Remove an interrupted/old generated prefab before recreating it. This avoids
+            // returning a stale or partially imported prefab asset from an earlier Cloud Build.
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) != null)
+            {
+                if (!AssetDatabase.DeleteAsset(prefabPath))
+                    throw new System.InvalidOperationException(
+                        "Could not replace existing generated track prefab: " + prefabPath);
+            }
+
+            GameObject savedAsset = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            if (savedAsset == null)
+                throw new System.InvalidOperationException(
+                    "Unity failed to save generated track prefab: " + prefabPath);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.ImportAsset(prefabPath, ImportAssetOptions.ForceSynchronousImport);
+            GameObject reloadedAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            TrackSegment segment = reloadedAsset != null
+                ? reloadedAsset.GetComponent<TrackSegment>()
+                : null;
+
+            if (segment == null || segment.Entry == null || segment.Exit == null)
+                throw new System.InvalidOperationException(
+                    "Saved track prefab failed validation (TrackSegment/Entry/Exit missing): " + prefabPath);
+
+            return segment;
         }
 
         private static Transform FindChildRecursive(Transform parent, string childName)
