@@ -2,12 +2,7 @@ using UnityEngine;
 
 namespace JungleEscape
 {
-    public enum PickupKind
-    {
-        Coin,
-        Gem,
-        Boost
-    }
+    public enum PickupKind { Coin, Gem, Boost }
 
     [RequireComponent(typeof(Collider))]
     public sealed class PickupItem : MonoBehaviour
@@ -21,11 +16,20 @@ namespace JungleEscape
         [SerializeField] private GameObject visualRoot;
 
         private bool collected;
+        private Collider trigger;
+
+        private void Awake() => trigger = GetComponent<Collider>();
+
+        private void OnEnable()
+        {
+            collected = false;
+            if (trigger != null) trigger.enabled = true;
+            if (visualRoot != null) visualRoot.SetActive(true);
+        }
 
         private void Reset()
         {
-            Collider trigger = GetComponent<Collider>();
-            trigger.isTrigger = true;
+            GetComponent<Collider>().isTrigger = true;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -35,21 +39,15 @@ namespace JungleEscape
 
             switch (kind)
             {
-                case PickupKind.Coin:
-                    progress?.AddCoin(value);
-                    break;
-                case PickupKind.Gem:
-                    ui?.AddGems(value);
-                    break;
-                case PickupKind.Boost:
-                    game?.NotifyBoost(boostSeconds);
-                    break;
+                case PickupKind.Coin: progress?.AddCoin(value); break;
+                case PickupKind.Gem: ui?.AddGems(value); break;
+                case PickupKind.Boost: game?.NotifyBoost(boostSeconds); break;
             }
 
             if (visualRoot != null) visualRoot.SetActive(false);
-            Collider ownCollider = GetComponent<Collider>();
-            if (ownCollider != null) ownCollider.enabled = false;
-            Destroy(gameObject, 0.1f);
+            if (trigger != null) trigger.enabled = false;
+            // Disable rather than Destroy: segment pooling can reactivate this pickup.
+            gameObject.SetActive(false);
         }
     }
 }
