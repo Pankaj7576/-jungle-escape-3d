@@ -10,7 +10,7 @@ from mathutils import Vector
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
-OUT_DIR = os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Environment", "Generated")
+OUT_DIR = os.environ.get("TRACK_OUTPUT_DIR", os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Environment", "Generated"))
 os.makedirs(OUT_DIR, exist_ok=True)
 OUT = OUT_DIR + os.sep
 WIDTH = 5.4
