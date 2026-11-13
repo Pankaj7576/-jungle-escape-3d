@@ -49,7 +49,9 @@ namespace JungleEscape
                 CreatePickup(segment.transform, boostPosition, PickupKind.Boost, 1);
             }
 
-            if (Random.value <= hazardChance)
+            float difficulty = progress != null ? Mathf.Clamp01(progress.DistanceMeters / 1200f) : 0f;
+            float activeHazardChance = Mathf.Min(0.9f, hazardChance + difficulty * 0.16f);
+            if (Random.value <= activeHazardChance)
             {
                 float t = Random.Range(0.62f, 0.84f);
                 int lane = Random.Range(0, 3) - 1;
@@ -57,6 +59,18 @@ namespace JungleEscape
                 bool slide = Random.value < 0.5f;
                 CreateHazard(segment.transform, position, slide ? HazardAvoidance.Slide : HazardAvoidance.Jump);
             }
+        }
+
+        public void ClearSegment(TrackSegment segment)
+        {
+            if (segment == null) return;
+            generated.Remove(segment);
+            PickupItem[] pickups = segment.GetComponentsInChildren<PickupItem>(true);
+            foreach (PickupItem pickup in pickups)
+                if (pickup != null) Destroy(pickup.gameObject);
+            ObstacleHazard[] hazards = segment.GetComponentsInChildren<ObstacleHazard>(true);
+            foreach (ObstacleHazard hazard in hazards)
+                if (hazard != null) Destroy(hazard.gameObject);
         }
 
         private Vector3 SampleLane(TrackSegment segment, float t, int lane)
