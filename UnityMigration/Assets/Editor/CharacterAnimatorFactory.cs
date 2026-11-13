@@ -63,12 +63,12 @@ namespace JungleEscape.EditorTools
             controller.AddParameter("Fall", AnimatorControllerParameterType.Trigger);
 
             AnimatorStateMachine machine = controller.layers[0].stateMachine;
-            AnimationClip idleClip = FindClip(clips, "idle", "stand");
-            AnimationClip runClip = FindClip(clips, "run", "sprint", "jog", "walk");
-            AnimationClip jumpClip = FindClip(clips, "jump", "leap");
+            AnimationClip idleClip = FindClip(clips, "idle_relaxed", "idle_standing", "idle", "stand");
+            AnimationClip runClip = FindClip(clips, "run_jog", "run_sprint", "run", "sprint", "jog", "walk");
+            AnimationClip jumpClip = FindClip(clips, "jump_in_the_air", "jump", "leap");
             AnimationClip slideClip = FindClip(clips, "slide", "roll", "crouch");
-            AnimationClip stumbleClip = FindClip(clips, "stumble", "hit", "fall");
-            AnimationClip fallClip = FindClip(clips, "death", "fall", "die");
+            AnimationClip stumbleClip = FindClip(clips, "hit_knockback", "stumble", "hit", "fall");
+            AnimationClip fallClip = FindClip(clips, "death_fall", "death", "fall", "die");
             if (idleClip == null && runClip == null) runClip = clips[0];
 
             AnimatorState idle = AddState(machine, "Idle", idleClip);
