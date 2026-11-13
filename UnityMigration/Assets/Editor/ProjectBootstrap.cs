@@ -83,6 +83,7 @@ namespace JungleEscape.EditorTools
 
             GameObject manager = new GameObject("GameManager");
             RunProgress progress = manager.AddComponent<RunProgress>();
+            Assign(director, "progress", progress);
             SwipeInput input = manager.AddComponent<SwipeInput>();
             GameBootstrap game = manager.AddComponent<GameBootstrap>();
 
