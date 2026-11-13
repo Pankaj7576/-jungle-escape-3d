@@ -7,10 +7,12 @@ namespace JungleEscape
         [SerializeField] private RunnerMotor runner;
         [SerializeField] private GuardianChase guardian;
         [SerializeField] private RunnerCamera runnerCamera;
-        [SerializeField] private RunProgress runProgress;\n        [SerializeField] private TrackDirector track;
+        [SerializeField] private RunProgress runProgress;
+        [SerializeField] private TrackDirector track;
         [SerializeField] private UIFlow ui;
 
-        private bool gameOver;\n        private bool reviveUsed;
+        private bool gameOver;
+        private bool reviveUsed;
 
         private void Awake()
         {
@@ -18,7 +20,8 @@ namespace JungleEscape
             QualitySettings.vSyncCount = 0;
             Screen.orientation = ScreenOrientation.Portrait;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            if (runnerCamera != null && runner != null) runnerCamera.SetTarget(runner.transform);
+            if (runnerCamera != null && runner != null)
+                runnerCamera.SetTarget(runner.transform);
         }
 
         private void Start()
@@ -31,9 +34,9 @@ namespace JungleEscape
         public void StartRun()
         {
             gameOver = false;
+            reviveUsed = false;
             runner?.ResetMotor();
-            runner?.SetRunActive(true);
-            runner?.SetInputEnabled(true);
+            track?.ResetTrack();
             guardian?.ResetChase();
             runProgress?.ResetRun();
             ui?.ShowHUD();
@@ -63,12 +66,15 @@ namespace JungleEscape
             gameOver = true;
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
-            if (reviveUsed) ui?.ShowGameOver();\n            else ui?.ShowRevive();
+            if (reviveUsed) ui?.ShowGameOver();
+            else ui?.ShowRevive();
         }
 
         public bool TryRevive()
         {
-            if (!gameOver || reviveUsed || ui == null || !ui.TrySpendReviveGem()) return false;\n            reviveUsed = true;
+            if (!gameOver || reviveUsed || ui == null || !ui.TrySpendReviveGem())
+                return false;
+            reviveUsed = true;
             gameOver = false;
             runner?.ReviveAtLastSafePosition();
             guardian?.ResetChase();
