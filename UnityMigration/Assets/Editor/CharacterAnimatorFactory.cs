@@ -66,10 +66,14 @@ namespace JungleEscape.EditorTools
             AnimationClip idleClip = FindClip(clips, "idle_relaxed", "idle_standing", "idle", "stand");
             AnimationClip runClip = FindClip(clips, "run_jog", "run_sprint", "run", "sprint", "jog", "walk");
             AnimationClip jumpClip = FindClip(clips, "jump_in_the_air", "jump", "leap");
-            AnimationClip slideClip = FindClip(clips, "slide", "roll", "crouch");
+            AnimationClip slideClip = FindClip(clips, "walk_crouched", "slide", "roll", "crouch");
             AnimationClip stumbleClip = FindClip(clips, "hit_knockback", "stumble", "hit", "fall");
             AnimationClip fallClip = FindClip(clips, "death_fall", "death", "fall", "die");
             if (idleClip == null && runClip == null) runClip = clips[0];
+            SetLoop(idleClip, true);
+            SetLoop(runClip, true);
+            if (slideClip != null && slideClip.name.IndexOf("walk_crouched", StringComparison.OrdinalIgnoreCase) >= 0)
+                SetLoop(slideClip, true);
 
             AnimatorState idle = AddState(machine, "Idle", idleClip);
             AnimatorState run = AddState(machine, "Run", runClip);
@@ -141,6 +145,14 @@ namespace JungleEscape.EditorTools
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
             return controller;
+        }
+
+        private static void SetLoop(AnimationClip clip, bool loop)
+        {
+            if (clip == null) return;
+            AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(clip);
+            settings.loopTime = loop;
+            AnimationUtility.SetAnimationClipSettings(clip, settings);
         }
 
         private static AnimationClip[] LoadCharacterClips()
