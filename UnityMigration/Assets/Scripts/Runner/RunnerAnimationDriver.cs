@@ -44,7 +44,7 @@ namespace JungleEscape
 
         public void ResetAnimation()
         {
-            if (animator == null) return;
+            if (animator == null || animator.runtimeAnimatorController == null) return;
             animator.SetBool(Dead, false);
             animator.ResetTrigger(Fall);
             animator.ResetTrigger(Jump);
