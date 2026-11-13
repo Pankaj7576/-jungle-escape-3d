@@ -27,7 +27,7 @@ namespace JungleEscape
         {
             if (animator == null || motor == null) return;
             bool grounded = motor.IsGrounded;
-            animator.SetFloat(MoveSpeed, motor.ForwardSpeed, dampTime, Time.deltaTime);
+            animator.SetFloat(MoveSpeed, motor.IsRunActive ? motor.ForwardSpeed : 0f, dampTime, Time.deltaTime);
             animator.SetBool(Grounded, grounded);
             animator.SetBool(Sliding, motor.IsSliding);
             animator.SetBool(Stumbling, motor.IsStumbling);
