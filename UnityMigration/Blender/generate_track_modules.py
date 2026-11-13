@@ -174,7 +174,7 @@ def add_anchors(points, name):
     bpy.context.collection.objects.link(exit_obj)
     exit_obj.location = end
     exit_obj.rotation_euler[2] = math.atan2(-end_tangent.x, end_tangent.y)
-    for i in range(1, len(points) - 1, max(1, len(points) // 6)):
+    for i in range(1, len(points) - 1, max(1, len(points) // 12)):
         guide = bpy.data.objects.new("PathNode_%02d" % i, None)
         bpy.context.collection.objects.link(guide)
         guide.location = points[i][0]
