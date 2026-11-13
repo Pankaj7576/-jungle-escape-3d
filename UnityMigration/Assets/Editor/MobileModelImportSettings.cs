@@ -27,6 +27,7 @@ namespace JungleEscape.EditorTools
             else if (path.Contains("/Characters/Animations/KinemIQ/"))
             {
                 importer.importAnimation = true;
+                importer.importMesh = false;
                 importer.importCameras = false;
                 importer.importLights = false;
                 importer.meshCompression = ModelImporterMeshCompression.Medium;
