@@ -45,7 +45,11 @@ namespace JungleEscape
 
         private void OnDisable()
         {
-            if (recovery != null) StopCoroutine(recovery);
+            if (recovery != null)
+            {
+                StopCoroutine(recovery);
+                game?.NotifyRecovered();
+            }
             recovery = null;
         }
     }
