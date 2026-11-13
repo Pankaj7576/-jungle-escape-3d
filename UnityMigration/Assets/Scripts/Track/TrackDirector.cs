@@ -26,7 +26,7 @@ namespace JungleEscape
         [SerializeField, Min(0)] private int straightSegmentsBetweenTurns = 2;
         [SerializeField] private int randomSeed;
 
-        private readonly List<TrackSegment> active = new List<TrackSegment>();
+        private readonly List<TrackSegment> active = new List<TrackSegment>();\n        private readonly Dictionary<TrackSegment, Stack<TrackSegment>> pools =\n            new Dictionary<TrackSegment, Stack<TrackSegment>>();\n        private readonly Dictionary<TrackSegment, TrackSegment> prefabOf =\n            new Dictionary<TrackSegment, TrackSegment>();
         private Transform nextEntry;
         private int turnCooldown;
         private System.Random random;
@@ -43,7 +43,7 @@ namespace JungleEscape
             }
 
             random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
-            TrackSegment first = CreateAligned(startSegmentPrefab, transform);
+            TrackSegment first = GetSegment(startSegmentPrefab, transform);
             if (!Validate(first)) { enabled = false; return; }
             active.Add(first);
             nextEntry = first.Exit;
@@ -76,7 +76,7 @@ namespace JungleEscape
                 TrackSegment old = active[0];
                 active.RemoveAt(0);
                 if (old == CurrentSegment) CurrentSegment = null;
-                Destroy(old.gameObject);
+                ReturnSegment(old);
             }
 
             while (enabled && active.Count < segmentsAhead) SpawnNext();
@@ -108,17 +108,47 @@ namespace JungleEscape
                 return;
             }
 
-            TrackSegment instance = CreateAligned(prefab, nextEntry);
+            TrackSegment instance = GetSegment(prefab, nextEntry);
             if (!Validate(instance)) { Destroy(instance.gameObject); enabled = false; return; }
             active.Add(instance);
             nextEntry = instance.Exit;
         }
 
-        private TrackSegment CreateAligned(TrackSegment prefab, Transform targetEntry)
+        private TrackSegment GetSegment(TrackSegment prefab, Transform targetEntry)
         {
+            TrackSegment instance = null;
+            if (pools.TryGetValue(prefab, out Stack<TrackSegment> stack))
+            {
+                while (stack.Count > 0 && instance == null) instance = stack.Pop();
+            }
+
             Quaternion rotation = targetEntry.rotation * Quaternion.Inverse(prefab.Entry.localRotation);
             Vector3 position = targetEntry.position - rotation * prefab.Entry.localPosition;
-            return Instantiate(prefab, position, rotation, transform);
+            if (instance == null)
+                instance = Instantiate(prefab, position, rotation, transform);
+            else
+            {
+                instance.transform.SetParent(transform);
+                instance.transform.SetPositionAndRotation(position, rotation);
+                instance.gameObject.SetActive(true);
+            }
+
+            prefabOf[instance] = prefab;
+            return instance;
+        }
+
+        private void ReturnSegment(TrackSegment instance)
+        {
+            if (instance == null) return;
+            if (!prefabOf.TryGetValue(instance, out TrackSegment prefab)) prefab = startSegmentPrefab;
+            if (!pools.TryGetValue(prefab, out Stack<TrackSegment> stack))
+            {
+                stack = new Stack<TrackSegment>();
+                pools.Add(prefab, stack);
+            }
+            instance.gameObject.SetActive(false);
+            instance.transform.SetParent(transform);
+            stack.Push(instance);
         }
 
         private TrackSegment ChoosePrefab()
