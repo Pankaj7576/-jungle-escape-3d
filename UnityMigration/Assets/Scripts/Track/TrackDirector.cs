@@ -43,8 +43,7 @@ namespace JungleEscape
             }
 
             random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
-            TrackSegment first = Instantiate(startSegmentPrefab, transform.position,
-                transform.rotation, transform);
+            TrackSegment first = CreateAligned(startSegmentPrefab, transform);
             if (!Validate(first)) { enabled = false; return; }
             active.Add(first);
             nextEntry = first.Exit;
@@ -110,12 +109,17 @@ namespace JungleEscape
                 return;
             }
 
-            Quaternion rotation = nextEntry.rotation * Quaternion.Inverse(prefab.Entry.localRotation);
-            Vector3 position = nextEntry.position - rotation * prefab.Entry.localPosition;
-            TrackSegment instance = Instantiate(prefab, position, rotation, transform);
+            TrackSegment instance = CreateAligned(prefab, nextEntry);
             if (!Validate(instance)) { Destroy(instance.gameObject); enabled = false; return; }
             active.Add(instance);
             nextEntry = instance.Exit;
+        }
+
+        private TrackSegment CreateAligned(TrackSegment prefab, Transform targetEntry)
+        {
+            Quaternion rotation = targetEntry.rotation * Quaternion.Inverse(prefab.Entry.localRotation);
+            Vector3 position = targetEntry.position - rotation * prefab.Entry.localPosition;
+            return Instantiate(prefab, position, rotation, transform);
         }
 
         private TrackSegment ChoosePrefab()
