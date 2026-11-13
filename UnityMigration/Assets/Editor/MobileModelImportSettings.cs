@@ -24,6 +24,15 @@ namespace JungleEscape.EditorTools
                 importer.importNormals = ModelImporterNormals.Import;
                 importer.importTangents = ModelImporterTangents.CalculateMikk;
             }
+            else if (path.Contains("/Characters/Animations/KinemIQ/"))
+            {
+                importer.importAnimation = true;
+                importer.importCameras = false;
+                importer.importLights = false;
+                importer.meshCompression = ModelImporterMeshCompression.Medium;
+                importer.animationType = ModelImporterAnimationType.Human;
+                importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            }
             else if (path.EndsWith("/Characters/Explorer_BlackSuit.fbx"))
             {
                 importer.importAnimation = true;
