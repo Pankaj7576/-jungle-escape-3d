@@ -30,14 +30,13 @@ Without a valid UNITY_LICENSE secret, the workflow will fail before compilation.
 
 ## Start here
 1. Open this UnityMigration folder as the Unity project on a desktop/cloud workstation.
-2. Let Unity resolve packages, then run **Tools > Jungle Escape > Generate Demo Scene**.
-3. Open Assets/Scenes/JungleEscape_Demo.unity and press Play. Keyboard: arrows/A-D, Space/Up, Down/S. On Android: swipe left/right/up/down.
-4. Read UNITY_SETUP.md for scene systems and validation.
-5. Read Blender/ASSET_PIPELINE.md for explorer/guardian rigging, animation clips, modular bridge art and mobile budgets.
-6. Read Blender/FREE_ASSET_SOURCES.md for free CC0 models, animation packs and PBR texture sources; licences and mobile optimization requirements are documented there.
-6. The Blender Track Assets workflow is configured to generate straight, turn and broken-gap FBX/GLB files remotely; if it fails, use Blender 4.x and run Blender/generate_track_modules.py manually.
-7. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB to a Unity FBX after confirming its licence.
-7. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB into a Unity FBX without modifying the original.
+2. Let Unity resolve packages. Check the **Generate Blender Track Assets** workflow; if successful, FBX modules are committed under Assets/Environment/Generated.
+3. Run **Tools > Jungle Escape > Generate Demo Scene** in Unity.
+4. Open Assets/Scenes/JungleEscape_Demo.unity and press Play. Keyboard: arrows/A-D, Space/Up, Down/S. On Android: swipe left/right/up/down.
+5. Read UNITY_SETUP.md for scene systems and validation.
+6. Read Blender/ASSET_PIPELINE.md for explorer/guardian rigging, animation clips, modular bridge art and mobile budgets.
+7. Read Blender/FREE_ASSET_SOURCES.md for free CC0 models, animation packs and PBR texture sources.
+8. Run Blender/convert_black_suit_to_fbx.py to convert the existing repository GLB into a Unity FBX after confirming its licence; re-run the scene generator to use it.
 
 ## Implemented source systems
 - TrackSegment Entry/Exit anchors and ordered centerline path nodes for curved modules.
