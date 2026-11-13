@@ -36,6 +36,19 @@ namespace JungleEscape
                 CreatePickup(segment.transform, position, PickupKind.Coin, 1);
             }
 
+            if (Random.value < 0.14f)
+            {
+                Vector3 gemPosition = SampleLane(segment, Random.Range(0.35f, 0.75f),
+                    Random.Range(0, 3) - 1);
+                CreatePickup(segment.transform, gemPosition, PickupKind.Gem, 1);
+            }
+            if (Random.value < 0.08f)
+            {
+                Vector3 boostPosition = SampleLane(segment, Random.Range(0.35f, 0.75f),
+                    Random.Range(0, 3) - 1);
+                CreatePickup(segment.transform, boostPosition, PickupKind.Boost, 1);
+            }
+
             if (Random.value <= hazardChance)
             {
                 float t = Random.Range(0.62f, 0.84f);
@@ -68,7 +81,12 @@ namespace JungleEscape
             GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             visual.name = "Visual";
             visual.transform.SetParent(root.transform, false);
-            visual.transform.localScale = new Vector3(0.42f, 0.07f, 0.42f);
+            visual.transform.localScale = kind == PickupKind.Coin
+                ? new Vector3(0.42f, 0.07f, 0.42f)
+                : new Vector3(0.34f, 0.12f, 0.34f);
+            Renderer visualRenderer = visual.GetComponent<Renderer>();
+            if (kind == PickupKind.Gem) visualRenderer.material.color = new Color(0.1f, 0.72f, 1f);
+            else if (kind == PickupKind.Boost) visualRenderer.material.color = new Color(0.15f, 1f, 0.5f);
             Collider visualCollider = visual.GetComponent<Collider>();
             if (visualCollider != null) Destroy(visualCollider);
 
