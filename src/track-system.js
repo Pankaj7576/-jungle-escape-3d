@@ -183,6 +183,7 @@ export function makeWorldObstacle(scene, materials, pose, lane, kind) {
 export function makeCoin(scene, materials, pose, lane, isPowerup = false, type = 'magnet') {
   const group = new THREE.Group();
   group.position.copy(pose.position);
+  group.position.addScaledVector(pose.right, lane);
   group.position.y += isPowerup ? 1.15 : 1.0;
   group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pose.tangent);
   const color = isPowerup ? (type === 'magnet' ? 0x55d9ff : 0xffa52f) : 0xd8a93e;
