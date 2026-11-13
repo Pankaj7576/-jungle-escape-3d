@@ -62,20 +62,25 @@ The gem count is local PlayerPrefs prototype currency. It is not an online walle
 
 See Blender/ASSET_PIPELINE.md for skeletons, clip naming, export settings, mobile budgets and modular bridge modelling. Run Blender/convert_black_suit_to_fbx.py to prepare the repository black-suit GLB as Assets/Characters/Explorer_BlackSuit.fbx; then re-run the scene generator. Required hero clips: Idle, Run, Jump, Slide, Fall/Death and optional Stumble. Guardian clips: Idle, Run, Roar, Catch and Fall. Keep movement clips in-place and let Unity drive locomotion.
 
-## F. Android APK build
+## F. Android APK cloud build
 
-The repository includes .github/workflows/unity-android.yml. It runs only when manually started. The project is pinned to Unity `6000.0.60f1` in ProjectSettings/ProjectVersion.txt; Unity Hub `3.22.6` is only the Hub app version, and Unity 6.6 is not the currently pinned Editor version.
+Preferred route: use official Unity Build Automation, not a manually exported Personal .ulf file. See [UNITY_CLOUD_BUILD.md](UNITY_CLOUD_BUILD.md) for mobile-friendly instructions.
 
-The workflow checks for these repository Actions secrets before building:
-- `UNITY_LICENSE` — CI license data accepted by GameCI.
-- `UNITY_EMAIL` — Unity account email.
-- `UNITY_PASSWORD` — Unity account password.
+Key configuration:
+- Unity Dashboard → DevOps → Build Automation.
+- GitHub repository: `Pankaj7576/-jungle-escape-3d`.
+- Branch: `unity-migration/phase-1`.
+- Project subfolder path: `UnityMigration`.
+- Unity version: auto-detect from `ProjectSettings/ProjectVersion.txt` (currently `6000.0.60f1`).
+- Platform: Android.
+- Output: APK, not AAB, for direct phone testing.
+- Keep auto-build off initially to conserve the free monthly build minutes.
 
-Add secrets only in GitHub → repository Settings → Secrets and variables → Actions. Never put them in source files or send them in chat. The workflow then uses GameCI Unity Builder, verifies the APK, and uploads `Jungle-Escape-Unity-Android-APK`.
+Unity Cloud Personal currently includes 200 Windows build minutes/month and 5 GB DevOps storage. Monitor usage and do not opt into paid overages. A successful build and downloadable APK artifact are required before claiming an APK exists.
 
-Important: Unity Hub showing a Personal Activation Date confirms local Hub activation, but does not automatically provide the CI license secret. GameCI's current Personal activation documentation describes the older `.alf`/`.ulf` manual flow and warns that Unity no longer supports manual Personal activation. So the Unity APK is not confirmed buildable until a valid CI license is accepted by an actual workflow run. Do not use unsupported browser developer-tools workarounds.
+Unity Personal is activated by signing in to Unity Hub. Current Unity documentation does not support manual Personal activation, so the Hub Activation Date is not a GitHub Actions `UNITY_LICENSE` secret.
 
-The build script targets portrait ARM64 IL2CPP. A successful workflow run and uploaded APK artifact are required before claiming that an APK exists.
+The optional `.github/workflows/unity-android.yml` remains for a future supported CI license arrangement; it is not the recommended route for this free Personal setup. Do not share passwords, tokens or license data.
 
 ## G. Validation order
 
