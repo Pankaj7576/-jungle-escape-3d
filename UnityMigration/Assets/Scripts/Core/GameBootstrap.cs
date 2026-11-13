@@ -28,6 +28,7 @@ namespace JungleEscape
         {
             runner?.SetRunActive(false);
             runner?.SetInputEnabled(false);
+            guardian?.SetChaseActive(false);
             ui?.ShowMainMenu();
         }
 
@@ -66,6 +67,7 @@ namespace JungleEscape
             gameOver = true;
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
+            guardian?.SetChaseActive(false);
             if (reviveUsed) ui?.ShowGameOver();
             else ui?.ShowRevive();
         }
@@ -87,6 +89,7 @@ namespace JungleEscape
             gameOver = true;
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
+            guardian?.SetChaseActive(false);
             ui?.ShowGameOver();
         }
     }
