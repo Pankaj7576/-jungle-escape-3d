@@ -4,9 +4,8 @@ using UnityEngine;
 namespace JungleEscape
 {
     /// <summary>
-    /// Builds a connected path from modular prefabs. Each prefab needs TrackSegment with
-    /// Entry/Exit anchors. For turns, rotate the Exit anchor to the new path heading.
-    /// A gap prefab has missing floor geometry between its two anchors.
+    /// Connected modular track generation. Prefabs require TrackSegment Entry/Exit anchors;
+    /// curved turns also require ordered Path Nodes.
     /// </summary>
     public sealed class TrackDirector : MonoBehaviour
     {
@@ -26,7 +25,12 @@ namespace JungleEscape
         [SerializeField, Min(0)] private int straightSegmentsBetweenTurns = 2;
         [SerializeField] private int randomSeed;
 
-        private readonly List<TrackSegment> active = new List<TrackSegment>();\n        private readonly Dictionary<TrackSegment, Stack<TrackSegment>> pools =\n            new Dictionary<TrackSegment, Stack<TrackSegment>>();\n        private readonly Dictionary<TrackSegment, TrackSegment> prefabOf =\n            new Dictionary<TrackSegment, TrackSegment>();
+        private readonly List<TrackSegment> active = new List<TrackSegment>();
+        private readonly Dictionary<TrackSegment, Stack<TrackSegment>> pools =
+            new Dictionary<TrackSegment, Stack<TrackSegment>>();
+        private readonly Dictionary<TrackSegment, TrackSegment> prefabOf =
+            new Dictionary<TrackSegment, TrackSegment>();
+
         private Transform nextEntry;
         private int turnCooldown;
         private System.Random random;
@@ -43,22 +47,29 @@ namespace JungleEscape
             }
 
             random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
-            TrackSegment first = GetSegment(startSegmentPrefab, transform);
-            if (!Validate(first)) { enabled = false; return; }
-            active.Add(first);
-            nextEntry = first.Exit;
-            for (int i = 1; i < segmentsAhead; i++) SpawnNext();
-            UpdateCurrentSegment();
+            BuildInitialTrack();
         }
 
         public void ResetTrack()
         {
             for (int i = 0; i < active.Count; i++)
-                if (active[i] != null) Destroy(active[i].gameObject);
+                if (active[i] != null) ReturnSegment(active[i]);
             active.Clear();
             CurrentSegment = null;
-            TrackSegment first = CreateAligned(startSegmentPrefab, transform);
-            if (!Validate(first)) { enabled = false; return; }
+            turnCooldown = 0;
+            BuildInitialTrack();
+        }
+
+        private void BuildInitialTrack()
+        {
+            TrackSegment first = GetSegment(startSegmentPrefab, transform);
+            if (!Validate(first))
+            {
+                ReturnSegment(first);
+                enabled = false;
+                return;
+            }
+
             active.Add(first);
             nextEntry = first.Exit;
             for (int i = 1; i < segmentsAhead; i++) SpawnNext();
@@ -109,7 +120,12 @@ namespace JungleEscape
             }
 
             TrackSegment instance = GetSegment(prefab, nextEntry);
-            if (!Validate(instance)) { Destroy(instance.gameObject); enabled = false; return; }
+            if (!Validate(instance))
+            {
+                ReturnSegment(instance);
+                enabled = false;
+                return;
+            }
             active.Add(instance);
             nextEntry = instance.Exit;
         }
@@ -157,13 +173,21 @@ namespace JungleEscape
             if (turnCooldown == 0 && roll < turnChance)
             {
                 TrackSegment turn = Pick(random.Next(2) == 0 ? leftTurnPrefabs : rightTurnPrefabs);
-                if (turn != null) { turnCooldown = straightSegmentsBetweenTurns; return turn; }
+                if (turn != null)
+                {
+                    turnCooldown = straightSegmentsBetweenTurns;
+                    return turn;
+                }
             }
 
-            if (roll < turnChance + gapChance)
+            if (roll >= turnChance && roll < turnChance + gapChance)
             {
                 TrackSegment gap = Pick(gapPrefabs);
-                if (gap != null) { turnCooldown = Mathf.Max(turnCooldown, 1); return gap; }
+                if (gap != null)
+                {
+                    turnCooldown = Mathf.Max(turnCooldown, 1);
+                    return gap;
+                }
             }
 
             if (turnCooldown > 0) turnCooldown--;
