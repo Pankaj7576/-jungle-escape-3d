@@ -1,6 +1,7 @@
 # Blender 4.x/5.x: generate an original rigged dark-furred temple ape.
 # The mesh is procedural and uses no ripped game assets or external model downloads.
 # Run headless with Blender's FBX exporter enabled and NumPy available.
+# The CI workflow generates this original model and commits the FBX into the Unity project.
 
 import bpy
 import os
