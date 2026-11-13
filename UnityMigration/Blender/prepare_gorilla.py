@@ -10,7 +10,7 @@ from mathutils import Vector
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
-OUTPUT_DIR = os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Characters")
+OUTPUT_DIR = os.environ.get("GUARDIAN_OUTPUT_DIR", os.path.join(REPO_ROOT, "UnityMigration", "Assets", "Characters"))
 OUTPUT_FBX = os.path.join(OUTPUT_DIR, "Guardian_Ape.fbx")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
