@@ -39,6 +39,14 @@ namespace JungleEscape
             body.useGravity = false;
         }
 
+        public void ResetPickup()
+        {
+            collected = false;
+            if (trigger == null) trigger = GetComponent<Collider>();
+            if (trigger != null) trigger.enabled = true;
+            if (visualRoot != null) visualRoot.SetActive(true);
+        }
+
         private void OnEnable()
         {
             collected = false;
