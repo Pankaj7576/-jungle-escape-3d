@@ -1,5 +1,10 @@
 # Jungle Escape 3D — Version History
 
+## 1.004
+- Reduced repeated track geometry draw calls by batching the 26 stone parapet posts on each straight or curved segment into one InstancedMesh while preserving their positions, materials and shadows.
+- Added automated regression tests for straight and curved track post counts and mesh batching.
+- Android debug APK build and on-device frame-rate checks are pending CI and device verification.
+
 ## 1.003
 - Hardened lane input: canvas swipes are handled as one primary-pointer gesture with a 36 px dead zone and ambiguous-diagonal rejection.
 - Isolated on-screen control presses from canvas swipes and ignored keyboard auto-repeat so holding a direction cannot continuously move lanes.
