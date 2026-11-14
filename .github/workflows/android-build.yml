@@ -6,6 +6,7 @@ on:
       - main
       - game-updates-test
       - release/1.003-input-stability
+      - release/1.004-track-performance
   workflow_dispatch:
 
 permissions:
