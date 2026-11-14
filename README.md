@@ -2,10 +2,10 @@
 
 A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
 
-**Current game release: `1.003`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Previous snapshots are preserved.
+**Current game release: `1.004`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Previous snapshots are preserved.
 
 ## Gameplay systems
-- Procedural modular track with straight sections, 90-degree left/right curves and broken bridge gaps.
+- Procedural modular track with straight sections, 90-degree left/right curves and broken bridge gaps; instanced stone parapet posts reduce repeated draw calls.
 - Three-lane movement, jumpable rocks/walls, slide arches, coin trails and canyon scenery.
 - Spring-arm third-person camera with collision checks and turn-aware follow.
 - Bundled black-suit GLB runner with any available animation clips, plus articulated procedural animation fallback.
