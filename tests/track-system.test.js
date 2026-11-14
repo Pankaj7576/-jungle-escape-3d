@@ -24,7 +24,8 @@ function inspectPosts(piece) {
   assert.equal(instanced.length, 1, 'each track piece should use one instanced post mesh');
   assert.equal(instanced[0].count, 26, 'each piece should retain 13 posts on both sides');
   assert.equal(instanced[0].instanceMatrix.count, 26);
-  assert.equal(regularMeshes.length, 4, 'deck, foundation and two continuous rails remain separate');
+  const expectedRegularMeshes = piece.kind === 'turn' ? 5 : 4;
+  assert.equal(regularMeshes.length, expectedRegularMeshes, 'deck, foundation, continuous rails and optional turn marker remain separate');
 }
 
 test('straight track sections batch parapet posts into one instanced mesh', () => {
