@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - game-updates-test
+      - release/1.003-input-stability
+      - release/1.004-track-performance
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -48,6 +53,9 @@ jobs:
 
       - name: Check JavaScript syntax
         run: npm run check
+
+      - name: Run input regression tests
+        run: npm test
 
       - name: Build web app
         run: npm run build

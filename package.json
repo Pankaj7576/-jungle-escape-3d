@@ -1,9 +1,22 @@
 {
-  "name":"jungle-escape-3d",
-  "version":"2.0.0",
-  "private":true,
-  "type":"module",
-  "scripts":{"dev":"vite --host 0.0.0.0","build":"vite build","preview":"vite preview --host 0.0.0.0","check":"node --check src/main.js"},
-  "dependencies":{"@capacitor/android":"^7.4.3","@capacitor/core":"^7.4.3","three":"^0.180.0"},
-  "devDependencies":{"@capacitor/cli":"^7.4.3","vite":"^6.4.1"}
+  "name": "jungle-escape-3d",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "check": "node --check src/main.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "vite": "^6.4.1"
+  }
 }

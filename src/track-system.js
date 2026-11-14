@@ -113,15 +113,28 @@ export class TrackSystem {
     } else addDeck(0, 1);
 
     const railMaterial = this.mats.rail;
+    // One instanced draw object replaces 26 separate parapet-post meshes per segment.
+    const postInstances = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(.22, .92, .28),
+      this.mats.parapet,
+      26
+    );
+    postInstances.castShadow = true;
+    postInstances.receiveShadow = true;
+    postInstances.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+    const postTransform = new THREE.Object3D();
+    let postIndex = 0;
+
     for (const side of [-1, 1]) {
       for (let i = 0; i <= 12; i++) {
         const t = i / 12, p = curve.getPointAt(t), tangent = curve.getTangentAt(t).normalize();
         const right = tangent.clone().cross(UP).normalize();
         const postPos = p.clone().addScaledVector(right, side * (this.width * .5 - .12));
-        const post = new THREE.Mesh(new THREE.BoxGeometry(.22, .92, .28), this.mats.parapet);
-        post.position.copy(postPos); post.position.y += .35;
-        post.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
-        post.castShadow = true; post.receiveShadow = true; g.add(post);
+        postTransform.position.copy(postPos);
+        postTransform.position.y += .35;
+        postTransform.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
+        postTransform.updateMatrix();
+        postInstances.setMatrixAt(postIndex++, postTransform.matrix);
       }
       const points = [];
       for (let i = 0; i <= 32; i++) {
@@ -131,6 +144,10 @@ export class TrackSystem {
       const rail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 40, .105, 6, false), railMaterial);
       rail.castShadow = true; g.add(rail);
     }
+    postInstances.count = postIndex;
+    postInstances.instanceMatrix.needsUpdate = true;
+    postInstances.computeBoundingSphere();
+    g.add(postInstances);
     if (piece.kind === 'turn') {
       const marker = new THREE.Mesh(new THREE.TorusGeometry(1.15, .1, 7, 20, Math.PI), this.mats.gold);
       const p = curve.getPointAt(.48); marker.position.copy(p); marker.position.y += .25;
