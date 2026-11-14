@@ -3,7 +3,7 @@
 ## 1.004
 - Reduced repeated track geometry draw calls by batching the 26 stone parapet posts on each straight or curved segment into one InstancedMesh while preserving their positions, materials and shadows.
 - Added automated regression tests for straight and curved track post counts and mesh batching.
-- Android debug APK build and on-device frame-rate checks are pending CI and device verification.
+- Verification: GitHub Actions run `43569786547` passed JavaScript checks, all Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup and Android debug APK build. The APK artifact was downloaded and validated as an Android package; on-device gameplay and frame-rate testing remain.
 
 ## 1.003
 - Hardened lane input: canvas swipes are handled as one primary-pointer gesture with a 36 px dead zone and ambiguous-diagonal rejection.
