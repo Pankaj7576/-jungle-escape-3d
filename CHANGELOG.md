@@ -3,7 +3,7 @@
 ## 1.005
 - Added a visibility-aware render loop that stops scheduling animation frames when the app is backgrounded or navigated away, then resumes cleanly without a large catch-up simulation step.
 - Added deterministic regression tests for single-frame scheduling, bounded delta time, stop/resume and disposal.
-- Verification: local render-loop tests passed; GitHub Actions Android APK build is pending for this commit. On-device battery and resume testing remain.
+- Verification: GitHub Actions run `43689238765` passed JavaScript syntax checks, all 13 Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14151398292` was downloaded; ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,058 bytes). On-device install, background/resume and FPS testing remain.
 
 
 ## 1.004
