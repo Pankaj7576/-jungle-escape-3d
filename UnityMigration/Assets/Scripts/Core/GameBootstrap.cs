@@ -12,6 +12,7 @@ namespace JungleEscape
         [SerializeField] private RunProgress runProgress;
         [SerializeField] private TrackDirector track;
         [SerializeField] private UIFlow ui;
+        [SerializeField] private JungleEscapeAuth authentication;
 
         private bool gameOver;
         private bool reviveUsed;
@@ -28,12 +29,36 @@ namespace JungleEscape
                 runnerCamera.SetTarget(runner.transform);
         }
 
-        private void Start()
+        private async void Start()
         {
             runner?.SetRunActive(false);
             runner?.SetInputEnabled(false);
             guardian?.SetChaseActive(false);
+            ui?.HideGamePanels();
+
+            if (authentication != null)
+            {
+                await authentication.InitializeAsync();
+            }
+            else
+            {
+                Debug.LogError("Jungle Escape authentication manager is missing. Login is required.");
+                ui?.ShowMainMenu();
+            }
+        }
+
+        public void OnPlayerAuthenticated()
+        {
+            ui?.SetBestScore(authentication != null ? authentication.BestScore : 0);
             ui?.ShowMainMenu();
+        }
+
+        public void OnPlayerLoggedOut()
+        {
+            runner?.SetRunActive(false);
+            runner?.SetInputEnabled(false);
+            guardian?.SetChaseActive(false);
+            ui?.HideGamePanels();
         }
 
         public void StartRun()
@@ -76,6 +101,7 @@ namespace JungleEscape
         {
             if (gameOver) return;
             gameOver = true;
+            authentication?.SaveBestScoreAsync(runProgress != null ? runProgress.Score : 0);
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
             runnerAnimation?.PlayFall();
@@ -102,6 +128,7 @@ namespace JungleEscape
         public void EndRun()
         {
             gameOver = true;
+            authentication?.SaveBestScoreAsync(runProgress != null ? runProgress.Score : 0);
             runner?.SetInputEnabled(false);
             runner?.SetRunActive(false);
             guardian?.SetChaseActive(false);
