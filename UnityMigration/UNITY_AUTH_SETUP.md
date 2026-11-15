@@ -1,5 +1,14 @@
 # Jungle Escape 3D — Player Login Setup
 
+## Current repository verification — 2026-11-15
+
+- The Player Accounts settings asset at `Assets/Resources/UnityPlayerAccountSettings.asset` already contains a non-empty Client ID. Do not replace it unless the Unity Dashboard Auth Client has changed.
+- This branch does not currently contain `ProjectSettings/ProjectSettings.asset`. The Unity Cloud project link therefore cannot be confirmed from the checked-in project settings. Open `UnityMigration` in Unity Editor, sign in with the intended Unity ID, and link the existing Cloud Project ID below. Do not create a second Unity Cloud project.
+- Existing Cloud Project ID: `e42882f8-3657-40d2-8402-de62e432998b`.
+- Enable Cloud Save in the Unity Dashboard. If it is not enabled, the current code keeps the best score locally and logs a warning; cloud score sync is not complete.
+- The login implementation uses Unity Player Accounts in the system browser, then Unity Authentication. Email/password and Google are supported when enabled in the Player Accounts Auth Client. Facebook remains deferred.
+- The Unity login code has not yet been compiled in Unity Editor or verified in a Unity Android APK. The verified Android APK in the root Three.js/Capacitor release does not contain this separate Unity login flow.
+
 This branch now contains the first implementation of the account flow.
 
 ## Implemented in code
