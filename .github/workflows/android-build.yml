@@ -7,6 +7,7 @@ on:
       - game-updates-test
       - release/1.003-input-stability
       - release/1.004-track-performance
+      - release/1.005-render-loop-efficiency
   pull_request:
     branches:
       - main
@@ -54,7 +55,7 @@ jobs:
       - name: Check JavaScript syntax
         run: npm run check
 
-      - name: Run input regression tests
+      - name: Run gameplay and render-loop regression tests
         run: npm test
 
       - name: Build web app
