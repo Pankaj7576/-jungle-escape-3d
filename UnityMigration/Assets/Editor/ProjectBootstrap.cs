@@ -186,6 +186,7 @@ namespace JungleEscape.EditorTools
             RunnerCamera camera = UnityEngine.Object.FindFirstObjectByType<RunnerCamera>();
             GameBootstrap game = UnityEngine.Object.FindFirstObjectByType<GameBootstrap>();
             UIFlow ui = UnityEngine.Object.FindFirstObjectByType<UIFlow>();
+            JungleEscapeAuth authentication = UnityEngine.Object.FindFirstObjectByType<JungleEscapeAuth>();
             EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
 
             Require(runner != null, "RunnerMotor is missing.");
@@ -197,6 +198,7 @@ namespace JungleEscape.EditorTools
             Require(camera != null, "RunnerCamera is missing.");
             Require(game != null, "GameBootstrap is missing.");
             Require(ui != null, "UIFlow is missing.");
+            Require(authentication != null, "JungleEscapeAuth is missing.");
             Require(eventSystem != null, "EventSystem is missing.");
 
             if (director != null)
@@ -230,6 +232,8 @@ namespace JungleEscape.EditorTools
                 SerializedObject gameData = new SerializedObject(game);
                 Require(gameData.FindProperty("runner").objectReferenceValue == runner,
                     "GameBootstrap Runner reference is incorrect.");
+                Require(gameData.FindProperty("authentication").objectReferenceValue == authentication,
+                    "GameBootstrap authentication reference is missing.");
                 Require(gameData.FindProperty("runnerAnimation").objectReferenceValue != null,
                     "RunnerAnimationDriver reference is missing.");
                 if (guardian.GetComponent<GuardianAnimationDriver>() != null)
