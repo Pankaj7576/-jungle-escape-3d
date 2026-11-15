@@ -32,7 +32,7 @@ namespace JungleEscape
         [SerializeField] private GameBootstrap game;
         [SerializeField] private RunProgress progress;
 
-        private void Awake()
+        private void Start()
         {
             if (playButton != null) playButton.onClick.AddListener(() => game?.StartRun());
             if (reviveButton != null) reviveButton.onClick.AddListener(() => game?.TryRevive());
