@@ -18,7 +18,7 @@ namespace JungleEscape
     [DefaultExecutionOrder(-100)]
     public sealed class JungleEscapeAuth : MonoBehaviour
     {
-        private const string LocalBestScoreKey = "JungleEscape.BestScore";
+        private const string LocalBestScorePrefix = "JungleEscape.BestScore.";
         private const string CloudBestScoreKey = "bestScore";
         public static JungleEscapeAuth Instance { get; private set; }
 
@@ -48,7 +48,7 @@ namespace JungleEscape
                 return;
             }
             Instance = this;
-            BestScore = PlayerPrefs.GetInt(LocalBestScoreKey, 0);
+            BestScore = 0;
         }
 
         private void OnDestroy()
@@ -411,9 +411,15 @@ namespace JungleEscape
             if (game != null) game.OnPlayerAuthenticated();
         }
 
+        private string GetLocalBestScoreKey()
+        {
+            return LocalBestScorePrefix + AuthenticationService.Instance.PlayerId;
+        }
+
         private async Task LoadBestScoreAsync()
         {
-            BestScore = PlayerPrefs.GetInt(LocalBestScoreKey, 0);
+            string localKey = GetLocalBestScoreKey();
+            BestScore = PlayerPrefs.GetInt(localKey, 0);
             if (!AuthenticationService.Instance.IsSignedIn) return;
 
             try
@@ -424,7 +430,7 @@ namespace JungleEscape
                 if (result.TryGetValue(CloudBestScoreKey, out var item))
                     BestScore = Mathf.Max(BestScore, item.Value.GetAs<int>());
 
-                PlayerPrefs.SetInt(LocalBestScoreKey, BestScore);
+                PlayerPrefs.SetInt(localKey, BestScore);
                 PlayerPrefs.Save();
 
                 // Upload a locally cached record if it is newer than the cloud record.
@@ -440,12 +446,10 @@ namespace JungleEscape
 
         public async void SaveBestScoreAsync(int score)
         {
-            if (score <= BestScore) return;
+            if (!servicesReady || !AuthenticationService.Instance.IsSignedIn || score <= BestScore) return;
             BestScore = score;
-            PlayerPrefs.SetInt(LocalBestScoreKey, BestScore);
+            PlayerPrefs.SetInt(GetLocalBestScoreKey(), BestScore);
             PlayerPrefs.Save();
-
-            if (!AuthenticationService.Instance.IsSignedIn) return;
             try
             {
                 await CloudSaveService.Instance.Data.Player.SaveAsync(
