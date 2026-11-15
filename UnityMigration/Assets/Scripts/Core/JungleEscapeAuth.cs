@@ -150,7 +150,7 @@ namespace JungleEscape
                 new Vector2(0.5f, 0.09f), new Vector2(940f, 150f), new Color(0.86f, 0.88f, 0.82f));
 
             logoutButtonObject = CreateButton("LOG OUT", canvas.transform,
-                new Vector2(0.86f, 0.96f), new Vector2(230f, 76f), SignOut);
+                new Vector2(0.86f, 0.96f), new Vector2(230f, 76f), SignOut).gameObject;
             logoutButtonObject.SetActive(false);
         }
 
@@ -418,9 +418,8 @@ namespace JungleEscape
 
             try
             {
-                Dictionary<string, Unity.Services.CloudSave.Models.Item> result =
-                    await CloudSaveService.Instance.Data.Player.LoadAsync(
-                        new HashSet<string> { CloudBestScoreKey });
+                var result = await CloudSaveService.Instance.Data.Player.LoadAsync(
+                    new HashSet<string> { CloudBestScoreKey });
 
                 if (result.TryGetValue(CloudBestScoreKey, out var item))
                     BestScore = Mathf.Max(BestScore, item.Value.GetAs<int>());
