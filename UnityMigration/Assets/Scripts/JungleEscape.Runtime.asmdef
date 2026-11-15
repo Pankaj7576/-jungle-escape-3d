@@ -1,7 +1,13 @@
 {
   "name": "JungleEscape.Runtime",
   "rootNamespace": "JungleEscape",
-  "references": ["Unity.ugui"],
+  "references": [
+    "Unity.ugui",
+    "Unity.Services.Core",
+    "Unity.Services.Authentication",
+    "Unity.Services.Authentication.PlayerAccounts",
+    "Unity.Services.CloudSave"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
