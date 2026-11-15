@@ -30,7 +30,6 @@ namespace JungleEscape
         private GameObject logoutButtonObject;
         private Text statusText;
         private Button signInButton;
-        private Button signUpButton;
         private bool servicesReady;
         private bool busy;
 
@@ -146,16 +145,12 @@ namespace JungleEscape
                 new Vector2(0.5f, 0.66f), new Vector2(940f, 90f),
                 new Color(0.86f, 0.88f, 0.82f));
 
-            signInButton = CreateButton("SIGN IN WITH EMAIL / GOOGLE", loginPanel.transform,
-                new Vector2(0.5f, 0.54f), new Vector2(800f, 112f),
-                () => StartUnityAccountFlow(false));
+            signInButton = CreateButton("SIGN IN / CREATE ACCOUNT", loginPanel.transform,
+                new Vector2(0.5f, 0.48f), new Vector2(800f, 112f),
+                StartUnityAccountFlow);
 
-            signUpButton = CreateButton("CREATE NEW ACCOUNT", loginPanel.transform,
-                new Vector2(0.5f, 0.42f), new Vector2(800f, 112f),
-                () => StartUnityAccountFlow(true));
-
-            statusText = CreateLabel("Please sign in to continue.", loginPanel.transform, 23,
-                new Vector2(0.5f, 0.25f), new Vector2(940f, 190f),
+            statusText = CreateLabel("Choose email/password or Google on the secure Unity page.", loginPanel.transform, 23,
+                new Vector2(0.5f, 0.27f), new Vector2(940f, 190f),
                 new Color(0.86f, 0.88f, 0.82f));
 
             CreateLabel("Secure sign-in is provided by Unity Player Accounts.",
@@ -247,10 +242,9 @@ namespace JungleEscape
         {
             busy = value;
             if (signInButton != null) signInButton.interactable = !value;
-            if (signUpButton != null) signUpButton.interactable = !value;
         }
 
-        private async void StartUnityAccountFlow(bool createAccount)
+        private async void StartUnityAccountFlow()
         {
             if (busy) return;
 
@@ -263,9 +257,7 @@ namespace JungleEscape
             try
             {
                 SetBusy(true);
-                SetStatus(createAccount
-                    ? "Opening the secure account creation page..."
-                    : "Opening the secure sign-in page...");
+                SetStatus("Opening the secure sign-in and account creation page...");
 
                 if (PlayerAccountService.Instance.IsSignedIn)
                 {
@@ -274,7 +266,7 @@ namespace JungleEscape
                 }
 
                 // This opens the browser. The SignedIn event completes game authentication.
-                await PlayerAccountService.Instance.StartSignInAsync(createAccount);
+                await PlayerAccountService.Instance.StartSignInAsync();
                 SetStatus("Complete sign-in in your browser, then return to Jungle Escape.");
             }
             catch (Exception exception)
