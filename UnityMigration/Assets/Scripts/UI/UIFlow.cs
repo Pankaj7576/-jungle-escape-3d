@@ -21,6 +21,7 @@ namespace JungleEscape
         [SerializeField] private Text distanceText;
         [SerializeField] private Text coinText;
         [SerializeField] private Text gemText;
+        [SerializeField] private Text bestScoreText;
 
         [Header("Buttons and references")]
         [SerializeField] private Text reviveMessage;
@@ -49,6 +50,11 @@ namespace JungleEscape
         }
 
         public void ShowMainMenu() => SetPanels(true, false, false, false);
+        public void HideGamePanels() => SetPanels(false, false, false, false);
+        public void SetBestScore(int score)
+        {
+            if (bestScoreText != null) bestScoreText.text = "BEST SCORE  " + score.ToString("N0");
+        }
         public void ShowHUD() => SetPanels(false, true, false, false);
 
         public void ShowRevive()
