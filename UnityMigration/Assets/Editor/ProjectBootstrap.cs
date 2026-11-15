@@ -112,6 +112,10 @@ namespace JungleEscape.EditorTools
             Canvas canvas = CreateCanvas();
             UIFlow ui = canvas.gameObject.AddComponent<UIFlow>();
             BuildUI(canvas.transform, ui, game, progress);
+            JungleEscapeAuth authentication = manager.AddComponent<JungleEscapeAuth>();
+            Assign(authentication, "canvas", canvas);
+            Assign(authentication, "game", game);
+            Assign(game, "authentication", authentication);
 
             Debug.Log("Jungle Escape stage 9: wiring scene components.");
             Assign(director, "runner", runner.transform);
@@ -820,6 +824,7 @@ namespace JungleEscape.EditorTools
 
             Text title = Label("JUNGLE ESCAPE", menu.transform, 58, new Vector2(0.5f, 0.76f));
             title.color = new Color(0.92f, 0.78f, 0.42f);
+            Text bestScore = Label("BEST SCORE  0", menu.transform, 30, new Vector2(0.5f, 0.57f));
             Button play = MakeButton("PLAY!", menu.transform, new Vector2(0.5f, 0.38f));
             Button reviveButton = MakeButton("REVIVE - 1 GEM", revive.transform, new Vector2(0.5f, 0.52f));
             Button giveUp = MakeButton("GIVE UP", revive.transform, new Vector2(0.5f, 0.36f));
@@ -840,6 +845,7 @@ namespace JungleEscape.EditorTools
             Assign(ui, "distanceText", distance);
             Assign(ui, "coinText", coins);
             Assign(ui, "gemText", gems);
+            Assign(ui, "bestScoreText", bestScore);
             Assign(ui, "reviveMessage", reviveMessage);
             Assign(ui, "reviveButton", reviveButton);
             Assign(ui, "playButton", play);
