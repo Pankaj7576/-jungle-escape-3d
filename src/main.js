@@ -4,6 +4,7 @@ import { TrackSystem, makeWorldObstacle, makeCoin } from './track-system.js';
 import { RunnerCharacter, TempleBeast } from './character-system.js';
 import { RunnerCamera } from './camera-system.js';
 import { bindGameInput } from './input-system.js';
+import { createRenderLoop } from './render-loop.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('world');
@@ -323,17 +324,28 @@ function updateWorld(dt) {
 
 resetRun();
 
-const clock = new THREE.Clock();
-function frame() {
-  requestAnimationFrame(frame);
-  const dt = Math.min(clock.getDelta(), .04);
-  if (state.active && !state.paused) updateWorld(dt);
-  runFrame += dt;
-  for (const coin of coinVisuals) if (!coin.taken) coin.mesh.rotation.y += dt * 2.2;
-  for (const power of pickups) if (!power.taken) { power.mesh.rotation.y += dt * 2.6; power.mesh.position.y += Math.sin(runFrame * 3 + power.progress) * .0015; }
-  renderer.render(scene, camera);
+const renderLoop = createRenderLoop({
+  update(dt) {
+    if (state.active && !state.paused) updateWorld(dt);
+    runFrame += dt;
+    for (const coin of coinVisuals) if (!coin.taken) coin.mesh.rotation.y += dt * 2.2;
+    for (const power of pickups) if (!power.taken) { power.mesh.rotation.y += dt * 2.6; power.mesh.position.y += Math.sin(runFrame * 3 + power.progress) * .0015; }
+  },
+  render() {
+    renderer.render(scene, camera);
+  },
+  requestFrame: callback => requestAnimationFrame(callback),
+  cancelFrame: frameId => cancelAnimationFrame(frameId)
+});
+
+function syncRenderLoopVisibility() {
+  if (document.hidden) renderLoop.stop();
+  else renderLoop.start();
 }
-frame();
+
+document.addEventListener('visibilitychange', syncRenderLoopVisibility);
+addEventListener('pagehide', () => renderLoop.stop());
+addEventListener('pageshow', syncRenderLoopVisibility);
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
