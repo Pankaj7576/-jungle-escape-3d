@@ -1,5 +1,11 @@
 # Jungle Escape 3D — Version History
 
+## 1.005
+- Added a visibility-aware render loop that stops scheduling animation frames when the app is backgrounded or navigated away, then resumes cleanly without a large catch-up simulation step.
+- Added deterministic regression tests for single-frame scheduling, bounded delta time, stop/resume and disposal.
+- Verification: local render-loop tests passed; GitHub Actions Android APK build is pending for this commit. On-device battery and resume testing remain.
+
+
 ## 1.004
 - Reduced repeated track geometry draw calls by batching the 26 stone parapet posts on each straight or curved segment into one InstancedMesh while preserving their positions, materials and shadows.
 - Added automated regression tests for straight and curved track post counts and mesh batching.
