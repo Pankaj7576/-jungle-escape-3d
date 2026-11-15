@@ -7,7 +7,6 @@
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.ui": "1.0.0",
     "com.unity.services.authentication": "3.8.1",
-    "com.unity.services.cloudsave": "3.4.2",
-    "com.unity.services.playeraccounts": "1.0.0-pre.2"
+    "com.unity.services.cloudsave": "3.4.2"
   }
 }
