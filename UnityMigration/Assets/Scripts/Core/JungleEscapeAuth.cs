@@ -55,7 +55,8 @@ namespace JungleEscape
         {
             if (servicesReady)
             {
-                PlayerAccountService.Instance.SignedIn -= OnUnityPlayerAccountSignedIn;
+                try { PlayerAccountService.Instance.SignedIn -= OnUnityPlayerAccountSignedIn; }
+                catch (Exception exception) { Debug.LogWarning("Could not detach Player Accounts event: " + exception.Message); }
             }
             if (Instance == this) Instance = null;
         }
@@ -78,7 +79,8 @@ namespace JungleEscape
                 {
                     try
                     {
-                        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                        if (!AuthenticationService.Instance.IsSignedIn)
+                            await AuthenticationService.Instance.SignInAnonymouslyAsync();
                         if (AuthenticationService.Instance.IsSignedIn &&
                             !AuthenticationService.Instance.IsAnonymous)
                         {
@@ -87,13 +89,15 @@ namespace JungleEscape
                         }
 
                         // Do not silently let an anonymous guest bypass the login screen.
-                        AuthenticationService.Instance.SignOut(true);
+                        if (AuthenticationService.Instance.IsSignedIn)
+                            AuthenticationService.Instance.SignOut(true);
                     }
                     catch (Exception restoreException)
                     {
                         Debug.LogWarning("Jungle Escape cached sign-in could not be restored: " +
                                          restoreException.Message);
-                        AuthenticationService.Instance.SignOut(true);
+                        if (AuthenticationService.Instance.IsSignedIn)
+                            AuthenticationService.Instance.SignOut(true);
                     }
                 }
 
