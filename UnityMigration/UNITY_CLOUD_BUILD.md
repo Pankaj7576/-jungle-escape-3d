@@ -1,43 +1,67 @@
-# Mobile-friendly Unity Android Cloud Build (preferred free route)
-
-## Why this route
-Unity Personal is activated by signing in to Unity Hub. Unity's current documentation says Personal licenses cannot be manually activated with the old .alf/.ulf method. Therefore, do not waste time looking for a .ulf file or putting Unity account passwords into GitHub Actions.
-
-Use Unity Build Automation (Unity DevOps) instead. Unity's current Cloud Personal FAQ lists 5 GB DevOps storage and 200 Windows build minutes. The included minutes are limited; check usage in the Unity Cloud dashboard and do not opt into paid overages. The free tier cannot be assumed to cover unlimited builds.
-
-Official references:
-- https://docs.unity.com/en-us/hub/manage-license
-- https://docs.unity.com/en-us/build-automation/get-started-with-build-automation/connect-your-version-control-system
-- https://docs.unity.com/en-us/build-automation/basic-build-configuration/overview
-- https://activation.unity3d.com/products/unity-cloud/faq
+# Mobile-friendly Unity Android Cloud Build
 
 ## Project facts
-- Repository: https://github.com/Pankaj7576/-jungle-escape-3d
-- Branch: unity-migration/phase-1
-- Unity project subfolder: UnityMigration
-- Pinned editor: 6000.0.60f1 (from UnityMigration/ProjectSettings/ProjectVersion.txt)
-- Target: Android APK (not AAB for phone testing)
 
-## Setup from an Android phone
-1. Open https://cloud.unity.com/ and sign in with the same Unity ID used in Unity Hub.
-2. Open DevOps, then Build Automation. If prompted, enable/start the free Unity DevOps/Build Automation tier. Do not add a payment method or opt into pay-as-you-go.
-3. Open Source Control / Version Control setup. Choose GitHub. This repository is public, so Unity Build Automation may connect to it without a token; if it asks for authorization, grant only the minimum public-repository read access. Do not share your GitHub password.
-4. Create a build configuration/target:
-   - Name: Jungle Escape Android Test
-   - Repository: Pankaj7576/-jungle-escape-3d
-   - Branch: unity-migration/phase-1
-   - Project subfolder path: UnityMigration
-   - Unity version: enable Auto detect from ProjectVersion.txt, or choose 6000.0.60f1 if offered
-   - Platform: Android
-   - Build output: APK (leave the AAB option off)
-   - Auto-build: Off initially, to save the free build minutes.
-5. Save the target and start one manual build.
-6. Watch Build History / Logs. If it succeeds, download the APK artifact and install it on Android. If it fails, share only the error text; never share passwords, tokens, or license files.
+- Repository: https://github.com/Pankaj7576/-jungle-escape-3d
+- Branch: `unity-migration/phase-1`
+- Unity project subfolder: `UnityMigration`
+- Pinned editor: `6000.0.60f1` (from `UnityMigration/ProjectSettings/ProjectVersion.txt`)
+- Target: Android APK (not AAB for direct phone testing)
+
+## Exact Quick target setup values
+
+For the current Unity `6000.0.60f1` project, use these values when creating the Android target:
+
+| Build Automation field | Value |
+|---|---|
+| Target name | `Jungle Escape Android` |
+| Branch | `unity-migration/phase-1` |
+| Project subfolder path | `UnityMigration` |
+| Manually select Unity version | Off / use Auto-detect |
+| Detected Unity version | `6000.0.60f1` |
+| Platform | `Android` |
+| Builder operating system | `Windows 11` |
+| Builder OS version | `24H2` |
+| Android SDK version | `36` (choose the highest available SDK version) |
+| Build App Bundle (.aab) | Off — keep APK output |
+| Auto-build | Off initially |
+
+**Why Windows 11 24H2 and SDK 36:** Unity's current Build Automation supported-platform table lists Android support on Windows 11 24H2 (not Windows 11 22H2). For Unity 6000.0.60f1, the available SDK table lists SDK 34, 35 and 36; Build Automation requires selecting the maximum available SDK version, so choose 36.
+
+If the UI does not offer Windows 11 24H2 or Android SDK 36, do not substitute a random value. Stop and capture the exact available options before saving.
+
+## Source control
+
+1. Open https://cloud.unity.com/ and sign in with the Unity ID linked to the existing project.
+2. Open DevOps > Build Automation > Settings > Source Control.
+3. Choose **GitHub** and select `Pankaj7576/-jungle-escape-3d`.
+4. Keep the repository authorization read-only. Do not share the token or password in chat. Do not add webhook write permission while Auto-build is off.
+5. If the Git Executable setting is shown for the Windows builder, keep **Native**. Unity documents Native as the default and recommended Windows Git client for new projects. Cygwin is only needed for specific Linux/macOS symlink compatibility.
+6. Save Source Control before creating the target.
+
+The repository is public, so Build Automation can also connect without a token when its public-repository detection succeeds. If the repository is already listed and the source-control page is saved, do not recreate the GitHub token unnecessarily.
+
+## Create and run the first target
+
+1. Open DevOps > Build Automation > Configurations and select **Quick target setup**.
+2. Enter the values in the table above. The project subfolder is `UnityMigration` because that is where `Assets`, `Packages`, and `ProjectSettings` live.
+3. Save/create the target.
+4. Keep Auto-build off to conserve the free monthly build minutes.
+5. Start one manual build and inspect Build History and the complete build log.
+6. If the build succeeds, download the APK artifact and install it on Android. If it fails, retain the exact first compiler/import/Gradle error; do not infer success from the target being saved.
 
 ## Important limits and caveats
-- Unity Personal activation date in Unity Hub means local Personal activation; it is not a CI license file.
-- The current Unity manual says Personal licenses are activated by signing into Unity Hub; manual activation is not supported for Personal.
-- Unity Build Automation is the preferred official cloud route for this project because it avoids trying to export a local Personal .ulf file to GitHub Actions.
-- The free tier has a monthly build-minute/storage cap. Monitor usage. Do not enable paid overages or enter card details for this test.
-- A successful build is not guaranteed until Unity actually imports and compiles this project's scripts/packages. If the editor version is unavailable, choose a supported Unity 6 version only after deliberately updating ProjectVersion and validating the project.
-- No APK should be claimed until Build History reports success and an APK artifact is available.
+
+- The project currently includes `ProjectSettings/ProjectVersion.txt` but does not include `ProjectSettings/ProjectSettings.asset`. The Unity Cloud project link therefore remains unverified until the project is opened in Unity Editor and linked to the existing Project ID `e42882f8-3657-40d2-8402-de62e432998b`. Do not fabricate this generated settings file.
+- Unity Personal is activated by signing in to Unity Hub. Do not try to export a legacy Personal `.ulf` file or put Unity account passwords into GitHub Actions.
+- The optional `.github/workflows/unity-android.yml` uses GameCI and requires `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` secrets. It is not the recommended route for this free Personal setup and must not be expected to build until a supported CI license has been verified.
+- Unity Cloud Personal/DevOps quotas can change. Check the live dashboard usage and do not opt into paid overages.
+- A successful Unity build is not guaranteed until Unity actually imports and compiles the scripts/packages. No Unity APK should be claimed until Build History reports success and an APK artifact is available.
+
+## Official references
+
+- Build configuration: https://docs.unity.com/en-us/build-automation/basic-build-configuration/overview
+- Android SDK versions in Build Automation: https://docs.unity.com/en-us/build-automation/reference/available-android-sdk-versions
+- Supported builder operating systems: https://docs.unity.com/en-us/build-automation/reference/supported-platforms-on-each-builder-os
+- Git executable options: https://docs.unity.com/en-us/build-automation/optimize-build-speed/choose-git-executable
+- Unity Player Accounts setup: https://docs.unity.com/en-us/authentication/unity-player-accounts
