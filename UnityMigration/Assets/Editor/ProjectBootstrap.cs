@@ -200,6 +200,7 @@ namespace JungleEscape.EditorTools
             Require(ui != null, "UIFlow is missing.");
             Require(authentication != null, "JungleEscapeAuth is missing.");
             Require(eventSystem != null, "EventSystem is missing.");
+            SwipeInput.ValidateGestureClassifier();
 
             if (director != null)
             {
