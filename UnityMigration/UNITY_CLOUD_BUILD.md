@@ -49,7 +49,7 @@ The repository is public, so Build Automation can also connect without a token w
 4. Open that target's **Advanced settings**.
 5. Under **Script hooks → Pre-Export Method**, enter exactly:
    `JungleEscape.EditorTools.CloudBuildHooks.PreExport`
-   Do not add parentheses. This method is already in `Assets/Editor/CloudBuildHooks.cs`; it generates the missing demo scene, validates the scene wiring, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export.
+   Do not add parentheses. This method is already in `Assets/Editor/CloudBuildHooks.cs`; it generates the missing demo scene, validates the scene wiring, runs six deterministic swipe-input regression cases, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export.
 6. Leave the target's custom **Scenes** override at its default/unset value so the generated Editor Build Settings scene list is used. Do not select a scene path before the pre-export hook has generated it.
 7. Save Advanced settings. Keep Auto-build off to conserve free build minutes.
 8. Start one manual build and inspect Build History and the complete build log.
