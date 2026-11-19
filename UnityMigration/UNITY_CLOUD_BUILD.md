@@ -49,7 +49,7 @@ The repository is public, so Build Automation can also connect without a token w
 4. Open that target's **Advanced settings**.
 5. Under **Script hooks → Pre-Export Method**, enter exactly:
    `JungleEscape.EditorTools.CloudBuildHooks.PreExport`
-   Do not add parentheses. This method is already in `Assets/Editor/CloudBuildHooks.cs`; it generates the missing demo scene, validates the scene wiring, runs six deterministic swipe-input regression cases, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export.
+   Do not add parentheses. This method is in `Assets/Editor/CloudBuildHooks.cs`; it generates the demo scene, validates scene wiring, runs six deterministic swipe-input regression cases, confirms the active target is Android, applies the Android package ID/orientation/ARM64/IL2CPP/APK settings, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export.
 6. Leave the target's custom **Scenes** override at its default/unset value so the generated Editor Build Settings scene list is used. Do not select a scene path before the pre-export hook has generated it.
 7. Save Advanced settings. Keep Auto-build off to conserve free build minutes.
 8. Start one manual build and inspect Build History and the complete build log.
@@ -57,16 +57,18 @@ The repository is public, so Build Automation can also connect without a token w
 
 **Important:** Creating/saving the target is not the same as running a build. The pre-export hook must be configured before the first manual build; otherwise the repository currently has no committed `Assets/Scenes` folder for Build Automation to select.
 
-## Current source checks (2026-11-17)
+## Current source checks (2026-11-19)
 
-- The Unity source branch is `unity-migration/phase-1`, latest inspected commit before this documentation update: `2bb00d8563f2c953075e61da3e6ffe248fa05a03`.
-- The earlier `CS0104: Object is ambiguous` references in `Assets/Editor/ProjectBootstrap.cs` are now explicitly written as `UnityEngine.Object`. This removes that specific ambiguity from the inspected file, but a Unity Editor compile has not yet verified the whole project.
+- The Unity source branch is `unity-migration/phase-1`, inspected at commit `14f3e3c170d0b986cdf06a3e26aa7b72256131ff` before the Android build-settings fix in this update.
+- `AndroidBuild.ConfigureAndroidPlayerSettings()` is now shared by the local/GameCI build entry point and the Unity Build Automation pre-export hook. This avoids relying on uncommitted local Player Settings for the Android package ID, portrait orientation, ARM64, IL2CPP and APK (not AAB) output choice.
+- `CloudBuildHooks.PreExport()` now fails with an explicit message if Build Automation invokes the Android hook while a non-Android target is active.
+- The earlier `CS0104: Object is ambiguous` references in `Assets/Editor/ProjectBootstrap.cs` are explicitly written as `UnityEngine.Object`. This removes that specific ambiguity from the inspected file, but a Unity Editor compile has not yet verified the whole project.
 - `Assets/Scenes/JungleEscape_Demo.unity` is generated at build time by the pre-export hook; it is not currently committed.
 - The Player Accounts settings asset contains a Client ID, but the project link is not confirmed in the repository because `ProjectSettings/ProjectSettings.asset` is absent. The Unity Editor must link the existing Cloud Project ID below and save the generated project settings; do not fabricate the file.
 
 ## Important limits and caveats
 
-- The project currently includes `ProjectSettings/ProjectVersion.txt` but does not include `ProjectSettings/ProjectSettings.asset`. The Unity Cloud project link therefore remains unverified until the project is opened in Unity Editor and linked to the existing Project ID `e42882f8-3657-40d2-8402-de62e432998b`. Do not fabricate this generated settings file.
+- The project currently includes `ProjectSettings/ProjectVersion.txt` but does not include `ProjectSettings/ProjectSettings.asset`. The Unity Cloud project link therefore remains unverified until the project is opened in Unity Editor and linked to the existing Cloud Project ID `e42882f8-3657-40d2-8402-de62e432998b`. Do not fabricate this generated settings file.
 - Unity Personal is activated by signing in to Unity Hub. Do not try to export a legacy Personal `.ulf` file or put Unity account passwords into GitHub Actions.
 - The optional `.github/workflows/unity-android.yml` uses GameCI and requires `UNITY_LICENSE`, `UNITY_EMAIL`, and `UNITY_PASSWORD` secrets. It is not the recommended route for this free Personal setup and must not be expected to build until a supported CI license has been verified.
 - Unity Cloud Personal/DevOps quotas can change. Check the live dashboard usage and do not opt into paid overages.
