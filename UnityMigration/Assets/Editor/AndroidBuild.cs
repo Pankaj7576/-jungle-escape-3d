@@ -8,13 +8,12 @@ namespace JungleEscape.EditorTools
 {
     public static class AndroidBuild
     {
-        public static void Build()
+        /// <summary>
+        /// Applies the same Android identity, portrait, architecture and APK settings
+        /// for both the local/GameCI build entry point and Unity Build Automation.
+        /// </summary>
+        public static void ConfigureAndroidPlayerSettings()
         {
-            ProjectBootstrap.BuildDemoScene();
-            ProjectBootstrap.ValidateGeneratedScene();
-
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
-            EditorUserBuildSettings.buildAppBundle = false;
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.jungleescape.losttemple");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.companyName = "Jungle Escape Studio";
@@ -23,6 +22,22 @@ namespace JungleEscape.EditorTools
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.stripEngineCode = true;
+
+            // Direct-install testing requires an APK, not a Play Store app bundle.
+            EditorUserBuildSettings.buildAppBundle = false;
+
+            Debug.Log("Jungle Escape Android settings applied: package=com.jungleescape.losttemple, portrait, ARM64, IL2CPP, APK.");
+        }
+
+        public static void Build()
+        {
+            ProjectBootstrap.BuildDemoScene();
+            ProjectBootstrap.ValidateGeneratedScene();
+
+            if (!EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android))
+                throw new System.Exception("Could not switch the active Unity build target to Android.");
+
+            ConfigureAndroidPlayerSettings();
 
             string output = Path.GetFullPath(Path.Combine(Application.dataPath, "../Builds/Android/JungleEscape.apk"));
             Directory.CreateDirectory(Path.GetDirectoryName(output));
