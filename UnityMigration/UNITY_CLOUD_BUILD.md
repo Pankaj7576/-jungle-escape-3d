@@ -49,7 +49,7 @@ The repository is public, so Build Automation can also connect without a token w
 4. Open that target's **Advanced settings**.
 5. Under **Script hooks → Pre-Export Method**, enter exactly:
    `JungleEscape.EditorTools.CloudBuildHooks.PreExport`
-   Do not add parentheses. This method is in `Assets/Editor/CloudBuildHooks.cs`; it generates the demo scene, validates scene wiring, runs six deterministic swipe-input regression cases, confirms the active target is Android, applies the Android package ID/orientation/ARM64/IL2CPP/APK settings, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export.
+   Do not add parentheses. This method is in `Assets/Editor/CloudBuildHooks.cs`; it generates the demo scene, validates scene wiring, runs six deterministic swipe-input regression cases, applies the Android package ID/orientation/ARM64/IL2CPP/APK settings, and registers `Assets/Scenes/JungleEscape_Demo.unity` in `EditorBuildSettings.scenes` before export. The hook does not switch the active build target; the selected Build Automation target remains responsible for selecting Android.
 6. Leave the target's custom **Scenes** override at its default/unset value so the generated Editor Build Settings scene list is used. Do not select a scene path before the pre-export hook has generated it.
 7. Save Advanced settings. Keep Auto-build off to conserve free build minutes.
 8. Start one manual build and inspect Build History and the complete build log.
@@ -61,7 +61,7 @@ The repository is public, so Build Automation can also connect without a token w
 
 - The Unity source branch is `unity-migration/phase-1`, inspected at commit `14f3e3c170d0b986cdf06a3e26aa7b72256131ff` before the Android build-settings fix in this update.
 - `AndroidBuild.ConfigureAndroidPlayerSettings()` is now shared by the local/GameCI build entry point and the Unity Build Automation pre-export hook. This avoids relying on uncommitted local Player Settings for the Android package ID, portrait orientation, ARM64, IL2CPP and APK (not AAB) output choice.
-- `CloudBuildHooks.PreExport()` now fails with an explicit message if Build Automation invokes the Android hook while a non-Android target is active.
+- `CloudBuildHooks.PreExport()` applies those Android settings without changing the active build target during the pre-export hook.
 - The earlier `CS0104: Object is ambiguous` references in `Assets/Editor/ProjectBootstrap.cs` are explicitly written as `UnityEngine.Object`. This removes that specific ambiguity from the inspected file, but a Unity Editor compile has not yet verified the whole project.
 - `Assets/Scenes/JungleEscape_Demo.unity` is generated at build time by the pre-export hook; it is not currently committed.
 - The Player Accounts settings asset contains a Client ID, but the project link is not confirmed in the repository because `ProjectSettings/ProjectSettings.asset` is absent. The Unity Editor must link the existing Cloud Project ID below and save the generated project settings; do not fabricate the file.
@@ -78,8 +78,8 @@ The repository is public, so Build Automation can also connect without a token w
 
 - Build configuration: https://docs.unity.com/en-us/build-automation/basic-build-configuration/overview
 - Advanced settings and script hooks: https://docs.unity.com/en-us/build-automation/advanced-build-configuration/overview
-- Pre-export method hook: https://docs.unity.cn/Manual/UnityCloudBuildPreAndPostExportMethods.html
-- Android SDK versions in Build Automation: https://docs.unity.com/en-us/build-automation/reference/available-android-sdk-versions
+- Pre-export method hook: https://docs.unity.com/en-us/build-automation/advanced-build-configuration/run-custom-scripts-during-the-build-process
+- Android SDK versions: https://docs.unity.com/en-us/build-automation/reference/available-android-sdk-versions
 - Supported builder operating systems: https://docs.unity.com/en-us/build-automation/reference/supported-platforms-on-each-builder-os
 - Git executable options: https://docs.unity.com/en-us/build-automation/optimize-build-speed/choose-git-executable
 - Unity Player Accounts setup: https://docs.unity.com/en-us/authentication/unity-player-accounts
