@@ -1,4 +1,5 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace JungleEscape.EditorTools
@@ -14,7 +15,15 @@ namespace JungleEscape.EditorTools
                 ProjectBootstrap.BuildDemoScene();
                 Debug.Log("Jungle Escape: demo scene generation completed; validating scene.");
                 ProjectBootstrap.ValidateGeneratedScene();
-                Debug.Log("Jungle Escape: demo scene is ready for Android export.");
+
+                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+                    throw new InvalidOperationException(
+                        "Jungle Escape Android PreExport requires the active build target to be Android, but it is " +
+                        EditorUserBuildSettings.activeBuildTarget + ".");
+
+                AndroidBuild.ConfigureAndroidPlayerSettings();
+                Debug.Log("Jungle Escape: Android identity, portrait orientation, ARM64, IL2CPP and APK output settings are ready.");
+                Debug.Log("Jungle Escape: demo scene and Android player settings are ready for export.");
             }
             catch (Exception exception)
             {
