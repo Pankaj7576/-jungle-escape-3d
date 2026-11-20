@@ -4,11 +4,11 @@ All listed sources below are free at the time checked. Re-check the licence and 
 
 ## Hero character and animations
 
-### Existing black-suit character in this repository
-- File: ../public/models/character_black_suit_rigged.glb
-- Use: first inspect this model in Blender. Check the rig, material maps, scale, bind pose and animation clips; the filename alone does not prove it has the required run/jump/slide/fall actions.
-- Licence: not verified in this repository metadata. Do not ship it commercially until ownership/licence is confirmed.
-- Blender workflow: import GLB, repair/retarget the rig if necessary, then export FBX into Assets/Characters.
+### Black-suit character used by the separate Three.js release
+- File: ../../public/models/character_black_suit_rigged.glb relative to this UnityMigration/Blender folder. This file belongs to the root Three.js game, not the UnityMigration/Assets folder.
+- Use: the model has not been approved for Unity use. Its licence is not verified in repository metadata, and its deep node hierarchy previously exceeded the Blender glTF importer's recursion limit.
+- Licence: not verified. Do not ship it commercially or copy it into the Unity APK until ownership/licence is confirmed.
+- Conversion: no black-suit-to-FBX conversion script is included in this branch. Do not follow instructions for a nonexistent converter; first resolve the licence and import/hierarchy problem, then create and validate a clean FBX separately.
 
 ### CC0 animation library
 - KinemIQ free CC0 animation pack: https://kinemiq.itch.io/free-game-animations
@@ -47,4 +47,4 @@ All listed sources below are free at the time checked. Re-check the licence and 
 5. Do not add a model to the APK until the licence, rig, scale, animation and Android performance are checked.
 
 ## Current status
-The CC0 KinemIQ animation pack has been downloaded into Assets/Characters/Animations/KinemIQ by GitHub Actions. Four Blender-generated bridge FBX/GLB modules are also committed under Assets/Environment/Generated. The current guardian pipeline generates an original procedural rigged ape using Blender/prepare_gorilla.py rather than downloading the static Grab3D reference. The current Unity scene uses the CC0 KinemIQ mannequin recoloured as a dark expedition runner because the legacy black-suit GLB could not be safely imported/converted. A licensed replacement FBX can be dropped into Assets/Characters/Explorer_BlackSuit.fbx later.
+The CC0 KinemIQ animation pack and mannequin are committed under Assets/Characters/Animations/KinemIQ. Four Blender-generated bridge FBX/GLB modules are committed under Assets/Environment/Generated. The current guardian pipeline generates an original procedural rigged ape using Blender/prepare_gorilla.py rather than downloading the static Grab3D reference. The current Unity scene uses the CC0 KinemIQ mannequin recoloured as a dark expedition runner because the legacy black-suit GLB could not be safely imported/converted. A licensed replacement FBX can be added as Assets/Characters/Explorer_BlackSuit.fbx after its source and conversion are validated.
