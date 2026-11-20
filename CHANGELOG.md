@@ -3,7 +3,7 @@
 ## 1.006
 - Centralized the three-lane transition in a small, tested helper so only explicit `left` or `right` input can change the lane; all other actions preserve the current lane and movement clamps at the outer lanes.
 - Added regression coverage for left/right movement, lane boundaries, non-lane actions and invalid lane state.
-- Verification: Android CI is triggered by this release branch; test/build results are pending. Real-device gameplay testing remains required.
+- Verification: GitHub Actions run `44699669453` passed JavaScript syntax checks, all 17 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14612561049` was downloaded; ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,133 bytes; SHA-256 `6466112861d0ae20059b12302d91457394328a8716397f8b9a01cc91ca71dee4`). Real-device installation, input and FPS testing remain required.
 
 
 ## 1.005
