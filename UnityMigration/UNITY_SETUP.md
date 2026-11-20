@@ -1,18 +1,18 @@
 # Unity Scene & Prefab Setup
 
-The repository now contains a Unity 6 project skeleton and an Editor tool that creates a playable greybox scene automatically. The scene uses placeholder geometry so mechanics can be tested before professional art is imported.
+The repository contains a Unity 6 project skeleton and an Editor tool that creates a playable greybox scene. The scene is a mechanics prototype, not finished production art.
 
 ## A. Open and generate the project
 
-1. Install Unity Hub and a Unity 6 LTS editor with Android Build Support (SDK, NDK and OpenJDK) on a Windows/Linux desktop or legitimate cloud workstation.
+1. Install Unity Hub and Unity 6000.0.60f1 with Android Build Support (SDK, NDK and OpenJDK) on a Windows/Linux desktop or supported cloud workstation.
 2. Open the UnityMigration folder itself as the Unity project. Let Package Manager install URP and uGUI.
 3. Ensure Active Input Handling is **Input Manager (Old)** or **Both**; the current swipe script uses the legacy Input API.
-4. In GitHub Actions, check **Generate Blender Track Assets**; after a successful run, the FBX modules should appear in Assets/Environment/Generated. The same files can be generated locally with Blender/generate_track_modules.py.
+4. The Generate Blender Track Assets workflow has generated FBX modules under Assets/Environment/Generated. If regenerating locally, use Blender/generate_track_modules.py.
 5. In Unity, choose **Tools > Jungle Escape > Generate Demo Scene**.
 6. Open Assets/Scenes/JungleEscape_Demo.unity and press Play.
 7. Keyboard test: Left/Right or A/D to change lane, Space/Up to jump, Down/S to slide. Android uses directional swipes.
 
-The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, a greybox explorer and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. If Assets/Characters/Explorer_BlackSuit.fbx exists, it imports that model and builds a basic Animator Controller from the clips found in the FBX; otherwise it uses the primitive explorer placeholder. Later spawned straight/turn modules receive extra procedural coin rows and a slide-or-jump hazard; gap modules remain clear for the jump. It also creates a mobile URP asset. These are prototype visuals, not final art.
+The generator creates reusable straight, left/right quarter-turn and broken-gap prefabs, a connected track, an explorer placeholder and guardian, camera, score HUD, main menu, gem revive overlay, coins/gems, and slide/jump tutorial hazards. The current hero is the CC0 KinemIQ mannequin recoloured dark with a backpack; it is not the finished black-suit hero. Later spawned straight/turn modules receive procedural coin rows and a slide-or-jump hazard; gap modules remain clear for the jump. The generator also creates a mobile URP asset. These are prototype visuals, not final art.
 
 ## B. Track module authoring
 
@@ -32,14 +32,14 @@ Keep a separate low-poly deck collider from decorative stone art. Railings must 
 
 ### Runner
 - CharacterController: height about 1.8 m, radius about 0.34 m, center Y about 0.9 m.
-- RunnerMotor handles movement and track-relative lane offsets.
+- RunnerMotor handles movement and track-relative lane offsets. Lane changes are requested through MoveLane; its Update loop only corrects toward the selected lane and does not choose a new lane by itself.
 - Keep character animation in-place; disable Animator Apply Root Motion.
 - Connect RunnerMotor fall handler to GameBootstrap.OnRunnerCaught (the generated demo scene does this automatically).
 
 ### Guardian
 - GuardianChase follows behind the runner, closes the gap after stumbles and falls back after boosts/clean movement.
 - Keep the gameplay collider simple (capsule); the visual guardian can use a Generic rig.
-- Connect its caught event to GameBootstrap.OnRunnerCaught (the generated demo scene does this automatically).
+- Guardian_Ape.fbx is a procedural prototype rig, not a photorealistic gorilla. Connect its caught event to GameBootstrap.OnRunnerCaught (the generated demo scene does this automatically).
 
 ### Camera
 - RunnerCamera uses a smoothed follow arm and SphereCast obstruction checks.
@@ -60,27 +60,31 @@ The gem count is local PlayerPrefs prototype currency. It is not an online walle
 
 ## E. Blender character and guardian pipeline
 
-See Blender/ASSET_PIPELINE.md for skeletons, clip naming, export settings, mobile budgets and modular bridge modelling. Run Blender/convert_black_suit_to_fbx.py to prepare the repository black-suit GLB as Assets/Characters/Explorer_BlackSuit.fbx; then re-run the scene generator. Required hero clips: Idle, Run, Jump, Slide, Fall/Death and optional Stumble. Guardian clips: Idle, Run, Roar, Catch and Fall. Keep movement clips in-place and let Unity drive locomotion.
+See Blender/ASSET_PIPELINE.md for skeletons, clip naming, export settings, mobile budgets and modular bridge modelling.
+
+**Current hero limitation:** Assets/Characters/Explorer_BlackSuit.fbx is not present in this branch. The current Unity scene uses the CC0 KinemIQ mannequin from Assets/Characters/Animations/KinemIQ/KinemIQ_Mannequin.fbx, recoloured as a dark expedition outfit with a backpack. The black-suit GLB belongs to the separate Three.js release at ../../public/models/character_black_suit_rigged.glb (relative to UnityMigration); its licence is not verified in this repository and its deep node hierarchy has not been safely imported into Blender. No Blender/convert_black_suit_to_fbx.py script exists in this branch. Do not treat that script as available or ship the GLB until licence, hierarchy, rig, scale and animation are verified. Only then add a tested Explorer_BlackSuit.fbx and rerun the scene generator.
+
+Required hero clips: Idle, Run, Jump, Slide, Fall/Death and optional Stumble. Guardian clips: Idle, Run, Roar, Catch and Fall. Keep movement clips in-place and let Unity drive locomotion. The procedural Guardian_Ape.fbx is a prototype Generic rig, not final creature art.
 
 ## F. Android APK cloud build
 
-Preferred route: use official Unity Build Automation, not a manually exported Personal .ulf file. See [UNITY_CLOUD_BUILD.md](UNITY_CLOUD_BUILD.md) for mobile-friendly instructions.
+Preferred route: use official Unity Build Automation, not a manually exported Personal .ulf file. See UNITY_CLOUD_BUILD.md for mobile-friendly instructions.
 
 Key configuration:
 - Unity Dashboard → DevOps → Build Automation.
-- GitHub repository: `Pankaj7576/-jungle-escape-3d`.
-- Branch: `unity-migration/phase-1`.
-- Project subfolder path: `UnityMigration`.
-- Unity version: auto-detect from `ProjectSettings/ProjectVersion.txt` (currently `6000.0.60f1`).
+- GitHub repository: Pankaj7576/-jungle-escape-3d.
+- Branch: unity-migration/phase-1.
+- Project subfolder path: UnityMigration.
+- Unity version: auto-detect from ProjectSettings/ProjectVersion.txt (currently 6000.0.60f1).
 - Platform: Android.
 - Output: APK, not AAB, for direct phone testing.
 - Keep auto-build off initially to conserve the free monthly build minutes.
 
-Unity Cloud Personal currently includes 200 Windows build minutes/month and 5 GB DevOps storage. Monitor usage and do not opt into paid overages. A successful build and downloadable APK artifact are required before claiming an APK exists.
+**Project-link blocker:** ProjectSettings/ProjectSettings.asset is absent from the repository. Open UnityMigration in the Unity Editor, link the existing Cloud Project ID documented in UNITY_AUTH_SETUP.md, and save the project before expecting Unity Gaming Services login to initialize. Do not fabricate the generated settings file or create a second Cloud Project.
 
-Unity Personal is activated by signing in to Unity Hub. Current Unity documentation does not support manual Personal activation, so the Hub Activation Date is not a GitHub Actions `UNITY_LICENSE` secret.
+Unity Cloud quotas can change. Check live usage and do not opt into paid overages. A successful build and downloadable APK artifact are required before claiming a Unity APK exists.
 
-The optional `.github/workflows/unity-android.yml` remains for a future supported CI license arrangement; it is not the recommended route for this free Personal setup. Do not share passwords, tokens or license data.
+Unity Personal is activated by signing in to Unity Hub. The optional .github/workflows/unity-android.yml remains for a future supported CI license arrangement; it is not the recommended route for this free Personal setup. Do not share passwords, tokens or license data.
 
 ## G. Validation order
 
