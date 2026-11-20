@@ -8,6 +8,7 @@ on:
       - release/1.003-input-stability
       - release/1.004-track-performance
       - release/1.005-render-loop-efficiency
+      - release/1.006-lane-guard
   pull_request:
     branches:
       - main
