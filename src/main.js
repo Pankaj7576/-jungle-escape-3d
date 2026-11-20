@@ -4,6 +4,7 @@ import { TrackSystem, makeWorldObstacle, makeCoin } from './track-system.js';
 import { RunnerCharacter, TempleBeast } from './character-system.js';
 import { RunnerCamera } from './camera-system.js';
 import { bindGameInput } from './input-system.js';
+import { applyLaneInput } from './lane-control.js';
 import { createRenderLoop } from './render-loop.js';
 
 const $ = id => document.getElementById(id);
@@ -210,8 +211,9 @@ $('resume').onclick = () => {
 
 function action(name) {
   if (!state.active || state.paused) return;
-  if (name === 'left') state.lane = Math.max(0, state.lane - 1);
-  if (name === 'right') state.lane = Math.min(2, state.lane + 1);
+  if (name === 'left' || name === 'right') {
+    state.lane = applyLaneInput(state.lane, name);
+  }
   if (name === 'jump' && state.jumpY <= 0 && state.slideTime <= 0) {
     state.jumpVelocity = 7.2; runner.play('jump');
   }
