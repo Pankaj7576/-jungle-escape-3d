@@ -1,5 +1,11 @@
 # Jungle Escape 3D — Version History
 
+## 1.006
+- Centralized the three-lane transition in a small, tested helper so only explicit `left` or `right` input can change the lane; all other actions preserve the current lane and movement clamps at the outer lanes.
+- Added regression coverage for left/right movement, lane boundaries, non-lane actions and invalid lane state.
+- Verification: Android CI is triggered by this release branch; test/build results are pending. Real-device gameplay testing remains required.
+
+
 ## 1.005
 - Added a visibility-aware render loop that stops scheduling animation frames when the app is backgrounded or navigated away, then resumes cleanly without a large catch-up simulation step.
 - Added deterministic regression tests for single-frame scheduling, bounded delta time, stop/resume and disposal.
