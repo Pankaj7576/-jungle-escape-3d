@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { TrackSystem, makeWorldObstacle, makeCoin } from './track-system.js';
+import { disposeWorldObject } from './resource-disposal.js';
 import { RunnerCharacter, TempleBeast } from './character-system.js';
 import { RunnerCamera } from './camera-system.js';
 import { bindGameInput } from './input-system.js';
@@ -181,7 +182,10 @@ function resetRun() {
   state.elapsed = 0; state.speed = 12; state.distance = 0; state.coins = 0;
   state.magnetTime = 0; state.boostTime = 0; state.chaserGap = 5.5;
   state.reviveUsed = false; state.spawnAt = 18; state.lastPowerup = 0;
-  for (const item of [...obstacles, ...coinVisuals, ...pickups]) scene.remove(item.mesh);
+  for (const item of [...obstacles, ...coinVisuals, ...pickups]) {
+    scene.remove(item.mesh);
+    disposeWorldObject(item.mesh);
+  }
   obstacles.length = 0; coinVisuals.length = 0; pickups.length = 0;
   $('distance').textContent = '0'; $('coins').textContent = '0';
   track.reset();
@@ -237,13 +241,18 @@ function collectCoins(dt, runnerPose) {
       coin.mesh.position.lerp(target, 1 - Math.exp(-dt * 5));
     }
     if (Math.abs(distance) < 1.05 && (coin.lane === state.lane || state.magnetTime > 0)) {
-      coin.taken = true; scene.remove(coin.mesh); state.coins++;
+      coin.taken = true;
+      scene.remove(coin.mesh);
+      disposeWorldObject(coin.mesh);
+      state.coins++;
     }
   }
   for (const power of pickups) {
     if (power.taken) continue;
     if (Math.abs(power.progress - state.progress) < 1.15 && power.lane === state.lane) {
-      power.taken = true; scene.remove(power.mesh);
+      power.taken = true;
+      scene.remove(power.mesh);
+      disposeWorldObject(power.mesh);
       if (power.type === 'magnet') state.magnetTime = 10;
       if (power.type === 'boost') state.boostTime = 5.5;
     }
@@ -309,6 +318,7 @@ function updateWorld(dt) {
   for (const item of [...obstacles, ...coinVisuals, ...pickups]) {
     if (item.progress < state.progress - 32) {
       scene.remove(item.mesh);
+      disposeWorldObject(item.mesh);
       const list = item.mesh.userData.kind ? obstacles : coinVisuals.includes(item) ? coinVisuals : pickups;
       const index = list.indexOf(item); if (index >= 0) list.splice(index, 1);
     }

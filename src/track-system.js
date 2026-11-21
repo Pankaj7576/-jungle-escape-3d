@@ -192,6 +192,7 @@ export class TrackSystem {
 export function makeWorldObstacle(scene, materials, pose, lane, kind) {
   const group = new THREE.Group();
   group.userData.cameraBlocker = true;
+  group.userData.ownedMaterials = [];
   group.position.copy(pose.position);
   group.position.y = 0;
   group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), pose.tangent);
@@ -214,12 +215,14 @@ export function makeWorldObstacle(scene, materials, pose, lane, kind) {
 
 export function makeCoin(scene, materials, pose, lane, isPowerup = false, type = 'magnet') {
   const group = new THREE.Group();
+  group.userData.ownedMaterials = [];
   group.position.copy(pose.position);
   group.position.addScaledVector(pose.right, lane);
   group.position.y += isPowerup ? 1.15 : 1.0;
   group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pose.tangent);
   const color = isPowerup ? (type === 'magnet' ? 0x55d9ff : 0xffa52f) : 0xd8a93e;
   const material = isPowerup ? new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: .55, metalness: .45, roughness: .25 }) : materials.gold;
+  if (isPowerup) group.userData.ownedMaterials.push(material);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(isPowerup ? .42 : .28, isPowerup ? .1 : .075, 8, 18), material);
   ring.rotation.y = Math.PI / 2; ring.castShadow = true; group.add(ring);
   if (isPowerup) {

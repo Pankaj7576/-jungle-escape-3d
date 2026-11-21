@@ -1,5 +1,11 @@
 # Jungle Escape 3D — Version History
 
+## 1.007
+- Added explicit GPU-resource cleanup for obstacles, coins and power-ups when collected, pruned behind the runner, or removed during a run reset. Shared scene materials remain alive; only power-up-owned materials are disposed.
+- Added unit coverage for geometry de-duplication, owned-versus-shared material handling and idempotent cleanup.
+- Verification: pending this release's GitHub Actions run; real-device FPS and long-session memory testing remain required.
+
+
 ## 1.006
 - Centralized the three-lane transition in a small, tested helper so only explicit `left` or `right` input can change the lane; all other actions preserve the current lane and movement clamps at the outer lanes.
 - Added regression coverage for left/right movement, lane boundaries, non-lane actions and invalid lane state.

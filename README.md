@@ -2,7 +2,7 @@
 
 A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
 
-**Current game release: `1.006`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Previous snapshots are preserved.
+**Current game release: `1.007`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Previous snapshots are preserved.
 
 ## Gameplay systems
 - Procedural modular track with straight sections, 90-degree left/right curves and broken bridge gaps; instanced stone parapet posts reduce repeated draw calls.
@@ -12,6 +12,7 @@ A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
 - Procedural articulated temple guardian, coin magnet, speed boost and one-time gem revive.
 - Portrait-first touch controls with single-pointer swipe filtering, keyboard repeat protection, pause, HUD and main menu.
 - Visibility-aware rendering pauses animation-frame work while the app is backgrounded and resumes with a reset frame clock.
+- Removed obstacle, coin and power-up meshes release their owned GPU geometries/materials on collection, pruning and run reset.
 
 ## Free asset policy
 The project uses Three.js and the existing bundled character model. Environment, obstacles, guardian, pickups and fallback animations are generated in code; no paid asset dependency is required.
