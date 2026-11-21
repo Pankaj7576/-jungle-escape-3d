@@ -3,7 +3,7 @@
 ## 1.007
 - Added explicit GPU-resource cleanup for obstacles, coins and power-ups when collected, pruned behind the runner, or removed during a run reset. Shared scene materials remain alive; only power-up-owned materials are disposed.
 - Added unit coverage for geometry de-duplication, owned-versus-shared material handling and idempotent cleanup.
-- Verification: pending this release's GitHub Actions run; real-device FPS and long-session memory testing remain required.
+- Verification: GitHub Actions run `44881713514` passed JavaScript syntax checks, all 21 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14697639751` was downloaded and checked: ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,302 bytes; SHA-256 `c97aeb263d557eac3c684ba5d478e83acd6a17e769e3c0d94d30e9e29afdd528`). Real-device FPS, long-session memory and gameplay testing remain required.
 
 
 ## 1.006
