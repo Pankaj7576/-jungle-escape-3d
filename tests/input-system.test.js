@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { bindGameInput, classifySwipe } from '../src/input-system.js';
 
 class FakeTarget {
-  constructor() { this.listeners = new Map(); this.buttons = []; this.dataset = {}; }
+  constructor() { this.listeners = new Map(); this.buttons = []; this.dataset = {}; this.hidden = false; }
   addEventListener(type, callback) {
     if (!this.listeners.has(type)) this.listeners.set(type, []);
     this.listeners.get(type).push(callback);
@@ -13,12 +13,7 @@ class FakeTarget {
   }
   querySelectorAll() { return this.buttons; }
   emit(type, values = {}) {
-    const event = {
-      target: this,
-      preventDefault() {},
-      stopPropagation() {},
-      ...values
-    };
+    const event = { target: this, preventDefault() {}, stopPropagation() {}, ...values };
     for (const callback of this.listeners.get(type) || []) callback(event);
   }
 }
@@ -82,4 +77,43 @@ test('held keyboard keys do not auto-repeat lane changes', () => {
   keyboard.emit('keydown', { ...key, repeat: false });
   keyboard.emit('keydown', { ...key, repeat: true });
   assert.deepEqual(actions, ['right']);
+});
+
+test('app blur and pagehide cancel unfinished gestures', () => {
+  const canvas = new FakeTarget();
+  const controls = new FakeTarget();
+  const keyboard = new FakeTarget();
+  const actions = [];
+  bindGameInput({ canvas, controlsRoot: controls, keyboardTarget: keyboard, action: name => actions.push(name) });
+
+  canvas.emit('pointerdown', { pointerId: 10, button: 0, isPrimary: true, clientX: 200, clientY: 100 });
+  keyboard.emit('blur');
+  keyboard.emit('pointerup', { pointerId: 10, clientX: 120, clientY: 100 });
+  assert.deepEqual(actions, []);
+
+  canvas.emit('pointerdown', { pointerId: 11, button: 0, isPrimary: true, clientX: 200, clientY: 100 });
+  keyboard.emit('pagehide');
+  keyboard.emit('pointerup', { pointerId: 11, clientX: 120, clientY: 100 });
+  assert.deepEqual(actions, []);
+});
+
+test('hidden visibility cancels an interrupted gesture but allows a fresh one after resume', () => {
+  const canvas = new FakeTarget();
+  const controls = new FakeTarget();
+  const keyboard = new FakeTarget();
+  const visibility = new FakeTarget();
+  const actions = [];
+  bindGameInput({ canvas, controlsRoot: controls, keyboardTarget: keyboard, visibilityTarget: visibility, action: name => actions.push(name) });
+
+  canvas.emit('pointerdown', { pointerId: 20, button: 0, isPrimary: true, clientX: 200, clientY: 100 });
+  visibility.hidden = true;
+  visibility.emit('visibilitychange');
+  keyboard.emit('pointerup', { pointerId: 20, clientX: 120, clientY: 100 });
+  assert.deepEqual(actions, []);
+
+  visibility.hidden = false;
+  visibility.emit('visibilitychange');
+  canvas.emit('pointerdown', { pointerId: 21, button: 0, isPrimary: true, clientX: 200, clientY: 100 });
+  keyboard.emit('pointerup', { pointerId: 21, clientX: 120, clientY: 100 });
+  assert.deepEqual(actions, ['left']);
 });

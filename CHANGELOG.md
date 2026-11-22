@@ -1,34 +1,35 @@
 # Jungle Escape 3D — Version History
 
+## 1.008
+- Cancel incomplete canvas swipe gestures when the app loses focus, is hidden, or begins page navigation; release pointer capture defensively so a stale pointer-up cannot move the runner after resume.
+- Added regression tests for blur, pagehide, hidden visibility, and a fresh gesture after the app resumes.
+- Local verification: input-system syntax check passed and all 9 input-system Node tests passed. Full GitHub Actions gameplay tests, Vite build, Capacitor sync, and Android APK build are pending for this commit.
+
 ## 1.007
 - Added explicit GPU-resource cleanup for obstacles, coins and power-ups when collected, pruned behind the runner, or removed during a run reset. Shared scene materials remain alive; only power-up-owned materials are disposed.
 - Added unit coverage for geometry de-duplication, owned-versus-shared material handling and idempotent cleanup.
-- Verification: GitHub Actions run `44881713514` passed JavaScript syntax checks, all 21 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14697639751` was downloaded and checked: ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,302 bytes; SHA-256 `c97aeb263d557eac3c684ba5d478e83acd6a17e769e3c0d94d30e9e29afdd528`). Real-device FPS, long-session memory and gameplay testing remain required.
-
+- Verification: GitHub Actions run 44881713514 passed JavaScript syntax checks, all 21 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle assembleDebug and artifact upload. Artifact 14697639751 was downloaded and checked: ZIP integrity passed and app-debug.apk is a valid Android package (4,304,302 bytes; SHA-256 c97aeb263d557eac3c684ba5d478e83acd6a17e769e3c0d94d30e9e29afdd528). Real-device FPS, long-session memory and gameplay testing remain required.
 
 ## 1.006
-- Centralized the three-lane transition in a small, tested helper so only explicit `left` or `right` input can change the lane; all other actions preserve the current lane and movement clamps at the outer lanes.
+- Centralized the three-lane transition in a small, tested helper so only explicit left or right input can change the lane; all other actions preserve the current lane and movement clamps at the outer lanes.
 - Added regression coverage for left/right movement, lane boundaries, non-lane actions and invalid lane state.
-- Verification: GitHub Actions run `44699669453` passed JavaScript syntax checks, all 17 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14612561049` was downloaded; ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,133 bytes; SHA-256 `6466112861d0ae20059b12302d91457394328a8716397f8b9a01cc91ca71dee4`). Real-device installation, input and FPS testing remain required.
-
+- Verification: GitHub Actions run 44699669453 passed JavaScript syntax checks, all 17 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle assembleDebug and artifact upload. Artifact 14612561049 was downloaded; ZIP integrity passed and app-debug.apk is a valid Android package (4,304,133 bytes; SHA-256 6466112861d0ae20059b12302d91457394328a8716397f8b9a01cc91ca71dee4). Real-device installation, input and FPS testing remain required.
 
 ## 1.005
 - Added a visibility-aware render loop that stops scheduling animation frames when the app is backgrounded or navigated away, then resumes cleanly without a large catch-up simulation step.
 - Added deterministic regression tests for single-frame scheduling, bounded delta time, stop/resume and disposal.
-- Verification: GitHub Actions run `43689238765` passed JavaScript syntax checks, all 13 Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup, Gradle `assembleDebug` and artifact upload. Artifact `14151398292` was downloaded; ZIP integrity passed and `app-debug.apk` is a valid Android package (4,304,058 bytes). On-device install, background/resume and FPS testing remain.
-
+- Verification: GitHub Actions run 43689238765 passed JavaScript syntax checks, all 13 Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup, Gradle assembleDebug and artifact upload. Artifact 14151398292 was downloaded; ZIP integrity passed and app-debug.apk is a valid Android package (4,304,058 bytes). On-device install, background/resume and FPS testing remain.
 
 ## 1.004
 - Reduced repeated track geometry draw calls by batching the 26 stone parapet posts on each straight or curved segment into one InstancedMesh while preserving their positions, materials and shadows.
 - Added automated regression tests for straight and curved track post counts and mesh batching.
-- Verification: GitHub Actions run `43569786547` passed JavaScript checks, all Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup and Android debug APK build. The APK artifact was downloaded and validated as an Android package; on-device gameplay and frame-rate testing remain.
+- Verification: GitHub Actions run 43569786547 passed JavaScript checks, all Node regression tests, Vite production build, Capacitor Android sync, portrait manifest setup and Android debug APK build. The APK artifact was downloaded and validated as an Android package; on-device gameplay and frame-rate testing remain.
 
 ## 1.003
 - Hardened lane input: canvas swipes are handled as one primary-pointer gesture with a 36 px dead zone and ambiguous-diagonal rejection.
 - Isolated on-screen control presses from canvas swipes and ignored keyboard auto-repeat so holding a direction cannot continuously move lanes.
 - Added automated Node regression tests for tap jitter, left/right swipes, jump/slide swipes and ambiguous diagonals.
 - Android workflow now runs the input regression tests before building the portrait debug APK.
-
 
 ## 1.002
 - Rebuilt gameplay around a procedural modular track system that generates and recycles straight, 90-degree left/right turn, and broken-gap sections.
@@ -45,11 +46,11 @@
 
 ## 1.00
 - Baseline snapshot: Himalayan valley scenery, modern suspension bridge, and refined jump/slide obstacles.
-- Rollback snapshot branch: `versions/1.00`.
+- Rollback snapshot branch: versions/1.00.
 
 ## Versioning rule
-- Keep the current release number in the root `VERSION` file.
-- Increase the final numeric part by 0.001 for every accepted game update: `1.00` → `1.001` → `1.002` → `1.003`.
-- Every release must have a matching snapshot branch named `versions/<version>` pointing to that release's exact commit.
+- Keep the current release number in the root VERSION file.
+- Increase the final numeric part by 0.001 for every accepted game update: 1.00 → 1.001 → 1.002 → 1.003.
+- Every release must have a matching snapshot branch named versions/<version> pointing to that release's exact commit.
 - Add a numbered changelog entry describing the update and its build status.
-- Never overwrite or delete old version snapshot branches. To roll back, restore `main` to the selected snapshot commit/branch after confirming the requested version.
+- Never overwrite or delete old version snapshot branches. To roll back, restore main to the selected snapshot commit/branch after confirming the requested version.
