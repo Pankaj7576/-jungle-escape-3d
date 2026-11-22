@@ -3,7 +3,7 @@
 ## 1.008
 - Cancel incomplete canvas swipe gestures when the app loses focus, is hidden, or begins page navigation; release pointer capture defensively so a stale pointer-up cannot move the runner after resume.
 - Added regression tests for blur, pagehide, hidden visibility, and a fresh gesture after the app resumes.
-- Local verification: input-system syntax check passed and all 9 input-system Node tests passed. Full GitHub Actions gameplay tests, Vite build, Capacitor sync, and Android APK build are pending for this commit.
+- Verification: GitHub Actions run 44999970978 passed JavaScript syntax checks, all 23 Node tests (0 failures), Vite production build, Capacitor Android sync, portrait manifest setup, Gradle assembleDebug and artifact upload. Artifact 14745457278 was downloaded and checked: ZIP integrity passed and app-debug.apk is a valid Android package (4,304,423 bytes; SHA-256 598f7fdfdd034bc75f1f1e8503fe893d637047be4ef9397a165e5e61e8f554d1). Real-device installation, interrupted-touch and FPS testing remain required.
 
 ## 1.007
 - Added explicit GPU-resource cleanup for obstacles, coins and power-ups when collected, pruned behind the runner, or removed during a run reset. Shared scene materials remain alive; only power-up-owned materials are disposed.
