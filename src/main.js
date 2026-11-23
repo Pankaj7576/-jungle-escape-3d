@@ -5,7 +5,7 @@ import { TrackSystem } from './track-system.js';
 import './style.css';
 const $=id=>document.getElementById(id),canvas=$('world');
 const scene=new THREE.Scene();const UNITY_FOG_COLOR=0x47524a;scene.background=new THREE.Color(UNITY_FOG_COLOR);scene.fog=new THREE.FogExp2(UNITY_FOG_COLOR,0.008);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,130);camera.position.set(0,6.1,10.8);
+const camera=new THREE.PerspectiveCamera(64,innerWidth/innerHeight,.1,180);camera.position.set(0,7.2,13.5);
 // Graphics are permanently locked to the Super Smooth profile. No quality selector or user override is exposed.
 const GRAPHICS={pixelRatio:1.5,shadows:true,shadowMap:THREE.PCFSoftShadowMap,toneMapping:THREE.ACESFilmicToneMapping,exposure:1.05};
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=GRAPHICS.shadows;renderer.shadowMap.type=GRAPHICS.shadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=GRAPHICS.toneMapping;renderer.toneMappingExposure=GRAPHICS.exposure;renderer.setClearColor(UNITY_FOG_COLOR);
@@ -50,8 +50,18 @@ function prepareFBXCharacter(root,targetHeight,turn=0){
   root.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;if(node.material){const mats=Array.isArray(node.material)?node.material:[node.material];for(const m of mats){if(m)m.needsUpdate=true}}}});
   return root;
 }
-fbxLoader.load('/models/unity_hero_mannequin.fbx',object=>{
-  const model=prepareFBXCharacter(object,1.85,Math.PI);
+const gltfLoader=new GLTFLoader();
+gltfLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
+  const model=gltf.scene;
+  model.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(model);
+  const size=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  const scale=1.85/Math.max(size.y,.001);
+  model.scale.setScalar(scale);
+  model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
+  model.rotation.y=Math.PI;
+  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
   const replacement=new THREE.Group();
   replacement.add(model);
   replacement.position.set(0,.22,2.5);
@@ -59,47 +69,26 @@ fbxLoader.load('/models/unity_hero_mannequin.fbx',object=>{
   scene.remove(hero);
   hero=replacement;
   heroModelLoaded=true;
-  heroAnimationRoot=object;heroAnimationRootPosition.copy(object.position);
-  heroMixer=new THREE.AnimationMixer(object);
-  fbxLoader.load('/models/unity_hero_run.fbx',runObject=>{
-    const sourceClip=runObject.animations?.find(clip=>/run|jog|sprint/i.test(clip.name))||runObject.animations?.[0];
-    if(sourceClip){const runClip=makeInPlaceRunClip(sourceClip);heroRunAction=heroMixer.clipAction(runClip);heroRunAction.play()}
-  },undefined,error=>console.warn('Unity hero run animation could not be loaded.',error));
-},undefined,error=>{
-  console.warn('Unity hero FBX could not be loaded; trying the existing black-suit GLB.',error);
-  const gltfLoader=new GLTFLoader();
-  gltfLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
-    const model=gltf.scene;
-    model.updateMatrixWorld(true);
-    const bounds=new THREE.Box3().setFromObject(model);
-    const size=bounds.getSize(new THREE.Vector3());
-    const center=bounds.getCenter(new THREE.Vector3());
-    const scale=1.85/Math.max(size.y,.001);
-    model.scale.setScalar(scale);
-    model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
-    model.rotation.y=Math.PI;
-    model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
-    const replacement=new THREE.Group();
-    replacement.add(model);
-    replacement.position.set(0,.22,2.5);
-    scene.add(replacement);
-    scene.remove(hero);
-    hero=replacement;
-    heroModelLoaded=true;
-    if(gltf.animations?.length){heroAnimationRoot=model;heroAnimationRootPosition.copy(model.position);heroMixer=new THREE.AnimationMixer(model);const sourceClip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];heroRunAction=heroMixer.clipAction(makeInPlaceRunClip(sourceClip));heroRunAction.play()}
-  },undefined,glbError=>console.warn('Black-suit fallback could not be loaded; using the built-in character.',glbError));
-});
+  if(gltf.animations?.length){
+    heroAnimationRoot=model;
+    heroAnimationRootPosition.copy(model.position);
+    heroMixer=new THREE.AnimationMixer(model);
+    const runClip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];
+    heroRunAction=heroMixer.clipAction(makeInPlaceRunClip(runClip));
+    heroRunAction.play();
+  }
+},undefined,error=>console.warn('Black-suit hero model could not be loaded; using the built-in explorer.',error));
 let guardian=new THREE.Group();
 mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);
 mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);
 for(const x of [-.15,.15])mesh(guardian,sphereGeo,mats.eye,[x,2.02,-.43],[.06,.045,.025],false);
-guardian.position.set(0,0,7.8);
+guardian.position.set(0,0,8.5);
 scene.add(guardian);
 fbxLoader.load('/models/unity_guardian_ape.fbx',ape=>{
-  const model=prepareFBXCharacter(ape,2.35,Math.PI);
+  const model=prepareFBXCharacter(ape,2.55,Math.PI);
   const replacement=new THREE.Group();
   replacement.add(model);
-  replacement.position.set(0,0,7.8);
+  replacement.position.set(0,0,8.5);
   scene.add(replacement);
   scene.remove(guardian);
   guardian=replacement;
@@ -116,8 +105,8 @@ function spawnSegmentContent(segment){if(segment.isGap)return;const count=3+Math
 trackSystem=new TrackSystem(road,spawnSegmentContent);trackSystem.ready.then(()=>{trackReady=true;$('play').textContent='START RUN';$('message').textContent='Run through the connected ancient stone bridge, take the turns, jump broken gaps and escape the guardian.'}).catch(error=>{console.error('Unity bridge track failed to load',error);$('message').textContent='Bridge assets could not load. Please check your connection and try again.'});
 function act(a){if(!active||paused)return;if(a==='left')lane=Math.max(0,lane-1);if(a==='right')lane=Math.min(2,lane+1);if(a==='jump'&&jumpHeight<=0&&verticalSpeed<=0&&slide<=0)verticalSpeed=7.3;if(a==='slide'&&jumpHeight<=0&&verticalSpeed<=0)slide=.78}
 document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();act(b.dataset.action)}));let sx=0,sy=0;canvas.addEventListener('touchstart',e=>{sx=e.changedTouches[0].clientX;sy=e.changedTouches[0].clientY},{passive:true});canvas.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<22)return;act(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy<0?'jump':'slide')},{passive:true});addEventListener('keydown',e=>{if(e.key==='ArrowLeft')act('left');if(e.key==='ArrowRight')act('right');if(e.key==='ArrowUp'||e.key===' ')act('jump');if(e.key==='ArrowDown')act('slide')});
-function reset(){for(const o of obstacles)obstacleGroup.remove(o);for(const c of coins)obstacleGroup.remove(c.visual);obstacles.length=0;coins.length=0;lane=1;laneOffset=0;verticalSpeed=0;jumpHeight=0;slide=0;elapsed=0;distance=0;coinCount=0;trackSystem.reset();hero.position.set(0,.22,2.5);guardian.position.set(0,.22,7.8)}
+function reset(){for(const o of obstacles)obstacleGroup.remove(o);for(const c of coins)obstacleGroup.remove(c.visual);obstacles.length=0;coins.length=0;lane=1;laneOffset=0;verticalSpeed=0;jumpHeight=0;slide=0;elapsed=0;distance=0;coinCount=0;trackSystem.reset();hero.position.set(0,.22,2.5);guardian.position.set(0,.22,8.5)}
 function finish(){active=false;best=Math.max(best,Math.floor(distance));localStorage.setItem('jungleBest',best);$('best').textContent=best;$('message').textContent='The guardian caught you! Distance: '+Math.floor(distance)+' m · Coins: '+coinCount;$('play').textContent='RUN AGAIN';$('menu').classList.remove('hidden');$('hud').classList.add('hidden');$('controls').classList.add('hidden')}
 $('play').onclick=()=>{if(!trackReady){$('message').textContent='Unity stone bridge modules are loading. Please wait a moment.';return}reset();active=true;paused=false;$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('controls').classList.remove('hidden')};$('pause').onclick=()=>{if(!active)return;paused=!paused;$('message').textContent=paused?'Run paused.':'Run through ancient ruins, dodge deadly traps and escape the temple guardian.';$('play').textContent=paused?'RESUME':'START RUN';$('menu').classList.toggle('hidden',!paused)};
-const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer){heroMixer.update(dt);if(heroAnimationRoot)heroAnimationRoot.position.copy(heroAnimationRootPosition)}if(guardianMixer)guardianMixer.update(dt);elapsed+=dt;const speed=Math.min(14.5,9.5+elapsed*.045);distance+=speed*dt;trackSystem.update(distance);const targetLaneOffset=(lane-1)*2;laneOffset+=THREE.MathUtils.clamp((targetLaneOffset-laneOffset)*12,-12,12)*dt;const playerFrame=trackSystem.sample(distance,laneOffset);if(verticalSpeed!==0||jumpHeight>0){jumpHeight+=verticalSpeed*dt;verticalSpeed-=21*dt;if(jumpHeight<=0){jumpHeight=0;verticalSpeed=0}}if(slide>0)slide=Math.max(0,slide-dt);hero.position.copy(playerFrame.position);hero.position.y+=.22+jumpHeight;hero.rotation.y=Math.atan2(-playerFrame.forward.x,-playerFrame.forward.z);hero.scale.y=slide>0?.62:1;let guardianFrame;if(distance>=4)guardianFrame=trackSystem.sample(distance-4,0);else guardianFrame={position:playerFrame.position.clone().addScaledVector(playerFrame.forward,-(4-distance)),forward:playerFrame.forward};guardian.position.copy(guardianFrame.position);guardian.rotation.y=Math.atan2(-guardianFrame.forward.x,-guardianFrame.forward.z);if(trackSystem.isGapAt(distance)&&jumpHeight<=0&&verticalSpeed<=0){finish()}for(const o of obstacles){if(!o.userData.hit&&Math.abs(o.userData.distance-distance)<.78&&Math.abs(o.userData.lane*2-laneOffset)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jumpHeight>.65;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].userData.distance<distance-3){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){if(!c.taken&&Math.abs(c.distance-distance)<.8&&Math.abs(c.lane*2-laneOffset)<.85){c.taken=true;coinCount++;obstacleGroup.remove(c.visual)}}for(let i=coins.length-1;i>=0;i--)if(coins[i].distance<distance-3){obstacleGroup.remove(coins[i].visual);coins.splice(i,1)}$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}if(active&&trackReady){const frame=trackSystem.sample(distance,0);const desired=hero.position.clone().addScaledVector(frame.forward,-7.5).add(new THREE.Vector3(0,4.2,0));camera.position.lerp(desired,1-Math.exp(-7*dt));camera.lookAt(hero.position.clone().add(new THREE.Vector3(0,1.25,0)))}else camera.lookAt(0,1.2,-8);renderer.render(scene,camera)}frame();
+const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer){heroMixer.update(dt);if(heroAnimationRoot)heroAnimationRoot.position.copy(heroAnimationRootPosition)}if(guardianMixer)guardianMixer.update(dt);elapsed+=dt;const speed=Math.min(14.5,9.5+elapsed*.045);distance+=speed*dt;trackSystem.update(distance);const targetLaneOffset=(lane-1)*2;laneOffset+=THREE.MathUtils.clamp((targetLaneOffset-laneOffset)*12,-12,12)*dt;const playerFrame=trackSystem.sample(distance,laneOffset);if(verticalSpeed!==0||jumpHeight>0){jumpHeight+=verticalSpeed*dt;verticalSpeed-=21*dt;if(jumpHeight<=0){jumpHeight=0;verticalSpeed=0}}if(slide>0)slide=Math.max(0,slide-dt);hero.position.copy(playerFrame.position);hero.position.y+=.22+jumpHeight;hero.rotation.y=Math.atan2(-playerFrame.forward.x,-playerFrame.forward.z);hero.scale.y=slide>0?.62:1;let guardianFrame;if(distance>=4)guardianFrame=trackSystem.sample(distance-5.5,0);else guardianFrame={position:playerFrame.position.clone().addScaledVector(playerFrame.forward,-(5.5-distance)),forward:playerFrame.forward};guardian.position.copy(guardianFrame.position);guardian.rotation.y=Math.atan2(-guardianFrame.forward.x,-guardianFrame.forward.z);if(trackSystem.isGapAt(distance)&&jumpHeight<=0&&verticalSpeed<=0){finish()}for(const o of obstacles){if(!o.userData.hit&&Math.abs(o.userData.distance-distance)<.78&&Math.abs(o.userData.lane*2-laneOffset)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jumpHeight>.65;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].userData.distance<distance-3){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){if(!c.taken&&Math.abs(c.distance-distance)<.8&&Math.abs(c.lane*2-laneOffset)<.85){c.taken=true;coinCount++;obstacleGroup.remove(c.visual)}}for(let i=coins.length-1;i>=0;i--)if(coins[i].distance<distance-3){obstacleGroup.remove(coins[i].visual);coins.splice(i,1)}$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}if(active&&trackReady){const frame=trackSystem.sample(distance,0);const desired=hero.position.clone().addScaledVector(frame.forward,-9.5).add(new THREE.Vector3(0,5.8,0));camera.position.lerp(desired,1-Math.exp(-5*dt));const lookAhead=hero.position.clone().addScaledVector(frame.forward,13).add(new THREE.Vector3(0,.65,0));camera.lookAt(lookAhead)}else camera.lookAt(0,1.1,-12);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio))});
