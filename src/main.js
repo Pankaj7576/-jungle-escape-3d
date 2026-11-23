@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import './style.css';
 const $=id=>document.getElementById(id),canvas=$('world');
@@ -31,19 +32,22 @@ for(let n=0;n<13;n++)for(let l=0;l<3;l++)if(Math.random()>.12)block(g,(n+l)%4?ma
 for(let i=0;i<7;i++)segments.push(segment(-i*25,i));
 function heroModel(){const g=new THREE.Group();mesh(g,sphereGeo,mats.hero,[0,1.12,0],[.34,.48,.23]);mesh(g,sphereGeo,mats.skin,[0,1.78,-.01],[.21,.26,.19]);mesh(g,sphereGeo,mats.dark,[0,1.96,.02],[.22,.1,.2]);for(const x of [-.16,.16]){mesh(g,new THREE.CapsuleGeometry(.11,.38,4,8),mats.cloth,[x,.42,0],[1,1,1]);mesh(g,new THREE.CapsuleGeometry(.09,.35,4,8),mats.hero,[x*2,1.15,0],[1,1,1])}return g}
 let hero=heroModel();hero.position.set(0,.22,2.5);scene.add(hero);
-let heroMixer=null,heroRunAction=null,heroModelLoaded=false;
-const heroLoader=new GLTFLoader();
-heroLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
-  const model=gltf.scene;
-  model.updateMatrixWorld(true);
-  const bounds=new THREE.Box3().setFromObject(model);
+let heroMixer=null,heroRunAction=null,heroModelLoaded=false,guardianMixer=null;
+const fbxLoader=new FBXLoader();
+function prepareFBXCharacter(root,targetHeight,turn=0){
+  root.updateMatrixWorld(true);
+  const bounds=new THREE.Box3().setFromObject(root);
   const size=bounds.getSize(new THREE.Vector3());
   const center=bounds.getCenter(new THREE.Vector3());
-  const height=Math.max(size.y,.001);
-  model.scale.setScalar(1.85/height);
-  model.position.set(-center.x*model.scale.x,-bounds.min.y*model.scale.y,-center.z*model.scale.z);
-  model.rotation.y=Math.PI;
-  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
+  const scale=targetHeight/Math.max(size.y,.001);
+  root.scale.setScalar(scale);
+  root.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
+  root.rotation.y=turn;
+  root.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;if(node.material){const mats=Array.isArray(node.material)?node.material:[node.material];for(const m of mats){if(m)m.needsUpdate=true}}}});
+  return root;
+}
+fbxLoader.load('/models/unity_hero_mannequin.fbx',object=>{
+  const model=prepareFBXCharacter(object,1.85,Math.PI);
   const replacement=new THREE.Group();
   replacement.add(model);
   replacement.position.set(0,.22,2.5);
@@ -51,14 +55,55 @@ heroLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
   scene.remove(hero);
   hero=replacement;
   heroModelLoaded=true;
-  if(gltf.animations&&gltf.animations.length){
-    heroMixer=new THREE.AnimationMixer(model);
-    const runClip=gltf.animations.find(clip=>/run|walk|jog/i.test(clip.name))||gltf.animations[0];
-    heroRunAction=heroMixer.clipAction(runClip);
-    heroRunAction.play();
+  heroMixer=new THREE.AnimationMixer(object);
+  fbxLoader.load('/models/unity_hero_run.fbx',runObject=>{
+    const runClip=runObject.animations?.find(clip=>/run|jog|sprint/i.test(clip.name))||runObject.animations?.[0];
+    if(runClip){heroRunAction=heroMixer.clipAction(runClip);heroRunAction.play()}
+  },undefined,error=>console.warn('Unity hero run animation could not be loaded.',error));
+},undefined,error=>{
+  console.warn('Unity hero FBX could not be loaded; trying the existing black-suit GLB.',error);
+  const gltfLoader=new GLTFLoader();
+  gltfLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
+    const model=gltf.scene;
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(model);
+    const size=bounds.getSize(new THREE.Vector3());
+    const center=bounds.getCenter(new THREE.Vector3());
+    const scale=1.85/Math.max(size.y,.001);
+    model.scale.setScalar(scale);
+    model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
+    model.rotation.y=Math.PI;
+    model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
+    const replacement=new THREE.Group();
+    replacement.add(model);
+    replacement.position.set(0,.22,2.5);
+    scene.add(replacement);
+    scene.remove(hero);
+    hero=replacement;
+    heroModelLoaded=true;
+    if(gltf.animations?.length){heroMixer=new THREE.AnimationMixer(model);const clip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];heroRunAction=heroMixer.clipAction(clip);heroRunAction.play()}
+  },undefined,glbError=>console.warn('Black-suit fallback could not be loaded; using the built-in character.',glbError));
+});
+let guardian=new THREE.Group();
+mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);
+mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);
+for(const x of [-.15,.15])mesh(guardian,sphereGeo,mats.eye,[x,2.02,-.43],[.06,.045,.025],false);
+guardian.position.set(0,0,7.8);
+scene.add(guardian);
+fbxLoader.load('/models/unity_guardian_ape.fbx',ape=>{
+  const model=prepareFBXCharacter(ape,2.35,Math.PI);
+  const replacement=new THREE.Group();
+  replacement.add(model);
+  replacement.position.set(0,0,7.8);
+  scene.add(replacement);
+  scene.remove(guardian);
+  guardian=replacement;
+  if(ape.animations?.length){
+    guardianMixer=new THREE.AnimationMixer(ape);
+    const runClip=ape.animations.find(clip=>/run|chase/i.test(clip.name))||ape.animations.find(clip=>/idle/i.test(clip.name))||ape.animations[0];
+    guardianMixer.clipAction(runClip).play();
   }
-},undefined,error=>console.warn('Black suit hero model could not be loaded; using fallback character.',error));
-const guardian=new THREE.Group();mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);for(const x of [-.15,.15])mesh(guardian,sphereGeo,mats.eye,[x,2.02,-.43],[.06,.045,.025],false);guardian.position.set(0,0,7.8);scene.add(guardian);
+},undefined,error=>console.warn('Unity guardian ape could not be loaded; using the built-in guardian.',error));
 const obstacleGroup=new THREE.Group();scene.add(obstacleGroup);const obstacles=[],coins=[];let lane=1,jump=0,slide=0,active=false,paused=false,elapsed=0,distance=0,coinCount=0,spawn=0,best=Number(localStorage.getItem('jungleBest')||0);$('best').textContent=best;
 function obstacle(l,z){const g=new THREE.Group();g.position.set(lanes[l],0,z);obstacleGroup.add(g);const type=Math.random();if(type<.45)mesh(g,new THREE.DodecahedronGeometry(.75,1),mats.dark,[0,.65,0],[1,.8,1]);else if(type<.8)block(g,mats.stone,0,.7,0,1.8,1.4,.55);else block(g,mats.bark,0,1.85,0,2.2,.3,.3);g.userData={kind:type<.45?'rock':type<.8?'wall':'branch',hit:false};obstacles.push(g)}
 function coin(l,z){coins.push({x:lanes[l],z,taken:false})}
@@ -68,5 +113,5 @@ document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointe
 function reset(){for(const o of obstacles)obstacleGroup.remove(o);obstacles.length=0;coins.length=0;lane=1;jump=0;slide=0;elapsed=0;distance=0;coinCount=0;spawn=0;hero.position.set(0,.22,2.5);guardian.position.set(0,.22,7.8);segments.forEach((s,i)=>s.position.z=-i*25)}
 function finish(){active=false;best=Math.max(best,Math.floor(distance));localStorage.setItem('jungleBest',best);$('best').textContent=best;$('message').textContent='The guardian caught you! Distance: '+Math.floor(distance)+' m · Coins: '+coinCount;$('play').textContent='RUN AGAIN';$('menu').classList.remove('hidden');$('hud').classList.add('hidden');$('controls').classList.add('hidden')}
 $('play').onclick=()=>{reset();active=true;paused=false;$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('controls').classList.remove('hidden')};$('pause').onclick=()=>{if(!active)return;paused=!paused;$('message').textContent=paused?'Run paused.':'Run through ancient ruins, dodge deadly traps and escape the temple guardian.';$('play').textContent=paused?'RESUME':'START RUN';$('menu').classList.toggle('hidden',!paused)};
-const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer)heroMixer.update(dt);elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>25)s.position.z-=175}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
+const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer)heroMixer.update(dt);if(guardianMixer)guardianMixer.update(dt);elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>25)s.position.z-=175}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio))});
