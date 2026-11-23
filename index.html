@@ -51,6 +51,24 @@
       font-size: 13px;
     }
 
+    #turn-banner {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 83, 45, 0.92);
+      border: 2px solid #facc15;
+      color: #fde047;
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 1px;
+      z-index: 12;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
     .overlay {
       position: fixed;
       inset: 0;
@@ -114,7 +132,7 @@
     .creator-tag b { color: #fde047; }
 
     .desc {
-      max-width: 460px;
+      max-width: 470px;
       color: #dcfce7;
       font-size: 14px;
       line-height: 1.55;
@@ -166,21 +184,23 @@
     <button id="sound-btn" type="button">🔊 साउंड ON</button>
   </div>
 
+  <div id="turn-banner" class="hidden">↰ TURN LEFT</div>
+
   <div id="start-screen" class="overlay">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Temple Run Inspired</div>
+        <div class="logo-sub">Temple Run 1 &amp; 2 Mechanics</div>
         <div class="logo-title">JUNGLE ESCAPE</div>
       </div>
       <div class="logo-3d">3D</div>
       <div class="creator-tag">Created by <b>Niranjan Kumar</b></div>
     </div>
     <p class="desc">
-      जंगल के ऊंचे ब्रिज/ट्रैक पर दौड़ें, टूटी जगहों पर जंप करें, बाधाओं से बचें, कॉइन्स उठाएं और पीछे आते मॉन्स्टर से बचें!
+      जंगल के सस्पेंशन ब्रिज पर दौड़ें, जंक्शन पर सही दिशा में मुड़ें, टूटी जगहों पर जंप करें, बाधाओं से बचें और पीछे आते मॉन्स्टर से बचकर निकलें!
     </p>
     <div class="controls-hint">
-      <b>कीबोर्ड:</b> ← / → या A / D (लेन बदलें) • ↑ / W / Space (जंप) • ↓ / S (स्लाइड)<br />
-      <b>मोबाइल:</b> बाएं, दाएं, ऊपर या नीचे स्वाइप करें
+      <b>लेन व मोड़:</b> ← / → या A / D (स्वाइप बाएं/दाएं) • <b>जंप:</b> ↑ / W / Space (ऊपर स्वाइप)<br />
+      <b>स्लाइड:</b> ↓ / S (नीचे स्वाइप) • मोड़ आने पर संकेत देखकर बाएं या दाएं मुड़ें
     </div>
     <button id="start-btn" class="play-btn" type="button">▶ गेम शुरू करें</button>
   </div>
@@ -203,6 +223,43 @@
 
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+    // ---------------- PROCEDURAL TEXTURES ----------------
+    function createWoodTexture(baseHex, grainHex, plankLines = true) {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, 256, 256);
+
+      for (let i = 0; i < 160; i++) {
+        ctx.strokeStyle = grainHex;
+        ctx.globalAlpha = 0.14 + Math.random() * 0.15;
+        ctx.lineWidth = 1 + Math.random() * 2;
+        const y = Math.random() * 256;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(85, y + (Math.random() - 0.5) * 12, 170, y + (Math.random() - 0.5) * 12, 256, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      if (plankLines) {
+        ctx.strokeStyle = 'rgba(15, 8, 3, 0.55)';
+        ctx.lineWidth = 3;
+        for (let y = 32; y < 256; y += 32) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(256, y);
+          ctx.stroke();
+        }
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
 
     // ---------------- SOUND ENGINE ----------------
     class SoundEngine {
@@ -239,9 +296,10 @@
         osc.start(now);
         osc.stop(now + duration);
       }
-      jump() { this.playTone(205, 540, 0.22, 'triangle', 0.15); }
-      slide() { this.playTone(320, 105, 0.2, 'sawtooth', 0.09); }
-      move() { this.playTone(270, 350, 0.08, 'sine', 0.08); }
+      jump() { this.playTone(210, 560, 0.22, 'triangle', 0.16); }
+      slide() { this.playTone(330, 105, 0.2, 'sawtooth', 0.09); }
+      move() { this.playTone(275, 355, 0.08, 'sine', 0.08); }
+      turn() { this.playTone(430, 670, 0.14, 'triangle', 0.12); }
       coin() {
         this.playTone(987.77, null, 0.08, 'sine', 0.13);
         setTimeout(() => this.playTone(1318.51, null, 0.14, 'sine', 0.13), 65);
@@ -265,36 +323,32 @@
     // ---------------- SCENE, FOG & LIGHTING ----------------
     const canvas = document.getElementById('game-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b2217);
-    scene.fog = new THREE.FogExp2(0x0b2217, 0.018);
+    scene.background = new THREE.Color(0x092015);
+    scene.fog = new THREE.FogExp2(0x092015, 0.017);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 160);
-    camera.position.set(0, 4.9, 8.2);
-    camera.lookAt(0, 1.5, -8);
-
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 180);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
-    const hemiLight = new THREE.HemisphereLight(0xd1fae5, 0x0c2114, 1.25);
+    const hemiLight = new THREE.HemisphereLight(0xd1fae5, 0x0b1f13, 1.25);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.75);
-    dirLight.position.set(9, 18, 11);
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.8);
+    dirLight.position.set(10, 20, 12);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
-    // Abyss / Jungle floor below bridge
     const abyss = new THREE.Mesh(
-      new THREE.PlaneGeometry(240, 260),
+      new THREE.PlaneGeometry(340, 340),
       new THREE.MeshStandardMaterial({ color: 0x05140c, roughness: 1 })
     );
     abyss.rotation.x = -Math.PI / 2;
-    abyss.position.y = -5.5;
+    abyss.position.y = -5.8;
     scene.add(abyss);
 
-    // ---------------- HERO CHARACTER (ADVENTURER RUNNER) ----------------
+    // ---------------- HERO CHARACTER ----------------
     const playerGroup = new THREE.Group();
     const pSkin = new THREE.MeshStandardMaterial({ color: 0xe09d6f, roughness: 0.5 });
     const pHair = new THREE.MeshStandardMaterial({ color: 0x18120e, roughness: 0.65 });
@@ -380,7 +434,7 @@
 
     scene.add(playerGroup);
 
-    // ---------------- DEMON MONKEY MONSTER (TEMPLE RUN 2 STYLE) ----------------
+    // ---------------- DEMON MONKEY MONSTER ----------------
     const monsterGroup = new THREE.Group();
     const mFur = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.9 });
     const mSkull = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.55 });
@@ -392,7 +446,6 @@
     mBody.castShadow = true;
     monsterGroup.add(mBody);
 
-    // Skull-like monkey face angled forward
     const mFace = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), mSkull);
     mFace.scale.set(0.95, 1.05, 1.2);
     mFace.position.set(0, 1.62, -0.58);
@@ -405,7 +458,6 @@
       monsterGroup.add(eye);
     });
 
-    // Long front arms & hind legs
     const mArmL = makeJointLimb(0.48, 0.46, 0.12, 0.095, mFur, null);
     mArmL.root.position.set(-0.52, 1.45, -0.35);
     monsterGroup.add(mArmL.root);
@@ -422,21 +474,22 @@
     mLegR.root.position.set(0.34, 1.1, 0.45);
     monsterGroup.add(mLegR.root);
 
-    monsterGroup.position.set(0, 0, 4.3);
     scene.add(monsterGroup);
 
-    // ---------------- STRAIGHT TEMPLE BRIDGE & JUNGLE ----------------
+    // ---------------- SEAMLESS JUNCTION BRIDGE WORLD ----------------
+    const worldGroup = new THREE.Group();
+    scene.add(worldGroup);
+
     const LANES = [-2.4, 0, 2.4];
     const SEG_LEN = 6.0;
-    const segments = [];
-    const trees = [];
-    const coins = [];
-    const obstacles = [];
+    const BRIDGE_W = 7.6;
 
-    const stoneDeckMat = new THREE.MeshStandardMaterial({ color: 0x3f4e42, roughness: 0.88 });
-    const woodPlankMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.88 });
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x36200f, roughness: 0.92 });
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3a200e, roughness: 0.95 });
+    const plankTex = createWoodTexture('#664122', '#381e0b', true);
+    const beamTex = createWoodTexture('#432610', '#211004', false);
+    const plankMat = new THREE.MeshStandardMaterial({ map: plankTex, roughness: 0.88 });
+    const beamMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.92 });
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.8 });
+    const trunkMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.95 });
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x156534, roughness: 0.82 });
     const coinMat = new THREE.MeshStandardMaterial({
       color: 0xfacc15,
@@ -446,30 +499,59 @@
     });
     const obsMat = new THREE.MeshStandardMaterial({ color: 0x881337, roughness: 0.7 });
 
-    function makeSegmentMesh(isGap) {
+    function makeStraightSegment(isGap) {
       const g = new THREE.Group();
 
-      // Side stone/wood rails
-      [-3.75, 3.75].forEach((rx) => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, SEG_LEN), railMat);
-        rail.position.set(rx, 0.25, 0);
+      // Side rails & suspension posts so edges stay solid
+      [-BRIDGE_W * 0.5, BRIDGE_W * 0.5].forEach((bx) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.55, SEG_LEN), beamMat);
+        rail.position.set(bx, 0.22, 0);
         rail.castShadow = true;
         g.add(rail);
+
+        const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, SEG_LEN + 0.04, 8), ropeMat);
+        rope.rotation.x = Math.PI / 2;
+        rope.position.set(bx, 0.95, 0);
+        g.add(rope);
       });
 
       if (!isGap) {
-        const base = new THREE.Mesh(new THREE.BoxGeometry(7.3, 0.35, SEG_LEN), stoneDeckMat);
-        base.position.set(0, -0.18, 0);
-        base.receiveShadow = true;
-        g.add(base);
-
-        for (let zOff = -2.2; zOff <= 2.2; zOff += 1.1) {
-          const plank = new THREE.Mesh(new THREE.BoxGeometry(7.1, 0.08, 0.55), woodPlankMat);
-          plank.position.set(0, 0.02, zOff);
-          plank.receiveShadow = true;
-          g.add(plank);
-        }
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(BRIDGE_W - 0.2, 0.32, SEG_LEN), plankMat);
+        deck.position.set(0, -0.16, 0);
+        deck.receiveShadow = true;
+        g.add(deck);
       }
+
+      return g;
+    }
+
+    // Wide square junction platform so incoming and outgoing bridges meet cleanly with zero gap
+    function makeTurnJunction(dir) {
+      const jSize = BRIDGE_W + 1.4;
+      const g = new THREE.Group();
+
+      const platform = new THREE.Mesh(new THREE.BoxGeometry(jSize, 0.36, jSize), plankMat);
+      platform.position.set(0, -0.18, 0);
+      platform.receiveShadow = true;
+      g.add(platform);
+
+      // Corner stone/wood pillars at the 4 corners of the junction
+      const half = jSize * 0.5 - 0.2;
+      [[-half, -half], [half, -half], [-half, half], [half, half]].forEach(([px, pz]) => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.3, 10), beamMat);
+        post.position.set(px, 0.55, pz);
+        post.castShadow = true;
+        g.add(post);
+      });
+
+      // Turn direction indicator strip on the platform
+      const marker = new THREE.Mesh(
+        new THREE.BoxGeometry(dir === 'left' ? 4.2 : 4.2, 0.06, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0x854d0e, roughness: 0.4 })
+      );
+      marker.position.set(dir === 'left' ? -1.4 : 1.4, 0.03, 0);
+      g.add(marker);
+
       return g;
     }
 
@@ -477,86 +559,149 @@
       const t = new THREE.Group();
       const h = 6.5 + Math.random() * 5.5;
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, h, 8), trunkMat);
-      trunk.position.y = h * 0.5 - 5.2;
+      trunk.position.y = h * 0.5 - 5.5;
       t.add(trunk);
 
       const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5 + Math.random() * 1.0, 4.4, 8), leafMat);
-      c1.position.y = h - 3.9;
+      c1.position.y = h - 4.2;
       t.add(c1);
 
       const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.8 + Math.random() * 0.7, 3.6, 8), leafMat);
-      c2.position.y = h - 1.9;
+      c2.position.y = h - 2.2;
       t.add(c2);
 
       t.position.set(xPos, 0, zPos);
-      scene.add(t);
-      trees.push(t);
+      worldGroup.add(t);
     }
 
-    function spawnRowContent(zPos, isGap) {
-      if (isGap) {
-        // Coins above gap to guide jump
+    const segments = [];
+    const coins = [];
+    const obstacles = [];
+
+    let cursorX = 0;
+    let cursorZ = 12;
+    let cursorYaw = 0; // local path angle in worldGroup
+    let segCount = 0;
+
+    function addSegment(kind) {
+      segCount++;
+      let mesh;
+      if (kind === 'turnLeft') mesh = makeTurnJunction('left');
+      else if (kind === 'turnRight') mesh = makeTurnJunction('right');
+      else mesh = makeStraightSegment(kind === 'gap');
+
+      mesh.position.set(cursorX, 0, cursorZ);
+      mesh.rotation.y = cursorYaw;
+      worldGroup.add(mesh);
+
+      const entry = { mesh, kind, triggered: false };
+      segments.push(entry);
+
+      if (kind === 'bridge' && segCount > 4 && Math.random() < 0.68) {
         const laneX = LANES[Math.floor(Math.random() * 3)];
+        const upVec = new THREE.Vector3(0, 1, 0);
+
+        if (Math.random() < 0.55) {
+          for (let k = -1; k <= 1; k++) {
+            const cPos = new THREE.Vector3(laneX, 1.1, k * 1.9).applyAxisAngle(upVec, cursorYaw);
+            const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
+            coin.rotation.z = Math.PI / 2;
+            coin.position.set(cursorX + cPos.x, cPos.y, cursorZ + cPos.z);
+            worldGroup.add(coin);
+            coins.push(coin);
+          }
+        } else {
+          const isHigh = Math.random() < 0.35;
+          const oPos = new THREE.Vector3(laneX, isHigh ? 1.82 : 0.55, 0).applyAxisAngle(upVec, cursorYaw);
+          const obs = new THREE.Mesh(new THREE.BoxGeometry(1.7, isHigh ? 0.85 : 1.1, 1.05), obsMat);
+          obs.position.set(cursorX + oPos.x, oPos.y, cursorZ + oPos.z);
+          obs.rotation.y = cursorYaw;
+          obs.castShadow = true;
+          obs.userData = { isHigh };
+          worldGroup.add(obs);
+          obstacles.push(obs);
+        }
+      } else if (kind === 'gap') {
+        const laneX = LANES[Math.floor(Math.random() * 3)];
+        const upVec = new THREE.Vector3(0, 1, 0);
         for (let k = -1; k <= 1; k++) {
+          const cPos = new THREE.Vector3(laneX, 2.05 - Math.abs(k) * 0.35, k * 1.9).applyAxisAngle(upVec, cursorYaw);
           const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
           coin.rotation.z = Math.PI / 2;
-          coin.position.set(laneX, 2.05 - Math.abs(k) * 0.35, zPos + k * 1.9);
-          scene.add(coin);
+          coin.position.set(cursorX + cPos.x, cPos.y, cursorZ + cPos.z);
+          worldGroup.add(coin);
           coins.push(coin);
         }
-        return;
       }
 
-      const laneX = LANES[Math.floor(Math.random() * 3)];
-      if (Math.random() < 0.55) {
-        for (let k = -1; k <= 1; k++) {
-          const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
-          coin.rotation.z = Math.PI / 2;
-          coin.position.set(laneX, 1.1, zPos + k * 2.0);
-          scene.add(coin);
-          coins.push(coin);
-        }
+      // Advance cursor seamlessly from center of current piece to center of next piece
+      if (kind === 'turnLeft') {
+        const halfOut = new THREE.Vector3(0, 0, -SEG_LEN * 0.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), cursorYaw);
+        cursorX += halfOut.x;
+        cursorZ += halfOut.z;
+        cursorYaw += Math.PI / 2;
+        const halfIn = new THREE.Vector3(0, 0, -SEG_LEN * 0.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), cursorYaw);
+        cursorX += halfIn.x;
+        cursorZ += halfIn.z;
+      } else if (kind === 'turnRight') {
+        const halfOut = new THREE.Vector3(0, 0, -SEG_LEN * 0.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), cursorYaw);
+        cursorX += halfOut.x;
+        cursorZ += halfOut.z;
+        cursorYaw -= Math.PI / 2;
+        const halfIn = new THREE.Vector3(0, 0, -SEG_LEN * 0.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), cursorYaw);
+        cursorX += halfIn.x;
+        cursorZ += halfIn.z;
       } else {
-        const isHigh = Math.random() < 0.35;
-        const obs = new THREE.Mesh(new THREE.BoxGeometry(1.7, isHigh ? 0.85 : 1.1, 1.05), obsMat);
-        obs.position.set(laneX, isHigh ? 1.82 : 0.55, zPos);
-        obs.castShadow = true;
-        obs.userData = { isHigh };
-        scene.add(obs);
-        obstacles.push(obs);
+        const step = new THREE.Vector3(0, 0, -SEG_LEN).applyAxisAngle(new THREE.Vector3(0, 1, 0), cursorYaw);
+        cursorX += step.x;
+        cursorZ += step.z;
       }
+    }
+
+    let segsSinceTurn = 0;
+    function nextKind() {
+      segsSinceTurn++;
+      if (segsSinceTurn >= 11 && Math.random() < 0.35) {
+        segsSinceTurn = 0;
+        return Math.random() < 0.5 ? 'turnLeft' : 'turnRight';
+      }
+      if (segsSinceTurn > 3 && Math.random() < 0.14) {
+        return 'gap';
+      }
+      return 'bridge';
     }
 
     function initWorld() {
-      segments.forEach((s) => scene.remove(s.mesh));
-      trees.forEach((t) => scene.remove(t));
-      coins.forEach((c) => scene.remove(c));
-      obstacles.forEach((o) => scene.remove(o));
+      while (worldGroup.children.length > 0) {
+        worldGroup.remove(worldGroup.children[0]);
+      }
       segments.length = 0;
-      trees.length = 0;
       coins.length = 0;
       obstacles.length = 0;
 
-      for (let i = 0; i < 24; i++) {
-        const z = 12 - i * SEG_LEN;
-        const isGap = i > 5 && i % 9 === 0;
-        const mesh = makeSegmentMesh(isGap);
-        mesh.position.z = z;
-        scene.add(mesh);
-        segments.push({ mesh, isGap });
-        if (i >= 4) spawnRowContent(z, isGap);
+      worldGroup.position.set(0, 0, 0);
+      worldGroup.rotation.set(0, 0, 0);
+
+      cursorX = 0;
+      cursorZ = 12;
+      cursorYaw = 0;
+      segCount = 0;
+      segsSinceTurn = 0;
+
+      for (let i = 0; i < 36; i++) {
+        addSegment(i < 4 ? 'bridge' : nextKind());
       }
 
-      for (let i = 0; i < 48; i++) {
+      for (let i = 0; i < 70; i++) {
         const side = i % 2 === 0 ? -1 : 1;
-        const dist = 7.4 + Math.random() * 14;
-        const zPos = 14 - i * 4.2;
+        const dist = 8.2 + Math.random() * 18;
+        const zPos = 14 - i * 4.0;
         createJungleTree(side * dist, zPos);
       }
     }
 
     // ---------------- GAME STATE & CONTROLS ----------------
-    let state = 'start'; // 'start' | 'playing' | 'catching' | 'falling' | 'gameover'
+    let state = 'start';
     let currentLane = 1;
     let targetX = LANES[1];
     let yVel = 0;
@@ -569,28 +714,47 @@
     let animTime = 0;
     let stepAccumulator = 0;
     let growlAccumulator = 0;
+    let pendingTurn = null;
+    let worldYaw = 0;
+    let targetWorldYaw = 0;
 
     const scoreEl = document.getElementById('score-val');
     const coinsEl = document.getElementById('coins-val');
+    const turnBanner = document.getElementById('turn-banner');
     const startScreen = document.getElementById('start-screen');
     const gameoverScreen = document.getElementById('gameover-screen');
 
+    function tryTurn(dir) {
+      if (pendingTurn === dir) {
+        pendingTurn = null;
+        turnBanner.classList.add('hidden');
+        targetWorldYaw += dir === 'left' ? -Math.PI / 2 : Math.PI / 2;
+        sound.turn();
+        return true;
+      }
+      return false;
+    }
+
     function moveLeft() {
       if (state !== 'playing') return;
+      if (tryTurn('left')) return;
       if (currentLane > 0) {
         currentLane--;
         targetX = LANES[currentLane];
         sound.move();
       }
     }
+
     function moveRight() {
       if (state !== 'playing') return;
+      if (tryTurn('right')) return;
       if (currentLane < 2) {
         currentLane++;
         targetX = LANES[currentLane];
         sound.move();
       }
     }
+
     function jump() {
       if (state !== 'playing') return;
       if (isGrounded) {
@@ -600,6 +764,7 @@
         sound.jump();
       }
     }
+
     function slide() {
       if (state !== 'playing') return;
       if (!isGrounded) yVel = -15;
@@ -642,6 +807,10 @@
       state = 'playing';
       currentLane = 1;
       targetX = LANES[1];
+      worldYaw = 0;
+      targetWorldYaw = 0;
+      pendingTurn = null;
+      turnBanner.classList.add('hidden');
       playerGroup.position.set(0, 0, 0);
       playerGroup.rotation.set(0, 0, 0);
       pTorso.rotation.x = 0;
@@ -664,6 +833,7 @@
     function beginCatch() {
       if (state !== 'playing') return;
       state = 'catching';
+      turnBanner.classList.add('hidden');
       sound.crash();
       sound.growl();
     }
@@ -671,6 +841,7 @@
     function beginFall() {
       if (state !== 'playing') return;
       state = 'falling';
+      turnBanner.classList.add('hidden');
       yVel = -2;
       sound.fall();
     }
@@ -710,6 +881,8 @@
       if (state === 'start' || state === 'gameover') {
         playerGroup.position.y = Math.sin(animTime * 3) * 0.04;
         monsterGroup.position.y = Math.cos(animTime * 3.5) * 0.05;
+        camera.position.set(0, 4.9, 8.2);
+        camera.lookAt(0, 1.5, -8);
         coins.forEach((c) => { c.rotation.y += dt * 3; });
         renderer.render(scene, camera);
         return;
@@ -740,8 +913,15 @@
       distance += moveZ;
       scoreEl.textContent = String(Math.floor(distance));
 
+      worldYaw += (targetWorldYaw - worldYaw) * Math.min(1, dt * 10);
+      worldGroup.rotation.y = worldYaw;
+
+      const forwardStep = new THREE.Vector3(0, 0, moveZ).applyAxisAngle(new THREE.Vector3(0, 1, 0), worldYaw);
+      worldGroup.position.add(forwardStep);
+
       playerGroup.position.x += (targetX - playerGroup.position.x) * Math.min(1, dt * 15);
-      camera.position.x = playerGroup.position.x * 0.62;
+      camera.position.set(playerGroup.position.x * 0.62, 4.9, 8.2);
+      camera.lookAt(playerGroup.position.x * 0.45, 1.5, -8);
 
       const creep = Math.min(1.5, distance * 0.0016);
       monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, dt * 6.5);
@@ -798,63 +978,57 @@
         }
       }
 
-      // Recycle bridge segments & check broken gaps
-      let minSegZ = 0;
-      for (const s of segments) {
-        if (s.mesh.position.z < minSegZ) minSegZ = s.mesh.position.z;
-      }
+      // Check turn junctions & broken gaps in runner's local frame
+      pendingTurn = null;
+      turnBanner.classList.add('hidden');
 
       for (const s of segments) {
-        s.mesh.position.z += moveZ;
+        const wPos = new THREE.Vector3();
+        s.mesh.getWorldPosition(wPos);
+        const relZ = wPos.z - playerGroup.position.z;
 
-        if (s.isGap && isGrounded && Math.abs(s.mesh.position.z) < 2.1) {
+        if ((s.kind === 'turnLeft' || s.kind === 'turnRight') && !s.triggered) {
+          if (relZ > -13 && relZ < 2.5) {
+            pendingTurn = s.kind === 'turnLeft' ? 'left' : 'right';
+            turnBanner.textContent = pendingTurn === 'left' ? '↰ TURN LEFT (← / A)' : '↱ TURN RIGHT (→ / D)';
+            turnBanner.classList.remove('hidden');
+          }
+          if (relZ > 2.6) {
+            s.triggered = true;
+            if (pendingTurn) {
+              pendingTurn = null;
+              turnBanner.classList.add('hidden');
+              beginCatch();
+              break;
+            }
+          }
+        }
+
+        if (s.kind === 'gap' && isGrounded && Math.abs(relZ) < 2.2) {
           beginFall();
           break;
-        }
-
-        if (s.mesh.position.z > 18) {
-          minSegZ -= SEG_LEN;
-          s.mesh.position.z = minSegZ;
-          s.isGap = Math.random() < 0.16;
-          scene.remove(s.mesh);
-          s.mesh = makeSegmentMesh(s.isGap);
-          s.mesh.position.z = minSegZ;
-          scene.add(s.mesh);
-          spawnRowContent(minSegZ, s.isGap);
-        }
-      }
-
-      // Recycle jungle trees
-      let minTreeZ = 0;
-      for (const t of trees) {
-        if (t.position.z < minTreeZ) minTreeZ = t.position.z;
-      }
-      for (const t of trees) {
-        t.position.z += moveZ;
-        if (t.position.z > 18) {
-          minTreeZ -= 4.2;
-          t.position.z = minTreeZ;
         }
       }
 
       // Coins collection
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
-        c.position.z += moveZ;
         c.rotation.y += dt * 4.2;
+        const wPos = new THREE.Vector3();
+        c.getWorldPosition(wPos);
 
         if (
-          Math.abs(c.position.x - playerGroup.position.x) < 1.0 &&
-          Math.abs(c.position.y - (playerGroup.position.y + 1.1)) < 1.3 &&
-          Math.abs(c.position.z - playerGroup.position.z) < 1.05
+          Math.abs(wPos.x - playerGroup.position.x) < 1.0 &&
+          Math.abs(wPos.y - (playerGroup.position.y + 1.1)) < 1.3 &&
+          Math.abs(wPos.z - playerGroup.position.z) < 1.05
         ) {
           coinCount++;
           coinsEl.textContent = String(coinCount);
           sound.coin();
-          scene.remove(c);
+          worldGroup.remove(c);
           coins.splice(i, 1);
-        } else if (c.position.z > 12) {
-          scene.remove(c);
+        } else if (wPos.z > 14) {
+          worldGroup.remove(c);
           coins.splice(i, 1);
         }
       }
@@ -865,19 +1039,20 @@
 
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
-        obs.position.z += moveZ;
+        const wPos = new THREE.Vector3();
+        obs.getWorldPosition(wPos);
 
         if (
-          Math.abs(obs.position.x - playerGroup.position.x) < 0.85 &&
-          Math.abs(obs.position.z - playerGroup.position.z) < 0.8
+          Math.abs(wPos.x - playerGroup.position.x) < 0.85 &&
+          Math.abs(wPos.z - playerGroup.position.z) < 0.8
         ) {
           const halfH = obs.userData.isHigh ? 0.425 : 0.55;
-          if (pTop > obs.position.y - halfH && pBot < obs.position.y + halfH) {
+          if (pTop > wPos.y - halfH && pBot < wPos.y + halfH) {
             beginCatch();
             break;
           }
-        } else if (obs.position.z > 12) {
-          scene.remove(obs);
+        } else if (wPos.z > 14) {
+          worldGroup.remove(obs);
           obstacles.splice(i, 1);
         }
       }
