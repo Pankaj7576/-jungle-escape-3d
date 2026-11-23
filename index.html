@@ -8,7 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     body {
       overflow: hidden;
-      background: #07130d;
+      background: #06120c;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: #fff;
       touch-action: none;
@@ -29,7 +29,7 @@
     }
     .hud-group { display: flex; gap: 10px; align-items: center; }
     .pill {
-      background: rgba(10, 24, 16, 0.72);
+      background: rgba(9, 22, 15, 0.76);
       border: 1px solid rgba(134, 239, 172, 0.28);
       backdrop-filter: blur(8px);
       padding: 8px 14px;
@@ -43,7 +43,7 @@
     #sound-btn {
       pointer-events: auto;
       cursor: pointer;
-      background: rgba(10, 24, 16, 0.8);
+      background: rgba(9, 22, 15, 0.85);
       border: 1px solid rgba(250, 204, 21, 0.4);
       color: #fde047;
       padding: 8px 13px;
@@ -60,7 +60,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at center, rgba(9, 26, 17, 0.68) 0%, rgba(4, 11, 7, 0.92) 100%);
+      background: radial-gradient(circle at center, rgba(8, 24, 15, 0.65) 0%, rgba(3, 9, 6, 0.92) 100%);
       z-index: 20;
       padding: 20px;
       text-align: center;
@@ -72,14 +72,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
     .logo-badge {
-      background: linear-gradient(135deg, #166534, #14532d);
+      background: linear-gradient(135deg, #14532d, #052e16);
       border: 2px solid #facc15;
       border-radius: 20px;
       padding: 16px 28px;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(250, 204, 21, 0.22);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(250, 204, 21, 0.25);
       transform: skewX(-6deg);
     }
     .logo-sub {
@@ -97,7 +97,6 @@
       background: linear-gradient(180deg, #ffffff 0%, #fde047 55%, #f59e0b 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     .logo-3d {
       margin-top: 8px;
@@ -109,13 +108,21 @@
       border-radius: 8px;
       letter-spacing: 2px;
     }
+    .creator-tag {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #a7f3d0;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+    .creator-tag b { color: #fde047; }
 
     .desc {
-      max-width: 460px;
+      max-width: 470px;
       color: #dcfce7;
       font-size: 14px;
       line-height: 1.55;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .controls-hint {
       font-size: 12px;
@@ -124,7 +131,7 @@
       border: 1px solid rgba(134, 239, 172, 0.25);
       padding: 10px 16px;
       border-radius: 12px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
       line-height: 1.6;
     }
     .play-btn {
@@ -142,7 +149,7 @@
     .play-btn:active { transform: scale(0.96); }
 
     .stats-box {
-      background: rgba(12, 28, 19, 0.85);
+      background: rgba(10, 25, 17, 0.88);
       border: 1px solid rgba(250, 204, 21, 0.35);
       border-radius: 16px;
       padding: 16px 24px;
@@ -167,13 +174,14 @@
   <div id="start-screen" class="overlay">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Ancient Forest Runner</div>
+        <div class="logo-sub">Suspension Bridge Chase</div>
         <div class="logo-title">JUNGLE ESCAPE</div>
       </div>
       <div class="logo-3d">3D EDITION</div>
+      <div class="creator-tag">Created by <b>Niranjan Kumar</b></div>
     </div>
     <p class="desc">
-      जंगल के पुल और पगडंडी पर तेज़ दौड़ें, कॉइन्स बटोरें, जंप और स्लाइड करके बाधाओं से बचें!
+      जंगल के सस्पेंशन ब्रिज पर तेज़ दौड़ें, पीछे आते मॉन्स्टर और बाधाओं से बचें, और गोल्ड कॉइन्स बटोरें!
     </p>
     <div class="controls-hint">
       <b>कीबोर्ड:</b> ← / → या A / D (लेन बदलें) • ↑ / W / Space (जंप) • ↓ / S (स्लाइड)<br />
@@ -186,9 +194,10 @@
   <div id="gameover-screen" class="overlay hidden">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Run Ended</div>
+        <div class="logo-sub">Caught in the Jungle</div>
         <div class="logo-title">GAME OVER</div>
       </div>
+      <div class="creator-tag"><b>Jungle Escape 3D</b> • Niranjan Kumar</div>
     </div>
     <div class="stats-box">
       <p>तय दूरी: <span id="final-score" style="color:#4ade80">0</span> m</p>
@@ -238,17 +247,18 @@
         osc.start(now);
         osc.stop(now + duration);
       }
-      jump() { this.playTone(190, 520, 0.22, 'triangle', 0.16); }
-      slide() { this.playTone(320, 110, 0.2, 'sawtooth', 0.09); }
-      move() { this.playTone(260, 340, 0.08, 'sine', 0.08); }
+      jump() { this.playTone(210, 560, 0.22, 'triangle', 0.16); }
+      slide() { this.playTone(340, 105, 0.22, 'sawtooth', 0.1); }
+      move() { this.playTone(280, 360, 0.08, 'sine', 0.08); }
       coin() {
         this.playTone(987.77, null, 0.08, 'sine', 0.13);
         setTimeout(() => this.playTone(1318.51, null, 0.14, 'sine', 0.13), 65);
       }
-      step() { this.playTone(95, 55, 0.05, 'triangle', 0.05); }
+      step() { this.playTone(105, 58, 0.05, 'triangle', 0.055); }
+      growl() { this.playTone(78, 46, 0.28, 'sawtooth', 0.08); }
       crash() {
-        this.playTone(150, 38, 0.42, 'sawtooth', 0.24);
-        setTimeout(() => this.playTone(90, 30, 0.35, 'square', 0.16), 80);
+        this.playTone(155, 35, 0.45, 'sawtooth', 0.25);
+        setTimeout(() => this.playTone(85, 28, 0.35, 'square', 0.16), 80);
       }
     }
 
@@ -262,11 +272,11 @@
     // ---------------- THREE.JS SETUP ----------------
     const canvas = document.getElementById('game-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c2418);
-    scene.fog = new THREE.FogExp2(0x0c2418, 0.022);
+    scene.background = new THREE.Color(0x091d13);
+    scene.fog = new THREE.FogExp2(0x091d13, 0.02);
 
-    const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 140);
-    camera.position.set(0, 5.2, 8.5);
+    const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 150);
+    camera.position.set(0, 5.1, 8.6);
     camera.lookAt(0, 1.5, -8);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -274,103 +284,252 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
-    // Lights
-    const hemiLight = new THREE.HemisphereLight(0xa7f3d0, 0x132a13, 1.15);
+    const hemiLight = new THREE.HemisphereLight(0xbbf7d0, 0x0f2416, 1.25);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.6);
-    dirLight.position.set(8, 16, 10);
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.75);
+    dirLight.position.set(10, 18, 12);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
-    // Jungle Ground below bridge/path
-    const groundGeo = new THREE.PlaneGeometry(140, 220);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x071a10, roughness: 1 });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -2.2;
-    scene.add(ground);
+    const rimLight = new THREE.DirectionalLight(0x34d399, 0.55);
+    rimLight.position.set(-10, 8, -14);
+    scene.add(rimLight);
 
-    // ---------------- 3D CHARACTER ----------------
+    const riverGeo = new THREE.PlaneGeometry(160, 240);
+    const riverMat = new THREE.MeshStandardMaterial({
+      color: 0x06282b,
+      roughness: 0.35,
+      metalness: 0.25
+    });
+    const river = new THREE.Mesh(riverGeo, riverMat);
+    river.rotation.x = -Math.PI / 2;
+    river.position.y = -3.8;
+    scene.add(river);
+
+    // ---------------- REALISTIC 3D HUMAN RUNNER ----------------
     const playerGroup = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.6 });
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.5 });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
-    const hatMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
 
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.75, 1.0, 0.45), bodyMat);
-    torso.position.y = 1.35;
-    torso.castShadow = true;
-    playerGroup.add(torso);
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xe6a678, roughness: 0.45, metalness: 0.05 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x181412, roughness: 0.65 });
+    const tankMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.55 });
+    const jeansMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.75 });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
 
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), skinMat);
-    head.position.y = 2.15;
-    head.castShadow = true;
-    playerGroup.add(head);
+    const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.29, 0.26, 18), jeansMat);
+    hips.position.y = 0.96;
+    hips.castShadow = true;
+    playerGroup.add(hips);
 
-    const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.06, 16), hatMat);
-    hatBrim.position.y = 2.38;
-    playerGroup.add(hatBrim);
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.y = 1.08;
+    const lowerTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.37, 0.30, 0.42, 20), skinMat);
+    lowerTorso.position.y = 0.2;
+    lowerTorso.castShadow = true;
+    torsoGroup.add(lowerTorso);
 
-    const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.24, 16), hatMat);
-    hatTop.position.y = 2.52;
-    playerGroup.add(hatTop);
+    const chest = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.37, 0.44, 20), tankMat);
+    chest.scale.set(1.12, 1.0, 0.72);
+    chest.position.y = 0.56;
+    chest.castShadow = true;
+    torsoGroup.add(chest);
 
-    const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.85, 0.3), pantsMat);
-    leftLeg.position.set(-0.2, 0.42, 0);
-    playerGroup.add(leftLeg);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 14), skinMat);
+    neck.position.y = 0.82;
+    torsoGroup.add(neck);
 
-    const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.85, 0.3), pantsMat);
-    rightLeg.position.set(0.2, 0.42, 0);
-    playerGroup.add(rightLeg);
+    const headGroup = new THREE.Group();
+    headGroup.position.y = 1.06;
 
-    const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.75, 0.22), skinMat);
-    leftArm.position.set(-0.52, 1.4, 0);
-    playerGroup.add(leftArm);
+    const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.24, 22, 22), skinMat);
+    cranium.scale.set(0.92, 1.12, 1.04);
+    cranium.castShadow = true;
+    headGroup.add(cranium);
 
-    const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.75, 0.22), skinMat);
-    rightArm.position.set(0.52, 1.4, 0);
-    playerGroup.add(rightArm);
+    const browMat = new THREE.MeshStandardMaterial({ color: 0x1f1612, roughness: 0.8 });
+    [-0.075, 0.075].forEach((bx) => {
+      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.022, 0.04), browMat);
+      brow.position.set(bx, 0.055, -0.22);
+      headGroup.add(brow);
+    });
+
+    const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.252, 22, 18, 0, Math.PI * 2, 0, Math.PI * 0.58), hairMat);
+    hairCap.scale.set(0.95, 1.12, 1.08);
+    hairCap.position.set(0, 0.025, 0.01);
+    hairCap.rotation.x = 0.12;
+    headGroup.add(hairCap);
+
+    const hairSweep = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.24, 12), hairMat);
+    hairSweep.position.set(0.06, 0.17, 0.06);
+    hairSweep.rotation.set(0.9, 0.2, -0.3);
+    headGroup.add(hairSweep);
+
+    torsoGroup.add(headGroup);
+
+    function createLimb(upperLen, lowerLen, upperR, lowerR, upperMat, lowerMat, endMesh) {
+      const shoulder = new THREE.Group();
+      const upper = new THREE.Mesh(new THREE.CapsuleGeometry(upperR, upperLen, 8, 14), upperMat);
+      upper.position.y = -upperLen * 0.5;
+      upper.castShadow = true;
+      shoulder.add(upper);
+
+      const elbow = new THREE.Group();
+      elbow.position.y = -upperLen;
+      const lower = new THREE.Mesh(new THREE.CapsuleGeometry(lowerR, lowerLen, 8, 14), lowerMat);
+      lower.position.y = -lowerLen * 0.5;
+      lower.castShadow = true;
+      elbow.add(lower);
+
+      if (endMesh) {
+        endMesh.position.y = -lowerLen - 0.06;
+        elbow.add(endMesh);
+      }
+
+      shoulder.add(elbow);
+      return { root: shoulder, joint: elbow };
+    }
+
+    const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), skinMat);
+    leftHand.scale.set(0.9, 1.2, 0.7);
+    const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 12), skinMat);
+    rightHand.scale.set(0.9, 1.2, 0.7);
+
+    const leftArm = createLimb(0.28, 0.27, 0.095, 0.078, skinMat, skinMat, leftHand);
+    leftArm.root.position.set(-0.52, 0.72, 0);
+    torsoGroup.add(leftArm.root);
+
+    const rightArm = createLimb(0.28, 0.27, 0.095, 0.078, skinMat, skinMat, rightHand);
+    rightArm.root.position.set(0.52, 0.72, 0);
+    torsoGroup.add(rightArm.root);
+
+    playerGroup.add(torsoGroup);
+
+    function createShoe() {
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.12, 0.32), shoeMat);
+      shoe.position.set(0, -0.04, -0.05);
+      shoe.castShadow = true;
+      return shoe;
+    }
+
+    const leftLeg = createLimb(0.38, 0.38, 0.125, 0.095, jeansMat, jeansMat, createShoe());
+    leftLeg.root.position.set(-0.18, 0.88, 0);
+    playerGroup.add(leftLeg.root);
+
+    const rightLeg = createLimb(0.38, 0.38, 0.125, 0.095, jeansMat, jeansMat, createShoe());
+    rightLeg.root.position.set(0.18, 0.88, 0);
+    playerGroup.add(rightLeg.root);
 
     scene.add(playerGroup);
 
-    // ---------------- BRIDGE SEGMENTS & JUNGLE TREES ----------------
+    // ---------------- CHASING JUNGLE MONSTER ----------------
+    const monsterGroup = new THREE.Group();
+    const monsterBodyMat = new THREE.MeshStandardMaterial({ color: 0x2a1810, roughness: 0.85 });
+    const monsterArmorMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.65, metalness: 0.2 });
+    const hornMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.4 });
+    const eyeMat = new THREE.MeshStandardMaterial({
+      color: 0xff2a00,
+      emissive: 0xff1e00,
+      emissiveIntensity: 1.8
+    });
+
+    const mTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.44, 1.25, 14), monsterBodyMat);
+    mTorso.scale.set(1.25, 1.0, 0.85);
+    mTorso.position.y = 1.45;
+    mTorso.castShadow = true;
+    monsterGroup.add(mTorso);
+
+    const mShoulderPad = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.32, 0.65), monsterArmorMat);
+    mShoulderPad.position.y = 2.02;
+    monsterGroup.add(mShoulderPad);
+
+    const mHead = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 16), monsterBodyMat);
+    mHead.scale.set(1.1, 1.0, 1.25);
+    mHead.position.set(0, 2.38, -0.08);
+    monsterGroup.add(mHead);
+
+    [-0.14, 0.14].forEach((ex) => {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 10), eyeMat);
+      eye.position.set(ex, 2.42, -0.43);
+      monsterGroup.add(eye);
+    });
+
+    [-0.32, 0.32].forEach((hx, idx) => {
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.55, 10), hornMat);
+      horn.position.set(hx, 2.75, -0.05);
+      horn.rotation.z = idx === 0 ? 0.38 : -0.38;
+      monsterGroup.add(horn);
+    });
+
+    const mLeftArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.75, 8, 12), monsterBodyMat);
+    mLeftArm.position.set(-0.85, 1.55, -0.15);
+    mLeftArm.rotation.x = -0.4;
+    monsterGroup.add(mLeftArm);
+
+    const mRightArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.75, 8, 12), monsterBodyMat);
+    mRightArm.position.set(0.85, 1.55, -0.15);
+    mRightArm.rotation.x = -0.4;
+    monsterGroup.add(mRightArm);
+
+    const mLeftLeg = new THREE.Mesh(new THREE.CapsuleGeometry(0.18, 0.65, 8, 12), monsterBodyMat);
+    mLeftLeg.position.set(-0.28, 0.52, 0);
+    monsterGroup.add(mLeftLeg);
+
+    const mRightLeg = new THREE.Mesh(new THREE.CapsuleGeometry(0.18, 0.65, 8, 12), monsterBodyMat);
+    mRightLeg.position.set(0.28, 0.52, 0);
+    monsterGroup.add(mRightLeg);
+
+    monsterGroup.position.set(0, 0, 4.2);
+    scene.add(monsterGroup);
+
+    // ---------------- JUNGLE RUN SUSPENSION BRIDGE & ENVIRONMENT ----------------
     const LANES = [-2.5, 0, 2.5];
     const segments = [];
     const trees = [];
     const coins = [];
     const obstacles = [];
 
-    const plankMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.85 });
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x4a2e16, roughness: 0.9 });
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3f230f, roughness: 0.95 });
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+    const plankMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.9 });
+    const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x3b2310, roughness: 0.95 });
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.85 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3b200d, roughness: 0.95 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.82 });
     const coinMat = new THREE.MeshStandardMaterial({
       color: 0xfacc15,
       emissive: 0x854d0e,
-      metalness: 0.6,
+      metalness: 0.65,
       roughness: 0.25
     });
-    const obstacleMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.65 });
+    const obstacleMat = new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.7 });
 
     function createBridgeSegment(zPos) {
       const seg = new THREE.Group();
-      const deck = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.35, 6), plankMat);
-      deck.position.y = -0.17;
-      deck.receiveShadow = true;
-      seg.add(deck);
 
-      // Wooden bridge slats & side rails
-      for (let i = -2; i <= 2; i += 1.5) {
-        const slat = new THREE.Mesh(new THREE.BoxGeometry(8.3, 0.08, 0.45), railMat);
-        slat.position.set(0, 0.02, i);
-        seg.add(slat);
-      }
-      [-4.0, 4.0].forEach((xSide) => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.75, 6), railMat);
-        rail.position.set(xSide, 0.35, 0);
-        seg.add(rail);
+      [-3.85, 3.85].forEach((bx) => {
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.32, 6), darkWoodMat);
+        beam.position.set(bx, -0.16, 0);
+        beam.castShadow = true;
+        beam.receiveShadow = true;
+        seg.add(beam);
+
+        const topRope = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 6.05, 8), ropeMat);
+        topRope.rotation.x = Math.PI / 2;
+        topRope.position.set(bx, 1.15, 0);
+        seg.add(topRope);
+
+        [-2.2, 0, 2.2].forEach((pz) => {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 1.25, 8), darkWoodMat);
+          post.position.set(bx, 0.52, pz);
+          seg.add(post);
+        });
       });
+
+      for (let zOff = -2.4; zOff <= 2.4; zOff += 0.96) {
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.16, 0.74), plankMat);
+        plank.position.set(0, -0.08, zOff);
+        plank.receiveShadow = true;
+        plank.castShadow = true;
+        seg.add(plank);
+      }
 
       seg.position.z = zPos;
       scene.add(seg);
@@ -379,14 +538,18 @@
 
     function createTree(xPos, zPos) {
       const tree = new THREE.Group();
-      const h = 5 + Math.random() * 5;
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, h, 7), trunkMat);
-      trunk.position.y = h / 2 - 2.2;
+      const h = 6 + Math.random() * 6;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.58, h, 8), trunkMat);
+      trunk.position.y = h / 2 - 3.8;
       tree.add(trunk);
 
-      const crown = new THREE.Mesh(new THREE.ConeGeometry(2.3 + Math.random() * 1.1, 4.5, 7), foliageMat);
-      crown.position.y = h - 1.2;
-      tree.add(crown);
+      const crown1 = new THREE.Mesh(new THREE.ConeGeometry(2.5 + Math.random() * 1.1, 4.5, 8), foliageMat);
+      crown1.position.y = h - 2.6;
+      tree.add(crown1);
+
+      const crown2 = new THREE.Mesh(new THREE.ConeGeometry(1.9 + Math.random() * 0.8, 3.8, 8), foliageMat);
+      crown2.position.y = h - 0.6;
+      tree.add(crown2);
 
       tree.position.set(xPos, 0, zPos);
       scene.add(tree);
@@ -403,13 +566,13 @@
       coins.length = 0;
       obstacles.length = 0;
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 22; i++) {
         createBridgeSegment(-i * 6 + 10);
       }
-      for (let i = 0; i < 36; i++) {
-        const z = -i * 4.5 + 12;
+      for (let i = 0; i < 42; i++) {
+        const z = -i * 4.2 + 12;
         const side = i % 2 === 0 ? -1 : 1;
-        const dist = 6.5 + Math.random() * 12;
+        const dist = 7.2 + Math.random() * 14;
         createTree(side * dist, z);
       }
     }
@@ -420,19 +583,17 @@
       const roll = Math.random();
 
       if (roll < 0.52) {
-        // Coin arc/line
         for (let k = 0; k < 3; k++) {
-          const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.14, 16), coinMat);
+          const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.44, 0.14, 18), coinMat);
           coin.rotation.z = Math.PI / 2;
           coin.position.set(x, 1.1, zPos - k * 2.2);
           scene.add(coin);
           coins.push(coin);
         }
       } else {
-        // Obstacle (low block to jump over, or high bar to slide under)
         const isHigh = Math.random() < 0.35;
         const obs = new THREE.Mesh(
-          new THREE.BoxGeometry(1.7, isHigh ? 0.9 : 1.15, 1.1),
+          new THREE.BoxGeometry(1.75, isHigh ? 0.9 : 1.15, 1.1),
           obstacleMat
         );
         obs.position.set(x, isHigh ? 1.85 : 0.58, zPos);
@@ -444,18 +605,19 @@
     }
 
     // ---------------- GAME STATE & INPUTS ----------------
-    let state = 'start'; // 'start' | 'playing' | 'gameover'
+    let state = 'start'; // 'start' | 'playing' | 'catching' | 'gameover'
     let currentLane = 1;
     let targetX = LANES[1];
     let yVel = 0;
     let isGrounded = true;
     let slideTimer = 0;
-    let speed = 15;
+    let speed = 15.5;
     let distance = 0;
     let coinCount = 0;
     let bestScore = Number(localStorage.getItem('jungle_escape_3d_best') || 0);
     let animTime = 0;
     let stepAccumulator = 0;
+    let growlAccumulator = 0;
     let nextSpawnZ = -24;
 
     const scoreEl = document.getElementById('score-val');
@@ -482,7 +644,7 @@
     function jump() {
       if (state !== 'playing') return;
       if (isGrounded) {
-        yVel = 11.5;
+        yVel = 11.8;
         isGrounded = false;
         slideTimer = 0;
         sound.jump();
@@ -491,7 +653,7 @@
     function slide() {
       if (state !== 'playing') return;
       if (!isGrounded) {
-        yVel = -14;
+        yVel = -14.5;
       }
       slideTimer = 0.65;
       sound.slide();
@@ -506,7 +668,6 @@
       } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') slide();
     });
 
-    // Touch swipe support
     let touchStartX = 0;
     let touchStartY = 0;
     window.addEventListener('touchstart', (e) => {
@@ -534,13 +695,17 @@
       currentLane = 1;
       targetX = LANES[1];
       playerGroup.position.set(0, 0, 0);
-      playerGroup.scale.set(1, 1, 1);
+      playerGroup.rotation.set(0, 0, 0);
+      torsoGroup.rotation.x = 0;
+      monsterGroup.position.set(0, 0, 4.2);
       yVel = 0;
       isGrounded = true;
       slideTimer = 0;
-      speed = 15;
+      speed = 15.5;
       distance = 0;
       coinCount = 0;
+      stepAccumulator = 0;
+      growlAccumulator = 0;
       nextSpawnZ = -24;
 
       for (let i = 0; i < 6; i++) {
@@ -554,9 +719,16 @@
       gameoverScreen.classList.add('hidden');
     }
 
-    function triggerGameOver() {
-      state = 'gameover';
+    function beginMonsterCatch() {
+      if (state !== 'playing') return;
+      state = 'catching';
       sound.crash();
+      sound.growl();
+      torsoGroup.rotation.x = -0.25;
+    }
+
+    function finalizeGameOver() {
+      state = 'gameover';
       const finalDist = Math.floor(distance);
       if (finalDist > bestScore) {
         bestScore = finalDist;
@@ -587,28 +759,58 @@
       lastTime = now;
       animTime += dt;
 
-      // Idle breathing on start/gameover
-      if (state !== 'playing') {
-        playerGroup.position.y = Math.sin(animTime * 3) * 0.06;
+      if (state === 'start' || state === 'gameover') {
+        playerGroup.position.y = Math.sin(animTime * 3) * 0.05;
+        monsterGroup.position.y = Math.cos(animTime * 3.5) * 0.06;
         coins.forEach((c) => { c.rotation.y += dt * 3; });
         renderer.render(scene, camera);
         return;
       }
 
-      // Speed & distance
-      speed = Math.min(34, 15 + distance * 0.015);
+      // When obstacle hit occurs, monster charges in close to catch the runner
+      if (state === 'catching') {
+        monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, dt * 14);
+        monsterGroup.position.z += (playerGroup.position.z + 1.15 - monsterGroup.position.z) * Math.min(1, dt * 12);
+        mLeftArm.rotation.x = -1.15 + Math.sin(animTime * 28) * 0.35;
+        mRightArm.rotation.x = -1.15 - Math.sin(animTime * 28) * 0.35;
+        camera.position.x = playerGroup.position.x * 0.65 + Math.sin(animTime * 45) * 0.14;
+        camera.position.y = 5.1 + Math.cos(animTime * 40) * 0.12;
+
+        renderer.render(scene, camera);
+        if (Math.abs(monsterGroup.position.z - (playerGroup.position.z + 1.15)) < 0.25) {
+          camera.position.y = 5.1;
+          finalizeGameOver();
+        }
+        return;
+      }
+
+      speed = Math.min(35, 15.5 + distance * 0.016);
       const moveZ = speed * dt;
       distance += moveZ;
       scoreEl.textContent = String(Math.floor(distance));
 
-      // Horizontal lane interpolation
+      const prevX = playerGroup.position.x;
       playerGroup.position.x += (targetX - playerGroup.position.x) * Math.min(1, dt * 15);
+      playerGroup.rotation.z = -(playerGroup.position.x - prevX) * 0.45;
       camera.position.x = playerGroup.position.x * 0.65;
 
-      // Jump & gravity
+      // Monster creeps closer as distance increases
+      const creepOffset = Math.min(1.6, distance * 0.0018);
+      const baseMonsterZ = 4.2 - creepOffset;
+      monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, dt * 6.5);
+      const chaseOsc = Math.sin(animTime * 2.4) * 0.45;
+      monsterGroup.position.z = baseMonsterZ + chaseOsc;
+      monsterGroup.position.y = Math.abs(Math.sin(animTime * (speed * 0.65))) * 0.18;
+
+      growlAccumulator += dt;
+      if (growlAccumulator > 5.5) {
+        growlAccumulator = 0;
+        sound.growl();
+      }
+
       if (!isGrounded) {
         playerGroup.position.y += yVel * dt;
-        yVel -= 30 * dt;
+        yVel -= 31 * dt;
         if (playerGroup.position.y <= 0) {
           playerGroup.position.y = 0;
           yVel = 0;
@@ -616,23 +818,35 @@
         }
       }
 
-      // Slide state
-      if (slideTimer > 0) {
+      const isSliding = slideTimer > 0;
+      if (isSliding) {
         slideTimer -= dt;
-        playerGroup.scale.y = 0.52;
-        playerGroup.position.y = Math.max(0, playerGroup.position.y);
+        torsoGroup.rotation.x = 0.95;
+        torsoGroup.position.y = 0.62;
       } else {
-        playerGroup.scale.y = 1;
+        torsoGroup.rotation.x = 0.16;
+        torsoGroup.position.y = 1.08 + Math.abs(Math.sin(animTime * (speed * 0.85))) * 0.05;
       }
 
-      // Running limb animation & footsteps
-      const runCycle = animTime * (speed * 0.9);
-      leftLeg.rotation.x = Math.sin(runCycle) * 0.85;
-      rightLeg.rotation.x = -Math.sin(runCycle) * 0.85;
-      leftArm.rotation.x = -Math.sin(runCycle) * 0.75;
-      rightArm.rotation.x = Math.sin(runCycle) * 0.75;
+      const runCycle = animTime * (speed * 0.88);
+      leftLeg.root.rotation.x = Math.sin(runCycle) * 0.85;
+      leftLeg.joint.rotation.x = Math.max(0, -Math.cos(runCycle) * 0.9);
 
-      if (isGrounded && slideTimer <= 0) {
+      rightLeg.root.rotation.x = -Math.sin(runCycle) * 0.85;
+      rightLeg.joint.rotation.x = Math.max(0, Math.cos(runCycle) * 0.9);
+
+      leftArm.root.rotation.x = -Math.sin(runCycle) * 0.72;
+      leftArm.joint.rotation.x = -0.65 - Math.max(0, Math.sin(runCycle) * 0.45);
+
+      rightArm.root.rotation.x = Math.sin(runCycle) * 0.72;
+      rightArm.joint.rotation.x = -0.65 - Math.max(0, -Math.sin(runCycle) * 0.45);
+
+      mLeftLeg.rotation.x = Math.sin(runCycle * 0.82) * 0.7;
+      mRightLeg.rotation.x = -Math.sin(runCycle * 0.82) * 0.7;
+      mLeftArm.rotation.x = -0.45 + Math.cos(runCycle * 0.82) * 0.45;
+      mRightArm.rotation.x = -0.45 - Math.cos(runCycle * 0.82) * 0.45;
+
+      if (isGrounded && !isSliding) {
         stepAccumulator += moveZ;
         if (stepAccumulator > 3.6) {
           stepAccumulator = 0;
@@ -640,7 +854,6 @@
         }
       }
 
-      // Move bridge segments
       for (const seg of segments) {
         seg.position.z += moveZ;
         if (seg.position.z > 18) {
@@ -648,22 +861,19 @@
         }
       }
 
-      // Move jungle trees
       for (const tree of trees) {
         tree.position.z += moveZ;
         if (tree.position.z > 18) {
-          tree.position.z -= trees.length * 4.5;
+          tree.position.z -= trees.length * 4.2;
         }
       }
 
-      // Spawn new rows ahead
       nextSpawnZ += moveZ;
       if (nextSpawnZ > -85) {
         spawnRow(nextSpawnZ);
         nextSpawnZ -= 11 + Math.random() * 5;
       }
 
-      // Update coins & collision
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
         c.position.z += moveZ;
@@ -688,10 +898,8 @@
         }
       }
 
-      // Update obstacles & collision
-      const isSliding = slideTimer > 0;
       const playerBottom = playerGroup.position.y;
-      const playerTop = playerGroup.position.y + (isSliding ? 1.0 : 2.1);
+      const playerTop = playerGroup.position.y + (isSliding ? 1.05 : 2.15);
 
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
@@ -705,7 +913,7 @@
           const obsBottom = obs.position.y - obsHalfH;
           const obsTop = obs.position.y + obsHalfH;
           if (playerTop > obsBottom && playerBottom < obsTop) {
-            triggerGameOver();
+            beginMonsterCatch();
             break;
           }
         }
