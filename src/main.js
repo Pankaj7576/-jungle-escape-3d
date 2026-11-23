@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TrackSystem } from './track-system.js';
 import './style.css';
 const $=id=>document.getElementById(id),canvas=$('world');
@@ -23,17 +22,14 @@ const lanes=[-2,0,2];
 let trackSystem=null,trackReady=false;
 function tree(parent,x,z,s=1){const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(s);parent.add(g);mesh(g,new THREE.CylinderGeometry(.12,.32,4.8,9),mats.bark,[0,2.4,0],[1,1,1]);for(let i=0;i<8;i++){const a=i*2.4,r=.7+(i%3)*.4;mesh(g,sphereGeo,i%2?mats.leaf:mats.leaf2,[Math.cos(a)*r,3.7+(i%3)*.45,Math.sin(a)*r],[1.25,.8,1.1],false)}}
 function temple(parent){const g=new THREE.Group();g.position.set(0,0,-12);parent.add(g);block(g,mats.stone,0,1.1,0,7,2.2,4);block(g,mats.dark,0,1.1,-2.06,2.3,1.9,.12);for(const x of [-2.7,2.7]){mesh(g,new THREE.CylinderGeometry(.2,.3,2.6,12),mats.stone,[x,1.3,-1.6],[1,1,1]);}for(let i=0;i<5;i++){const roof=mesh(g,new THREE.CylinderGeometry(2.8-i*.38,3.3-i*.38,.28,4),i%2?mats.stone:mats.dark,[0,2.35+i*.25,-1],[1,1,1]);roof.rotation.y=Math.PI/4}}
-function heroModel(){const g=new THREE.Group();mesh(g,sphereGeo,mats.hero,[0,1.12,0],[.34,.48,.23]);mesh(g,sphereGeo,mats.skin,[0,1.78,-.01],[.21,.26,.19]);mesh(g,sphereGeo,mats.dark,[0,1.96,.02],[.22,.1,.2]);for(const x of [-.16,.16]){mesh(g,new THREE.CapsuleGeometry(.11,.38,4,8),mats.cloth,[x,.42,0],[1,1,1]);mesh(g,new THREE.CapsuleGeometry(.09,.35,4,8),mats.hero,[x*2,1.15,0],[1,1,1])}return g}
-let hero=heroModel();hero.position.set(0,.22,2.5);scene.add(hero);
+let hero=new THREE.Group();hero.position.set(0,.22,2.5);scene.add(hero);
 let heroMixer=null,heroRunAction=null,heroModelLoaded=false,guardianMixer=null,guardianAnimationRoot=null,guardianAnimationRootPosition=new THREE.Vector3(),heroAnimationRoot=null,heroAnimationRootPosition=new THREE.Vector3();
 function makeInPlaceRunClip(sourceClip){
-  // Disable root/hips translation from the imported FBX run cycle. The game track
-  // supplies forward movement; allowing root motion here makes the hero jump/loop
-  // back to the same spawn point at the end of each animation cycle.
+  // Track movement is driven by the procedural Unity bridge path, not animation root motion.
   const clip=sourceClip.clone();
   clip.tracks=clip.tracks.filter(track=>{
     const name=track.name||'';
-    return !( /(?:^|[|/:.])(?:mixamorig)?(?:hips|root|armature)(?:[|/:.]|$).*\.position$/i.test(name) || name==='.position' );
+    return !(/(?:^|[|/:.])(?:mixamorig)?(?:hips|root|armature)(?:[|/:.]|$).*\\.position$/i.test(name)||name==='.position');
   });
   return clip;
 }
@@ -47,37 +43,47 @@ function prepareFBXCharacter(root,targetHeight,turn=0){
   root.scale.setScalar(scale);
   root.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
   root.rotation.y=turn;
-  root.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true;if(node.material){const mats=Array.isArray(node.material)?node.material:[node.material];for(const m of mats){if(m)m.needsUpdate=true}}}});
+  root.traverse(node=>{
+    if(node.isMesh){
+      node.castShadow=true;node.receiveShadow=true;
+      if(node.material){
+        const materials=Array.isArray(node.material)?node.material:[node.material];
+        for(const material of materials){
+          if(material){
+            material.color?.setHex(0x343a3b);
+            if('roughness' in material)material.roughness=.76;
+            material.needsUpdate=true;
+          }
+        }
+      }
+    }
+  });
   return root;
 }
-const gltfLoader=new GLTFLoader();
-gltfLoader.load('/models/character_black_suit_rigged.glb',gltf=>{
-  const model=gltf.scene;
-  model.updateMatrixWorld(true);
-  const bounds=new THREE.Box3().setFromObject(model);
-  const size=bounds.getSize(new THREE.Vector3());
-  const center=bounds.getCenter(new THREE.Vector3());
-  const scale=1.85/Math.max(size.y,.001);
-  model.scale.setScalar(scale);
-  model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
-  model.rotation.y=Math.PI;
-  model.traverse(node=>{if(node.isMesh){node.castShadow=true;node.receiveShadow=true}});
+// Load the same CC0 Unity KinemIQ mannequin used by the Unity scene generator.
+// No web-only/black-suit substitute is used if this model fails to load.
+fbxLoader.load('/models/unity_hero_mannequin.fbx',model=>{
+  prepareFBXCharacter(model,1.85,Math.PI);
   const replacement=new THREE.Group();
   replacement.add(model);
+  // Small dark backpack, matching the Unity prototype character setup.
+  mesh(replacement,boxGeo,mats.dark,[0,1.20,.27],[.48,.58,.24]);
   replacement.position.set(0,.22,2.5);
   scene.add(replacement);
   scene.remove(hero);
   hero=replacement;
   heroModelLoaded=true;
-  if(gltf.animations?.length){
-    heroAnimationRoot=model;
-    heroAnimationRootPosition.copy(model.position);
-    heroMixer=new THREE.AnimationMixer(model);
-    const runClip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];
-    heroRunAction=heroMixer.clipAction(makeInPlaceRunClip(runClip));
-    heroRunAction.play();
-  }
-},undefined,error=>console.warn('Black-suit hero model could not be loaded; using the built-in explorer.',error));
+  heroAnimationRoot=model;
+  heroAnimationRootPosition.copy(model.position);
+  heroMixer=new THREE.AnimationMixer(model);
+  fbxLoader.load('/models/unity_hero_run.fbx',animationFBX=>{
+    const runClip=animationFBX.animations.find(c=>/run|sprint/i.test(c.name))||animationFBX.animations[0];
+    if(runClip){
+      heroRunAction=heroMixer.clipAction(makeInPlaceRunClip(runClip));
+      heroRunAction.play();
+    }else console.warn('Unity hero run animation contains no clip.');
+  },undefined,error=>console.warn('Unity hero run animation could not be loaded.',error));
+},undefined,error=>console.error('Unity KinemIQ hero failed to load. No substitute character will be shown.',error));
 let guardian=new THREE.Group();
 mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);
 mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);
