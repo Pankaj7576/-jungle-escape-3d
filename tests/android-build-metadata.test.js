@@ -17,7 +17,7 @@ const gradle = `android {
 `;
 
 test('maps release 1.009 to a monotonically increasing Android versionCode', () => {
-  assert.deepEqual(parseReleaseVersion('1.009\\n'), { versionName: '1.009', versionCode: 1009 });
+  assert.deepEqual(parseReleaseVersion('1.009\n'), { versionName: '1.009', versionCode: 1009 });
   assert.equal(parseReleaseVersion('1.008').versionCode, 1008);
   assert.equal(parseReleaseVersion('1.00').versionCode, 1000);
 });
@@ -31,19 +31,19 @@ test('rejects release versions outside the project version format', () => {
 test('patches only Android defaultConfig version metadata', () => {
   const updated = patchGradleDefaultConfig(gradle, '1.009');
   assert.match(updated, /versionCode 1009/);
-  assert.match(updated, /versionName "1\\.009"/);
-  assert.match(updated, /applicationId "com\\.jungleescape\\.losttemple"/);
-  assert.match(updated, /debug \\{ \\}/);
+  assert.match(updated, /versionName "1\.009"/);
+  assert.match(updated, /applicationId "com\.jungleescape\.losttemple"/);
+  assert.match(updated, /debug \{ \}/);
 });
 
 test('supports Groovy assignment syntax and preserves indentation', () => {
   const source = gradle.replace('versionCode 1', 'versionCode = 1').replace('versionName "1.0"', "versionName = '1.0'");
   const updated = patchGradleDefaultConfig(source, '1.009');
   assert.match(updated, /versionCode = 1009/);
-  assert.match(updated, /versionName = "1\\.009"/);
+  assert.match(updated, /versionName = "1\.009"/);
 });
 
 test('fails closed if the generated Gradle file does not have one version pair', () => {
   assert.throws(() => patchGradleDefaultConfig('android { defaultConfig { applicationId "x" } }', '1.009'), /Expected exactly one Android defaultConfig block/);
-  assert.throws(() => patchGradleDefaultConfig(gradle.replace('versionCode 1', 'versionCode 1\\n        versionCode 2'), '1.009'), /Expected one versionCode/);
+  assert.throws(() => patchGradleDefaultConfig(gradle.replace('versionCode 1', 'versionCode 1\n        versionCode 2'), '1.009'), /Expected one versionCode/);
 });
