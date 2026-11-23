@@ -1,3 +1,3 @@
 Jungle Escape 3D – The Lost Temple
-Version: 1.001
+Version: 1.002
 Branch: web-character-import-1
