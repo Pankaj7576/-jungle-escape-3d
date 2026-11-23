@@ -11,6 +11,7 @@ on:
       - release/1.006-lane-guard
       - release/1.007-gpu-resource-cleanup
       - release/1.008-input-lifecycle-guard
+      - release/1.009-apk-metadata-guard
   pull_request:
     branches:
       - main
@@ -60,7 +61,7 @@ jobs:
       - name: Check JavaScript syntax
         run: npm run check
 
-      - name: Run gameplay, render-loop and resource cleanup regression tests
+      - name: Run gameplay and Android release metadata regression tests
         run: npm test
 
       - name: Build web app
@@ -74,6 +75,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Apply release version to Android Gradle config
+        run: node scripts/android-build-metadata.mjs prepare
 
       - name: Lock Android orientation to portrait
         run: |
@@ -104,10 +108,16 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload debug APK
+      - name: Verify APK package, version, portrait orientation and signature
+        run: node scripts/android-build-metadata.mjs verify android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload verified Android debug APK and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: jungle-escape-3d-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: jungle-escape-3d-v1.009-debug-apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/build-info.txt
+            android/app/build/outputs/apk/debug/SHA256SUMS
           if-no-files-found: error
           retention-days: 14

@@ -2,7 +2,7 @@
 
 A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
 
-**Current game release: 1.008** — see VERSION and CHANGELOG.md. Each accepted update increments the release by 0.001 and gets a permanent rollback snapshot branch (versions/<version>). Previous snapshots are preserved.
+**Current game release: 1.009** — see VERSION and CHANGELOG.md. Each accepted update increments the release by 0.001 and gets a permanent rollback snapshot branch (versions/<version>). Previous snapshots are preserved.
 
 ## Gameplay systems
 - Procedural modular track with straight sections, 90-degree left/right curves and broken bridge gaps; instanced stone parapet posts reduce repeated draw calls.
@@ -15,7 +15,10 @@ A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
 - Removed obstacle, coin and power-up meshes release their owned GPU geometries/materials on collection, pruning and run reset.
 
 ## Free asset policy
-The project uses Three.js and the existing bundled character model. Environment, obstacles, guardian, pickups and fallback animations are generated in code; no paid asset dependency is required.
+The project uses Three.js and procedural environment/obstacle/guardian geometry. No paid asset dependency is required. The bundled black-suit GLB's creator and license are not documented yet; do not describe it as CC0/free or redistribute it until provenance is confirmed. See ASSET_CREDITS.md.
+
+## Android build verification
+The GitHub Actions workflow derives Android `versionName` and `versionCode` from VERSION, then verifies package ID, portrait orientation, DEX/manifest presence, ZIP integrity and APK signature. The artifact includes build-info.txt and SHA256SUMS. CI debug signing is not a permanent release key; consecutive CI debug APKs may require uninstall/reinstall until a user-owned stable keystore is configured.
 
 ## Run locally
 npm install then npm run dev.

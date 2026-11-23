@@ -1,5 +1,12 @@
 # Jungle Escape 3D — Version History
 
+## 1.009
+- Map the repository VERSION (for example 1.009) to Android `versionName` and a monotonically increasing `versionCode` (1009) after Capacitor generates the Gradle project; fail the build if the expected Gradle fields are missing or duplicated.
+- Verify the built APK's package ID, versionName, versionCode, portrait manifest flag, DEX/manifest contents, ZIP integrity and Android signature before uploading it.
+- Include `build-info.txt` and `SHA256SUMS` beside the APK in the workflow artifact so each download has a reproducible identity and integrity check.
+- Added Node regression tests for release-version parsing and safe Gradle metadata patching. The bundled black-suit GLB's creator/source/license are not documented in the repository; it is marked unverified in ASSET_CREDITS.md rather than being represented as a confirmed free asset.
+- Verification: local metadata-script syntax check and 5 focused Node tests passed. GitHub Actions Android build and APK verification are pending for this commit; do not treat this entry as a successful APK until the workflow artifact is available.
+
 ## 1.008
 - Cancel incomplete canvas swipe gestures when the app loses focus, is hidden, or begins page navigation; release pointer capture defensively so a stale pointer-up cannot move the runner after resume.
 - Added regression tests for blur, pagehide, hidden visibility, and a fresh gesture after the app resumes.
