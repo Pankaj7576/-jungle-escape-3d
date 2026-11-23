@@ -46,7 +46,7 @@ function makeInPlaceRunClip(sourceClip){
   const clip=sourceClip.clone();
   clip.tracks=clip.tracks.filter(track=>{
     const name=track.name||'';
-    return !( /(?:^|[|/:.])(?:mixamorig)?(?:hips|root|armature)(?:[|/:.]|$).*\\.position$/i.test(name) || name===' .position' || name==='.position' );
+    return !( /(?:^|[|/:.])(?:mixamorig)?(?:hips|root|armature)(?:[|/:.]|$).*\.position$/i.test(name) || name==='.position' );
   });
   return clip;
 }
