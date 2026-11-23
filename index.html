@@ -8,14 +8,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     body {
       overflow: hidden;
-      background: #05110b;
+      background: #06140d;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: #fff;
       touch-action: none;
     }
     #game-canvas { display: block; width: 100vw; height: 100vh; }
 
-    /* Top HUD */
     #hud {
       position: fixed;
       top: 14px;
@@ -27,27 +26,23 @@
       pointer-events: none;
       z-index: 10;
     }
-    .hud-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .hud-group { display: flex; gap: 10px; align-items: center; }
     .pill {
-      background: rgba(8, 20, 14, 0.78);
+      background: rgba(8, 22, 15, 0.78);
       border: 1px solid rgba(134, 239, 172, 0.28);
       backdrop-filter: blur(8px);
       padding: 8px 14px;
       border-radius: 999px;
       font-weight: 700;
       font-size: 14px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
     }
     .pill span.gold { color: #facc15; }
     .pill span.mint { color: #4ade80; }
-    .pill.magnet-pill {
-      border-color: rgba(244, 63, 94, 0.65);
-      color: #fda4af;
-    }
     #sound-btn {
       pointer-events: auto;
       cursor: pointer;
-      background: rgba(8, 20, 14, 0.85);
+      background: rgba(8, 22, 15, 0.85);
       border: 1px solid rgba(250, 204, 21, 0.4);
       color: #fde047;
       padding: 8px 13px;
@@ -56,42 +51,6 @@
       font-size: 13px;
     }
 
-    /* Turn & Slow-Mo Banners */
-    #turn-banner {
-      position: fixed;
-      top: 68px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(20, 83, 45, 0.92);
-      border: 2px solid #facc15;
-      color: #fde047;
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 15px;
-      letter-spacing: 1px;
-      z-index: 12;
-      pointer-events: none;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    }
-    #slowmo-badge {
-      position: fixed;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.82);
-      border: 1px solid rgba(56, 189, 248, 0.6);
-      color: #7dd3fc;
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      z-index: 12;
-      pointer-events: none;
-    }
-
-    /* Overlay Screens */
     .overlay {
       position: fixed;
       inset: 0;
@@ -99,7 +58,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at center, rgba(7, 22, 14, 0.68) 0%, rgba(2, 8, 5, 0.93) 100%);
+      background: radial-gradient(circle at center, rgba(8, 24, 15, 0.66) 0%, rgba(3, 9, 6, 0.92) 100%);
       z-index: 20;
       padding: 20px;
       text-align: center;
@@ -117,7 +76,7 @@
       border: 2px solid #facc15;
       border-radius: 20px;
       padding: 16px 28px;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(250, 204, 21, 0.25);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(250, 204, 21, 0.25);
       transform: skewX(-6deg);
     }
     .logo-sub {
@@ -150,13 +109,12 @@
       margin-top: 8px;
       font-size: 12px;
       color: #a7f3d0;
-      letter-spacing: 0.8px;
       font-weight: 600;
     }
     .creator-tag b { color: #fde047; }
 
     .desc {
-      max-width: 480px;
+      max-width: 460px;
       color: #dcfce7;
       font-size: 14px;
       line-height: 1.55;
@@ -165,7 +123,7 @@
     .controls-hint {
       font-size: 12px;
       color: #bbf7d0;
-      background: rgba(20, 83, 45, 0.48);
+      background: rgba(20, 83, 45, 0.45);
       border: 1px solid rgba(134, 239, 172, 0.25);
       padding: 10px 16px;
       border-radius: 12px;
@@ -204,39 +162,33 @@
     <div class="hud-group">
       <div class="pill">दूरी: <span class="mint" id="score-val">0</span> m</div>
       <div class="pill">कॉइन: <span class="gold" id="coins-val">0</span></div>
-      <div id="magnet-hud" class="pill magnet-pill hidden">🧲 MAGNET: <span id="magnet-timer">8.0</span>s</div>
     </div>
     <button id="sound-btn" type="button">🔊 साउंड ON</button>
   </div>
 
-  <div id="turn-banner" class="hidden">↰ TURN LEFT</div>
-  <div id="slowmo-badge" class="hidden">⚡ SLOW MOTION</div>
-
-  <!-- Start Screen -->
   <div id="start-screen" class="overlay">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Ancient Temple &amp; Bridge Runner</div>
+        <div class="logo-sub">Temple Run Inspired</div>
         <div class="logo-title">JUNGLE ESCAPE</div>
       </div>
-      <div class="logo-3d">3D REALISTIC</div>
+      <div class="logo-3d">3D</div>
       <div class="creator-tag">Created by <b>Niranjan Kumar</b></div>
     </div>
     <p class="desc">
-      मुड़ते और टूटते सस्पेंशन ब्रिज पर तेज़ दौड़ें! मोड़ों और गैप्स पर स्लो-मोशन का फायदा उठाएं, कॉइन मैग्नेट पकड़ें, और पीछे आते मॉन्स्टर से बचें।
+      जंगल के ऊंचे ब्रिज/ट्रैक पर दौड़ें, टूटी जगहों पर जंप करें, बाधाओं से बचें, कॉइन्स उठाएं और पीछे आते मॉन्स्टर से बचें!
     </p>
     <div class="controls-hint">
-      <b>लेन व मोड़:</b> ← / → या A / D (स्वाइप बाएं/दाएं) • <b>जंप/गैप:</b> ↑ / W / Space (ऊपर स्वाइप)<br />
-      <b>स्लाइड:</b> ↓ / S (नीचे स्वाइप) • 🧲 मैग्नेट से कॉइन्स अपने-आप खिंचेंगे
+      <b>कीबोर्ड:</b> ← / → या A / D (लेन बदलें) • ↑ / W / Space (जंप) • ↓ / S (स्लाइड)<br />
+      <b>मोबाइल:</b> बाएं, दाएं, ऊपर या नीचे स्वाइप करें
     </div>
     <button id="start-btn" class="play-btn" type="button">▶ गेम शुरू करें</button>
   </div>
 
-  <!-- Game Over Screen -->
   <div id="gameover-screen" class="overlay hidden">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Jungle Claimed You</div>
+        <div class="logo-sub">Run Over</div>
         <div class="logo-title">GAME OVER</div>
       </div>
       <div class="creator-tag"><b>Jungle Escape 3D</b> • Niranjan Kumar</div>
@@ -251,66 +203,6 @@
 
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-
-    // ---------------- PROCEDURAL TEXTURES ----------------
-    function createWoodTexture(baseHex, grainHex, plankLines = true) {
-      const c = document.createElement('canvas');
-      c.width = 256;
-      c.height = 256;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = baseHex;
-      ctx.fillRect(0, 0, 256, 256);
-
-      for (let i = 0; i < 180; i++) {
-        ctx.strokeStyle = grainHex;
-        ctx.globalAlpha = 0.14 + Math.random() * 0.16;
-        ctx.lineWidth = 1 + Math.random() * 2;
-        const y = Math.random() * 256;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.bezierCurveTo(85, y + (Math.random() - 0.5) * 14, 170, y + (Math.random() - 0.5) * 14, 256, y);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      if (plankLines) {
-        ctx.strokeStyle = 'rgba(15, 8, 3, 0.55)';
-        ctx.lineWidth = 3;
-        for (let y = 32; y < 256; y += 32) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(256, y);
-          ctx.stroke();
-        }
-      }
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
-
-    function createClothTexture(colorA, colorB) {
-      const c = document.createElement('canvas');
-      c.width = 128;
-      c.height = 128;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = colorA;
-      ctx.fillRect(0, 0, 128, 128);
-      ctx.fillStyle = colorB;
-      ctx.globalAlpha = 0.18;
-      for (let y = 0; y < 128; y += 4) {
-        for (let x = 0; x < 128; x += 4) {
-          if ((x + y) % 8 === 0) ctx.fillRect(x, y, 2, 2);
-        }
-      }
-      ctx.globalAlpha = 1;
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(2, 2);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      return tex;
-    }
 
     // ---------------- SOUND ENGINE ----------------
     class SoundEngine {
@@ -347,24 +239,19 @@
         osc.start(now);
         osc.stop(now + duration);
       }
-      jump() { this.playTone(215, 580, 0.23, 'triangle', 0.16); }
-      slide() { this.playTone(340, 100, 0.22, 'sawtooth', 0.1); }
-      move() { this.playTone(280, 360, 0.08, 'sine', 0.08); }
-      turn() { this.playTone(420, 660, 0.14, 'triangle', 0.12); }
-      magnet() {
-        this.playTone(320, 740, 0.18, 'sine', 0.14);
-        setTimeout(() => this.playTone(540, 960, 0.2, 'triangle', 0.12), 90);
-      }
+      jump() { this.playTone(205, 540, 0.22, 'triangle', 0.15); }
+      slide() { this.playTone(320, 105, 0.2, 'sawtooth', 0.09); }
+      move() { this.playTone(270, 350, 0.08, 'sine', 0.08); }
       coin() {
         this.playTone(987.77, null, 0.08, 'sine', 0.13);
         setTimeout(() => this.playTone(1318.51, null, 0.14, 'sine', 0.13), 65);
       }
-      step() { this.playTone(105, 58, 0.05, 'triangle', 0.055); }
-      growl() { this.playTone(72, 42, 0.32, 'sawtooth', 0.085); }
-      fall() { this.playTone(320, 55, 0.55, 'sawtooth', 0.18); }
+      step() { this.playTone(100, 56, 0.05, 'triangle', 0.05); }
+      growl() { this.playTone(75, 44, 0.28, 'sawtooth', 0.08); }
+      fall() { this.playTone(300, 55, 0.5, 'sawtooth', 0.17); }
       crash() {
-        this.playTone(155, 35, 0.45, 'sawtooth', 0.25);
-        setTimeout(() => this.playTone(85, 28, 0.35, 'square', 0.16), 80);
+        this.playTone(150, 36, 0.42, 'sawtooth', 0.24);
+        setTimeout(() => this.playTone(85, 28, 0.35, 'square', 0.15), 80);
       }
     }
 
@@ -375,547 +262,335 @@
       soundBtn.textContent = on ? '🔊 साउंड ON' : '🔇 साउंड OFF';
     });
 
-    // ---------------- THREE.JS SCENE & LIGHTING ----------------
+    // ---------------- SCENE, FOG & LIGHTING ----------------
     const canvas = document.getElementById('game-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x071910);
-    scene.fog = new THREE.FogExp2(0x071910, 0.017);
+    scene.background = new THREE.Color(0x0b2217);
+    scene.fog = new THREE.FogExp2(0x0b2217, 0.018);
 
-    const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 180);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 160);
+    camera.position.set(0, 4.9, 8.2);
+    camera.lookAt(0, 1.5, -8);
+
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    const hemiLight = new THREE.HemisphereLight(0xc7f9cc, 0x0b1f12, 1.2);
+    const hemiLight = new THREE.HemisphereLight(0xd1fae5, 0x0c2114, 1.25);
     scene.add(hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff3d6, 1.85);
-    sunLight.position.set(14, 24, 12);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.set(1024, 1024);
-    scene.add(sunLight);
+    const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.75);
+    dirLight.position.set(9, 18, 11);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
 
-    const jungleRim = new THREE.DirectionalLight(0x2dd4bf, 0.45);
-    jungleRim.position.set(-14, 10, -18);
-    scene.add(jungleRim);
-
-    const riverGeo = new THREE.PlaneGeometry(320, 320);
-    const riverMat = new THREE.MeshStandardMaterial({
-      color: 0x05252b,
-      roughness: 0.25,
-      metalness: 0.35
-    });
-    const river = new THREE.Mesh(riverGeo, riverMat);
-    river.rotation.x = -Math.PI / 2;
-    river.position.y = -6.5;
-    scene.add(river);
-
-    // ---------------- REALISTIC ANATOMICAL 3D HERO ----------------
-    const playerGroup = new THREE.Group();
-
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xdc9869, roughness: 0.48, metalness: 0.04 });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x14100e, roughness: 0.62 });
-    const shirtMat = new THREE.MeshStandardMaterial({
-      map: createClothTexture('#1e293b', '#475569'),
-      roughness: 0.65
-    });
-    const pantMat = new THREE.MeshStandardMaterial({
-      map: createClothTexture('#273529', '#3f5242'),
-      roughness: 0.78
-    });
-    const bootMat = new THREE.MeshStandardMaterial({ color: 0x29180d, roughness: 0.65 });
-
-    // Magnet aura ring around runner when active
-    const magnetAura = new THREE.Mesh(
-      new THREE.TorusGeometry(0.95, 0.035, 10, 32),
-      new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xe11d48, emissiveIntensity: 1.5 })
+    // Abyss / Jungle floor below bridge
+    const abyss = new THREE.Mesh(
+      new THREE.PlaneGeometry(240, 260),
+      new THREE.MeshStandardMaterial({ color: 0x05140c, roughness: 1 })
     );
-    magnetAura.rotation.x = Math.PI / 2;
-    magnetAura.position.y = 1.15;
-    magnetAura.visible = false;
-    playerGroup.add(magnetAura);
+    abyss.rotation.x = -Math.PI / 2;
+    abyss.position.y = -5.5;
+    scene.add(abyss);
 
-    const pelvis = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.27, 0.24, 20), pantMat);
-    pelvis.position.y = 0.96;
-    pelvis.castShadow = true;
-    playerGroup.add(pelvis);
+    // ---------------- HERO CHARACTER (ADVENTURER RUNNER) ----------------
+    const playerGroup = new THREE.Group();
+    const pSkin = new THREE.MeshStandardMaterial({ color: 0xe09d6f, roughness: 0.5 });
+    const pHair = new THREE.MeshStandardMaterial({ color: 0x18120e, roughness: 0.65 });
+    const pShirt = new THREE.MeshStandardMaterial({ color: 0xf5f5f4, roughness: 0.6 });
+    const pPants = new THREE.MeshStandardMaterial({ color: 0x3b2818, roughness: 0.8 });
+    const pBag = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.75 });
+    const pShoe = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.6 });
 
-    const torsoGroup = new THREE.Group();
-    torsoGroup.position.y = 1.08;
+    const pHips = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.25, 0.22, 16), pPants);
+    pHips.position.y = 0.94;
+    playerGroup.add(pHips);
 
-    const core = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.29, 0.36, 22), skinMat);
-    core.scale.set(1.06, 1.0, 0.74);
-    core.position.y = 0.18;
-    core.castShadow = true;
-    torsoGroup.add(core);
+    const pTorso = new THREE.Group();
+    pTorso.position.y = 1.05;
 
-    const upperChest = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.36, 0.42, 22), shirtMat);
-    upperChest.scale.set(1.14, 1.0, 0.72);
-    upperChest.position.y = 0.54;
-    upperChest.castShadow = true;
-    torsoGroup.add(upperChest);
+    const pChest = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.31, 0.68, 16), pShirt);
+    pChest.scale.set(1.12, 1.0, 0.72);
+    pChest.position.y = 0.34;
+    pChest.castShadow = true;
+    pTorso.add(pChest);
 
-    [-0.51, 0.51].forEach((sx) => {
-      const delt = new THREE.Mesh(new THREE.SphereGeometry(0.145, 16, 16), shirtMat);
-      delt.scale.set(1.0, 1.05, 0.95);
-      delt.position.set(sx, 0.71, 0);
-      delt.castShadow = true;
-      torsoGroup.add(delt);
-    });
+    const pack = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.46, 0.22), pBag);
+    pack.position.set(0, 0.4, 0.24);
+    pTorso.add(pack);
 
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.125, 0.16, 16), skinMat);
-    neck.position.y = 0.81;
-    torsoGroup.add(neck);
+    const pHeadGroup = new THREE.Group();
+    pHeadGroup.position.y = 0.84;
 
-    const headGroup = new THREE.Group();
-    headGroup.position.y = 1.06;
+    const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.21, 18, 18), pSkin);
+    pHead.scale.set(0.92, 1.1, 1.0);
+    pHead.castShadow = true;
+    pHeadGroup.add(pHead);
 
-    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.235, 24, 24), skinMat);
-    headMesh.scale.set(0.9, 1.14, 1.05);
-    headMesh.castShadow = true;
-    headGroup.add(headMesh);
+    const pHairCap = new THREE.Mesh(new THREE.SphereGeometry(0.22, 18, 14, 0, Math.PI * 2, 0, Math.PI * 0.58), pHair);
+    pHairCap.position.set(0, 0.03, 0.02);
+    pHeadGroup.add(pHairCap);
 
-    const jawMesh = new THREE.Mesh(new THREE.ConeGeometry(0.175, 0.22, 18), skinMat);
-    jawMesh.rotation.x = Math.PI;
-    jawMesh.scale.set(0.95, 1.0, 0.92);
-    jawMesh.position.set(0, -0.14, -0.02);
-    headGroup.add(jawMesh);
+    pTorso.add(pHeadGroup);
 
-    const noseMesh = new THREE.Mesh(new THREE.ConeGeometry(0.032, 0.085, 8), skinMat);
-    noseMesh.rotation.x = -Math.PI / 2.4;
-    noseMesh.position.set(0, 0.0, -0.245);
-    headGroup.add(noseMesh);
-
-    const browMat = new THREE.MeshStandardMaterial({ color: 0x1a120e, roughness: 0.85 });
-    [-0.072, 0.072].forEach((bx) => {
-      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.02, 0.035), browMat);
-      brow.position.set(bx, 0.052, -0.225);
-      headGroup.add(brow);
-    });
-
-    const hairTop = new THREE.Mesh(new THREE.SphereGeometry(0.248, 24, 20, 0, Math.PI * 2, 0, Math.PI * 0.58), hairMat);
-    hairTop.scale.set(0.93, 1.14, 1.08);
-    hairTop.position.set(0, 0.03, 0.015);
-    hairTop.rotation.x = 0.14;
-    headGroup.add(hairTop);
-
-    for (let i = 0; i < 4; i++) {
-      const lock = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.2, 10), hairMat);
-      lock.position.set(-0.08 + i * 0.055, 0.16, 0.05 + i * 0.015);
-      lock.rotation.set(0.95, 0.1, -0.15 + i * 0.08);
-      headGroup.add(lock);
-    }
-
-    torsoGroup.add(headGroup);
-
-    function createLimb(upperLen, lowerLen, upperR, lowerR, upperMat, lowerMat, endMesh) {
+    function makeJointLimb(uLen, lLen, uR, lR, mat, footMesh) {
       const root = new THREE.Group();
-      const upper = new THREE.Mesh(new THREE.CapsuleGeometry(upperR, upperLen, 10, 16), upperMat);
-      upper.position.y = -upperLen * 0.5;
-      upper.castShadow = true;
+      const upper = new THREE.Mesh(new THREE.CapsuleGeometry(uR, uLen, 6, 12), mat);
+      upper.position.y = -uLen * 0.5;
       root.add(upper);
 
       const joint = new THREE.Group();
-      joint.position.y = -upperLen;
-      const lower = new THREE.Mesh(new THREE.CapsuleGeometry(lowerR, lowerLen, 10, 16), lowerMat);
-      lower.position.y = -lowerLen * 0.5;
-      lower.castShadow = true;
+      joint.position.y = -uLen;
+      const lower = new THREE.Mesh(new THREE.CapsuleGeometry(lR, lLen, 6, 12), mat);
+      lower.position.y = -lLen * 0.5;
       joint.add(lower);
 
-      if (endMesh) {
-        endMesh.position.y = -lowerLen - 0.05;
-        joint.add(endMesh);
+      if (footMesh) {
+        footMesh.position.y = -lLen - 0.04;
+        joint.add(footMesh);
       }
       root.add(joint);
       return { root, joint };
     }
 
-    function createHand() {
-      const h = new THREE.Mesh(new THREE.SphereGeometry(0.072, 14, 14), skinMat);
-      h.scale.set(0.88, 1.22, 0.68);
-      return h;
+    function makeFoot() {
+      const f = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.28), pShoe);
+      f.position.set(0, 0, -0.04);
+      return f;
     }
 
-    function createBoot() {
-      const boot = new THREE.Group();
-      const sole = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.06, 0.34), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 }));
-      sole.position.set(0, -0.07, -0.05);
-      const upper = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.11, 0.3), bootMat);
-      upper.position.set(0, -0.01, -0.04);
-      upper.castShadow = true;
-      boot.add(sole, upper);
-      return boot;
-    }
+    const pLeftArm = makeJointLimb(0.26, 0.25, 0.08, 0.068, pSkin, null);
+    pLeftArm.root.position.set(-0.44, 0.62, 0);
+    pTorso.add(pLeftArm.root);
 
-    const leftArm = createLimb(0.28, 0.27, 0.095, 0.076, skinMat, skinMat, createHand());
-    leftArm.root.position.set(-0.52, 0.7, 0);
-    torsoGroup.add(leftArm.root);
+    const pRightArm = makeJointLimb(0.26, 0.25, 0.08, 0.068, pSkin, null);
+    pRightArm.root.position.set(0.44, 0.62, 0);
+    pTorso.add(pRightArm.root);
 
-    const rightArm = createLimb(0.28, 0.27, 0.095, 0.076, skinMat, skinMat, createHand());
-    rightArm.root.position.set(0.52, 0.7, 0);
-    torsoGroup.add(rightArm.root);
+    playerGroup.add(pTorso);
 
-    playerGroup.add(torsoGroup);
+    const pLeftLeg = makeJointLimb(0.36, 0.36, 0.11, 0.085, pPants, makeFoot());
+    pLeftLeg.root.position.set(-0.16, 0.86, 0);
+    playerGroup.add(pLeftLeg.root);
 
-    const leftLeg = createLimb(0.38, 0.38, 0.125, 0.092, pantMat, pantMat, createBoot());
-    leftLeg.root.position.set(-0.18, 0.88, 0);
-    playerGroup.add(leftLeg.root);
-
-    const rightLeg = createLimb(0.38, 0.38, 0.125, 0.092, pantMat, pantMat, createBoot());
-    rightLeg.root.position.set(0.18, 0.88, 0);
-    playerGroup.add(rightLeg.root);
+    const pRightLeg = makeJointLimb(0.36, 0.36, 0.11, 0.085, pPants, makeFoot());
+    pRightLeg.root.position.set(0.16, 0.86, 0);
+    playerGroup.add(pRightLeg.root);
 
     scene.add(playerGroup);
 
-    // ---------------- REALISTIC HULKING JUNGLE DEMON MONSTER ----------------
+    // ---------------- DEMON MONKEY MONSTER (TEMPLE RUN 2 STYLE) ----------------
     const monsterGroup = new THREE.Group();
-    const beastSkinMat = new THREE.MeshStandardMaterial({
-      map: createClothTexture('#2b1810', '#180c07'),
-      roughness: 0.85
-    });
-    const beastBoneMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.35 });
-    const beastEyeMat = new THREE.MeshStandardMaterial({
-      color: 0xff2400,
-      emissive: 0xff1a00,
-      emissiveIntensity: 2.0
-    });
+    const mFur = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.9 });
+    const mSkull = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.55 });
+    const mEye = new THREE.MeshStandardMaterial({ color: 0xff2a00, emissive: 0xff1e00, emissiveIntensity: 1.7 });
 
-    const mPelvis = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.38, 0.35, 16), beastSkinMat);
-    mPelvis.position.y = 0.98;
-    monsterGroup.add(mPelvis);
+    const mBody = new THREE.Mesh(new THREE.SphereGeometry(0.58, 16, 16), mFur);
+    mBody.scale.set(1.15, 0.95, 1.35);
+    mBody.position.set(0, 1.35, 0);
+    mBody.castShadow = true;
+    monsterGroup.add(mBody);
 
-    const mTorsoGroup = new THREE.Group();
-    mTorsoGroup.position.y = 1.12;
+    // Skull-like monkey face angled forward
+    const mFace = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), mSkull);
+    mFace.scale.set(0.95, 1.05, 1.2);
+    mFace.position.set(0, 1.62, -0.58);
+    mFace.rotation.x = 0.25;
+    monsterGroup.add(mFace);
 
-    const mChest = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.45, 1.15, 18), beastSkinMat);
-    mChest.scale.set(1.28, 1.0, 0.88);
-    mChest.position.y = 0.56;
-    mChest.rotation.x = 0.22;
-    mChest.castShadow = true;
-    mTorsoGroup.add(mChest);
-
-    [-0.78, 0.78].forEach((sx, idx) => {
-      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.45, 10), beastBoneMat);
-      spike.position.set(sx, 1.05, 0.05);
-      spike.rotation.z = idx === 0 ? 0.65 : -0.65;
-      mTorsoGroup.add(spike);
+    [-0.11, 0.11].forEach((ex) => {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 10), mEye);
+      eye.position.set(ex, 1.66, -0.88);
+      monsterGroup.add(eye);
     });
 
-    const mHead = new THREE.Mesh(new THREE.SphereGeometry(0.36, 18, 18), beastSkinMat);
-    mHead.scale.set(1.08, 1.02, 1.28);
-    mHead.position.set(0, 1.22, -0.22);
-    mTorsoGroup.add(mHead);
+    // Long front arms & hind legs
+    const mArmL = makeJointLimb(0.48, 0.46, 0.12, 0.095, mFur, null);
+    mArmL.root.position.set(-0.52, 1.45, -0.35);
+    monsterGroup.add(mArmL.root);
 
-    [-0.13, 0.13].forEach((ex) => {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.052, 12, 12), beastEyeMat);
-      eye.position.set(ex, 1.26, -0.56);
-      mTorsoGroup.add(eye);
-    });
+    const mArmR = makeJointLimb(0.48, 0.46, 0.12, 0.095, mFur, null);
+    mArmR.root.position.set(0.52, 1.45, -0.35);
+    monsterGroup.add(mArmR.root);
 
-    [-0.32, 0.32].forEach((hx, idx) => {
-      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.58, 10), beastBoneMat);
-      horn.position.set(hx, 1.58, -0.18);
-      horn.rotation.set(-0.25, 0, idx === 0 ? 0.42 : -0.42);
-      mTorsoGroup.add(horn);
-    });
+    const mLegL = makeJointLimb(0.42, 0.4, 0.14, 0.11, mFur, null);
+    mLegL.root.position.set(-0.34, 1.1, 0.45);
+    monsterGroup.add(mLegL.root);
 
-    const mLeftArm = createLimb(0.45, 0.44, 0.17, 0.14, beastSkinMat, beastSkinMat, null);
-    mLeftArm.root.position.set(-0.84, 0.95, -0.05);
-    mTorsoGroup.add(mLeftArm.root);
+    const mLegR = makeJointLimb(0.42, 0.4, 0.14, 0.11, mFur, null);
+    mLegR.root.position.set(0.34, 1.1, 0.45);
+    monsterGroup.add(mLegR.root);
 
-    const mRightArm = createLimb(0.45, 0.44, 0.17, 0.14, beastSkinMat, beastSkinMat, null);
-    mRightArm.root.position.set(0.84, 0.95, -0.05);
-    mTorsoGroup.add(mRightArm.root);
-
-    monsterGroup.add(mTorsoGroup);
-
-    const mLeftLeg = createLimb(0.46, 0.44, 0.19, 0.15, beastSkinMat, beastSkinMat, null);
-    mLeftLeg.root.position.set(-0.3, 0.92, 0);
-    monsterGroup.add(mLeftLeg.root);
-
-    const mRightLeg = createLimb(0.46, 0.44, 0.19, 0.15, beastSkinMat, beastSkinMat, null);
-    mRightLeg.root.position.set(0.3, 0.92, 0);
-    monsterGroup.add(mRightLeg.root);
-
+    monsterGroup.position.set(0, 0, 4.3);
     scene.add(monsterGroup);
 
-    // ---------------- CURVING & BROKEN SUSPENSION BRIDGE WORLD ----------------
-    const worldGroup = new THREE.Group();
-    scene.add(worldGroup);
-
-    const LANES = [-2.45, 0, 2.45];
+    // ---------------- STRAIGHT TEMPLE BRIDGE & JUNGLE ----------------
+    const LANES = [-2.4, 0, 2.4];
     const SEG_LEN = 6.0;
-    const bridgeItems = [];
+    const segments = [];
     const trees = [];
     const coins = [];
     const obstacles = [];
-    const magnets = [];
 
-    const plankTex = createWoodTexture('#6b4222', '#3a1e0b', true);
-    const beamTex = createWoodTexture('#462912', '#241205', false);
-    const plankMat = new THREE.MeshStandardMaterial({ map: plankTex, roughness: 0.88 });
-    const beamMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.92 });
-    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.8 });
-    const turnStoneMat = new THREE.MeshStandardMaterial({ color: 0xca8a04, emissive: 0x713f12, roughness: 0.5 });
-
-    const trunkMat = new THREE.MeshStandardMaterial({ map: beamTex, roughness: 0.95 });
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.82 });
+    const stoneDeckMat = new THREE.MeshStandardMaterial({ color: 0x3f4e42, roughness: 0.88 });
+    const woodPlankMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.88 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x36200f, roughness: 0.92 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3a200e, roughness: 0.95 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x156534, roughness: 0.82 });
     const coinMat = new THREE.MeshStandardMaterial({
       color: 0xfacc15,
       emissive: 0x854d0e,
       metalness: 0.65,
       roughness: 0.25
     });
-    const magnetMat = new THREE.MeshStandardMaterial({
-      color: 0xf43f5e,
-      emissive: 0x9f1239,
-      metalness: 0.5,
-      roughness: 0.25
-    });
-    const obstacleMat = new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.72 });
+    const obsMat = new THREE.MeshStandardMaterial({ color: 0x881337, roughness: 0.7 });
 
-    function makeBridgePiece(kind) {
+    function makeSegmentMesh(isGap) {
       const g = new THREE.Group();
 
-      [-3.85, 3.85].forEach((bx) => {
-        const beam = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.34, SEG_LEN), beamMat);
-        beam.position.set(bx, -0.17, 0);
-        beam.castShadow = true;
-        beam.receiveShadow = true;
-        g.add(beam);
-
-        const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, SEG_LEN + 0.05, 8), ropeMat);
-        cable.rotation.x = Math.PI / 2;
-        cable.position.set(bx, 1.18, 0);
-        g.add(cable);
-
-        [-2.1, 2.1].forEach((pz) => {
-          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, 1.3, 8), beamMat);
-          post.position.set(bx, 0.53, pz);
-          g.add(post);
-        });
+      // Side stone/wood rails
+      [-3.75, 3.75].forEach((rx) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, SEG_LEN), railMat);
+        rail.position.set(rx, 0.25, 0);
+        rail.castShadow = true;
+        g.add(rail);
       });
 
-      if (kind !== 'gap') {
-        for (let zOff = -2.4; zOff <= 2.4; zOff += 0.96) {
-          const plank = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.16, 0.72), plankMat);
-          plank.position.set(0, -0.08, zOff);
+      if (!isGap) {
+        const base = new THREE.Mesh(new THREE.BoxGeometry(7.3, 0.35, SEG_LEN), stoneDeckMat);
+        base.position.set(0, -0.18, 0);
+        base.receiveShadow = true;
+        g.add(base);
+
+        for (let zOff = -2.2; zOff <= 2.2; zOff += 1.1) {
+          const plank = new THREE.Mesh(new THREE.BoxGeometry(7.1, 0.08, 0.55), woodPlankMat);
+          plank.position.set(0, 0.02, zOff);
           plank.receiveShadow = true;
-          plank.castShadow = true;
           g.add(plank);
         }
       }
-
-      if (kind === 'turnLeft' || kind === 'turnRight') {
-        const chev = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.12, 1.2), turnStoneMat);
-        chev.position.set(0, 0.04, 0);
-        g.add(chev);
-      }
-
       return g;
     }
 
-    function makeMagnetPickup() {
-      const mGroup = new THREE.Group();
-      const uShape = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.1, 10, 18, Math.PI), magnetMat);
-      uShape.rotation.z = Math.PI;
-      mGroup.add(uShape);
-      return mGroup;
+    function createJungleTree(xPos, zPos) {
+      const t = new THREE.Group();
+      const h = 6.5 + Math.random() * 5.5;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, h, 8), trunkMat);
+      trunk.position.y = h * 0.5 - 5.2;
+      t.add(trunk);
+
+      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5 + Math.random() * 1.0, 4.4, 8), leafMat);
+      c1.position.y = h - 3.9;
+      t.add(c1);
+
+      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.8 + Math.random() * 0.7, 3.6, 8), leafMat);
+      c2.position.y = h - 1.9;
+      t.add(c2);
+
+      t.position.set(xPos, 0, zPos);
+      scene.add(t);
+      trees.push(t);
     }
 
-    function createTree(xPos, zPos) {
-      const tree = new THREE.Group();
-      const h = 6.5 + Math.random() * 6;
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.58, h, 8), trunkMat);
-      trunk.position.y = h * 0.5 - 5.8;
-      tree.add(trunk);
-
-      const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.6 + Math.random() * 1.1, 4.6, 8), foliageMat);
-      c1.position.y = h - 4.4;
-      tree.add(c1);
-
-      const c2 = new THREE.Mesh(new THREE.ConeGeometry(1.9 + Math.random() * 0.8, 3.8, 8), foliageMat);
-      c2.position.y = h - 2.3;
-      tree.add(c2);
-
-      tree.position.set(xPos, 0, zPos);
-      worldGroup.add(tree);
-      trees.push(tree);
-    }
-
-    let pathX = 0;
-    let pathZ = 12;
-    let pathAngle = 0;
-    let segmentsSinceTurn = 0;
-
-    function appendPathSegment(forceKind = null) {
-      segmentsSinceTurn++;
-      let kind = forceKind || 'bridge';
-
-      if (!forceKind && segmentsSinceTurn >= 11 && Math.random() < 0.34) {
-        kind = Math.random() < 0.5 ? 'turnLeft' : 'turnRight';
-        segmentsSinceTurn = 0;
-      } else if (!forceKind && segmentsSinceTurn > 3 && Math.random() < 0.16) {
-        kind = 'gap';
-      }
-
-      const piece = makeBridgePiece(kind);
-      piece.position.set(pathX, 0, pathZ);
-      piece.rotation.y = pathAngle;
-      worldGroup.add(piece);
-
-      bridgeItems.push({
-        mesh: piece,
-        kind,
-        triggered: false
-      });
-
-      if (kind === 'bridge' && segmentsSinceTurn > 1 && Math.random() < 0.78) {
+    function spawnRowContent(zPos, isGap) {
+      if (isGap) {
+        // Coins above gap to guide jump
         const laneX = LANES[Math.floor(Math.random() * 3)];
-        const localOffset = new THREE.Vector3(laneX, 1.15, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), pathAngle);
-
-        const spawnRoll = Math.random();
-        if (spawnRoll < 0.14) {
-          const mag = makeMagnetPickup();
-          mag.position.set(pathX + localOffset.x, 1.2, pathZ + localOffset.z);
-          mag.rotation.y = pathAngle;
-          worldGroup.add(mag);
-          magnets.push(mag);
-        } else if (spawnRoll < 0.65) {
-          for (let k = -1; k <= 1; k++) {
-            const cOff = new THREE.Vector3(laneX, 1.1, k * 1.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), pathAngle);
-            const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
-            coin.rotation.z = Math.PI / 2;
-            coin.position.set(pathX + cOff.x, cOff.y, pathZ + cOff.z);
-            worldGroup.add(coin);
-            coins.push(coin);
-          }
-        } else {
-          const isHigh = Math.random() < 0.35;
-          const obs = new THREE.Mesh(new THREE.BoxGeometry(1.7, isHigh ? 0.85 : 1.1, 1.05), obstacleMat);
-          obs.position.set(pathX + localOffset.x, isHigh ? 1.82 : 0.55, pathZ + localOffset.z);
-          obs.rotation.y = pathAngle;
-          obs.castShadow = true;
-          obs.userData = { isHigh };
-          worldGroup.add(obs);
-          obstacles.push(obs);
+        for (let k = -1; k <= 1; k++) {
+          const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
+          coin.rotation.z = Math.PI / 2;
+          coin.position.set(laneX, 2.05 - Math.abs(k) * 0.35, zPos + k * 1.9);
+          scene.add(coin);
+          coins.push(coin);
         }
+        return;
       }
 
-      const step = new THREE.Vector3(0, 0, -SEG_LEN).applyAxisAngle(new THREE.Vector3(0, 1, 0), pathAngle);
-      pathX += step.x;
-      pathZ += step.z;
-
-      if (kind === 'turnLeft') {
-        pathAngle += Math.PI / 2;
-        const turnStep = new THREE.Vector3(0, 0, -SEG_LEN * 0.65).applyAxisAngle(new THREE.Vector3(0, 1, 0), pathAngle);
-        pathX += turnStep.x;
-        pathZ += turnStep.z;
-      } else if (kind === 'turnRight') {
-        pathAngle -= Math.PI / 2;
-        const turnStep = new THREE.Vector3(0, 0, -SEG_LEN * 0.65).applyAxisAngle(new THREE.Vector3(0, 1, 0), pathAngle);
-        pathX += turnStep.x;
-        pathZ += turnStep.z;
+      const laneX = LANES[Math.floor(Math.random() * 3)];
+      if (Math.random() < 0.55) {
+        for (let k = -1; k <= 1; k++) {
+          const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.13, 18), coinMat);
+          coin.rotation.z = Math.PI / 2;
+          coin.position.set(laneX, 1.1, zPos + k * 2.0);
+          scene.add(coin);
+          coins.push(coin);
+        }
+      } else {
+        const isHigh = Math.random() < 0.35;
+        const obs = new THREE.Mesh(new THREE.BoxGeometry(1.7, isHigh ? 0.85 : 1.1, 1.05), obsMat);
+        obs.position.set(laneX, isHigh ? 1.82 : 0.55, zPos);
+        obs.castShadow = true;
+        obs.userData = { isHigh };
+        scene.add(obs);
+        obstacles.push(obs);
       }
     }
 
     function initWorld() {
-      bridgeItems.forEach((b) => worldGroup.remove(b.mesh));
-      trees.forEach((t) => worldGroup.remove(t));
-      coins.forEach((c) => worldGroup.remove(c));
-      obstacles.forEach((o) => worldGroup.remove(o));
-      magnets.forEach((m) => worldGroup.remove(m));
-      bridgeItems.length = 0;
+      segments.forEach((s) => scene.remove(s.mesh));
+      trees.forEach((t) => scene.remove(t));
+      coins.forEach((c) => scene.remove(c));
+      obstacles.forEach((o) => scene.remove(o));
+      segments.length = 0;
       trees.length = 0;
       coins.length = 0;
       obstacles.length = 0;
-      magnets.length = 0;
 
-      worldGroup.position.set(0, 0, 0);
-      worldGroup.rotation.set(0, 0, 0);
-
-      pathX = 0;
-      pathZ = 12;
-      pathAngle = 0;
-      segmentsSinceTurn = 0;
-      pendingTurn = null;
-      document.getElementById('turn-banner').classList.add('hidden');
-      document.getElementById('slowmo-badge').classList.add('hidden');
-
-      for (let i = 0; i < 28; i++) {
-        appendPathSegment(i < 4 ? 'bridge' : null);
+      for (let i = 0; i < 24; i++) {
+        const z = 12 - i * SEG_LEN;
+        const isGap = i > 5 && i % 9 === 0;
+        const mesh = makeSegmentMesh(isGap);
+        mesh.position.z = z;
+        scene.add(mesh);
+        segments.push({ mesh, isGap });
+        if (i >= 4) spawnRowContent(z, isGap);
       }
 
-      for (let i = 0; i < 64; i++) {
+      for (let i = 0; i < 48; i++) {
         const side = i % 2 === 0 ? -1 : 1;
-        const dist = 7.8 + Math.random() * 16;
-        const zPos = 14 - i * 3.8;
-        createTree(side * dist, zPos);
+        const dist = 7.4 + Math.random() * 14;
+        const zPos = 14 - i * 4.2;
+        createJungleTree(side * dist, zPos);
       }
     }
 
     // ---------------- GAME STATE & CONTROLS ----------------
-    let state = 'start';
+    let state = 'start'; // 'start' | 'playing' | 'catching' | 'falling' | 'gameover'
     let currentLane = 1;
-    let targetLaneX = LANES[1];
+    let targetX = LANES[1];
     let yVel = 0;
     let isGrounded = true;
     let slideTimer = 0;
     let speed = 15.5;
-    let timeScale = 1.0;
     let distance = 0;
     let coinCount = 0;
-    let magnetTimer = 0;
-    let pendingTurn = null;
     let bestScore = Number(localStorage.getItem('jungle_escape_3d_best') || 0);
     let animTime = 0;
     let stepAccumulator = 0;
     let growlAccumulator = 0;
-    let worldYaw = 0;
-    let targetWorldYaw = 0;
 
     const scoreEl = document.getElementById('score-val');
     const coinsEl = document.getElementById('coins-val');
-    const magnetHud = document.getElementById('magnet-hud');
-    const magnetTimerEl = document.getElementById('magnet-timer');
-    const turnBanner = document.getElementById('turn-banner');
-    const slowmoBadge = document.getElementById('slowmo-badge');
     const startScreen = document.getElementById('start-screen');
     const gameoverScreen = document.getElementById('gameover-screen');
 
-    function executeTurn(dir) {
-      if (pendingTurn === dir) {
-        pendingTurn = null;
-        turnBanner.classList.add('hidden');
-        targetWorldYaw += dir === 'left' ? -Math.PI / 2 : Math.PI / 2;
-        sound.turn();
-        return true;
-      }
-      return false;
-    }
-
     function moveLeft() {
       if (state !== 'playing') return;
-      if (executeTurn('left')) return;
       if (currentLane > 0) {
         currentLane--;
-        targetLaneX = LANES[currentLane];
+        targetX = LANES[currentLane];
         sound.move();
       }
     }
-
     function moveRight() {
       if (state !== 'playing') return;
-      if (executeTurn('right')) return;
       if (currentLane < 2) {
         currentLane++;
-        targetLaneX = LANES[currentLane];
+        targetX = LANES[currentLane];
         sound.move();
       }
     }
-
     function jump() {
       if (state !== 'playing') return;
       if (isGrounded) {
@@ -925,7 +600,6 @@
         sound.jump();
       }
     }
-
     function slide() {
       if (state !== 'playing') return;
       if (!isGrounded) yVel = -15;
@@ -967,23 +641,17 @@
       initWorld();
       state = 'playing';
       currentLane = 1;
-      targetLaneX = LANES[1];
-      worldYaw = 0;
-      targetWorldYaw = 0;
+      targetX = LANES[1];
       playerGroup.position.set(0, 0, 0);
       playerGroup.rotation.set(0, 0, 0);
-      torsoGroup.rotation.x = 0;
+      pTorso.rotation.x = 0;
       monsterGroup.position.set(0, 0, 4.3);
       yVel = 0;
       isGrounded = true;
       slideTimer = 0;
       speed = 15.5;
-      timeScale = 1.0;
       distance = 0;
       coinCount = 0;
-      magnetTimer = 0;
-      magnetAura.visible = false;
-      magnetHud.classList.add('hidden');
       stepAccumulator = 0;
       growlAccumulator = 0;
 
@@ -993,29 +661,22 @@
       gameoverScreen.classList.add('hidden');
     }
 
-    function beginMonsterCatch() {
+    function beginCatch() {
       if (state !== 'playing') return;
       state = 'catching';
-      turnBanner.classList.add('hidden');
-      slowmoBadge.classList.add('hidden');
       sound.crash();
       sound.growl();
-      torsoGroup.rotation.x = -0.25;
     }
 
     function beginFall() {
       if (state !== 'playing') return;
       state = 'falling';
-      turnBanner.classList.add('hidden');
-      slowmoBadge.classList.add('hidden');
       yVel = -2;
       sound.fall();
     }
 
     function finalizeGameOver() {
       state = 'gameover';
-      magnetAura.visible = false;
-      magnetHud.classList.add('hidden');
       const finalDist = Math.floor(distance);
       if (finalDist > bestScore) {
         bestScore = finalDist;
@@ -1036,129 +697,56 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // ---------------- MAIN ANIMATION LOOP ----------------
+    // ---------------- MAIN LOOP ----------------
     initWorld();
     let lastTime = performance.now();
 
     function animate(now) {
       requestAnimationFrame(animate);
-      const rawDt = Math.min((now - lastTime) / 1000, 0.05);
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
+      animTime += dt;
 
       if (state === 'start' || state === 'gameover') {
-        animTime += rawDt;
-        playerGroup.position.y = Math.sin(animTime * 3) * 0.05;
-        monsterGroup.position.y = Math.cos(animTime * 3.5) * 0.06;
-        camera.position.set(0, 5.1, 8.7);
-        camera.lookAt(0, 1.55, -8);
-        coins.forEach((c) => { c.rotation.y += rawDt * 3; });
+        playerGroup.position.y = Math.sin(animTime * 3) * 0.04;
+        monsterGroup.position.y = Math.cos(animTime * 3.5) * 0.05;
+        coins.forEach((c) => { c.rotation.y += dt * 3; });
         renderer.render(scene, camera);
         return;
       }
 
       if (state === 'catching') {
-        animTime += rawDt;
-        monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, rawDt * 14);
-        monsterGroup.position.z += (playerGroup.position.z + 1.15 - monsterGroup.position.z) * Math.min(1, rawDt * 12);
-        mLeftArm.root.rotation.x = -1.15 + Math.sin(animTime * 28) * 0.35;
-        mRightArm.root.rotation.x = -1.15 - Math.sin(animTime * 28) * 0.35;
-        camera.position.x = playerGroup.position.x * 0.65 + Math.sin(animTime * 45) * 0.14;
-        camera.position.y = 5.1 + Math.cos(animTime * 40) * 0.12;
-        camera.lookAt(playerGroup.position.x * 0.5, 1.5, -6);
-
+        monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, dt * 14);
+        monsterGroup.position.z += (playerGroup.position.z + 1.15 - monsterGroup.position.z) * Math.min(1, dt * 12);
+        mArmL.root.rotation.x = -1.1 + Math.sin(animTime * 26) * 0.35;
+        mArmR.root.rotation.x = -1.1 - Math.sin(animTime * 26) * 0.35;
+        camera.position.x = playerGroup.position.x * 0.6 + Math.sin(animTime * 42) * 0.12;
         renderer.render(scene, camera);
-        if (Math.abs(monsterGroup.position.z - (playerGroup.position.z + 1.15)) < 0.25) {
-          camera.position.y = 5.1;
-          finalizeGameOver();
-        }
+        if (Math.abs(monsterGroup.position.z - (playerGroup.position.z + 1.15)) < 0.25) finalizeGameOver();
         return;
       }
 
       if (state === 'falling') {
-        animTime += rawDt;
-        playerGroup.position.y += yVel * rawDt;
-        yVel -= 26 * rawDt;
-        playerGroup.rotation.x += rawDt * 3.2;
-        camera.lookAt(playerGroup.position.x * 0.5, playerGroup.position.y + 0.8, -5);
+        playerGroup.position.y += yVel * dt;
+        yVel -= 26 * dt;
+        playerGroup.rotation.x += dt * 3.0;
         renderer.render(scene, camera);
-        if (playerGroup.position.y < -6.2) finalizeGameOver();
+        if (playerGroup.position.y < -5.2) finalizeGameOver();
         return;
       }
 
-      // Check proximity to turns or broken gaps for slow-motion assist
-      let slowMoActive = false;
-      pendingTurn = null;
-      turnBanner.classList.add('hidden');
-
-      for (const item of bridgeItems) {
-        const effZ = item.mesh.position.z + worldGroup.position.z;
-        if (item.kind === 'turnLeft' || item.kind === 'turnRight') {
-          if (!item.triggered && effZ > -14 && effZ < 2.2) {
-            pendingTurn = item.kind === 'turnLeft' ? 'left' : 'right';
-            turnBanner.textContent = pendingTurn === 'left' ? '↰ TURN LEFT (← / A)' : '↱ TURN RIGHT (→ / D)';
-            turnBanner.classList.remove('hidden');
-          }
-          if (!item.triggered && effZ > -11 && effZ < 1.8) {
-            slowMoActive = true;
-          }
-          if (!item.triggered && effZ > 2.2) {
-            item.triggered = true;
-            if (pendingTurn) {
-              pendingTurn = null;
-              turnBanner.classList.add('hidden');
-              beginMonsterCatch();
-              break;
-            }
-          }
-        } else if (item.kind === 'gap' && Math.abs(effZ) < 6.5) {
-          slowMoActive = true;
-        }
-      }
-
-      if (state !== 'playing') return;
-
-      const targetScale = slowMoActive ? 0.55 : 1.0;
-      timeScale += (targetScale - timeScale) * Math.min(1, rawDt * 12);
-      slowmoBadge.classList.toggle('hidden', !slowMoActive);
-
-      const dt = rawDt * timeScale;
-      animTime += dt;
-
-      // Magnet timer update
-      if (magnetTimer > 0) {
-        magnetTimer = Math.max(0, magnetTimer - rawDt);
-        magnetTimerEl.textContent = magnetTimer.toFixed(1);
-        magnetAura.visible = magnetTimer > 0;
-        magnetAura.rotation.z += rawDt * 5;
-        if (magnetTimer <= 0) {
-          magnetHud.classList.add('hidden');
-        }
-      }
-
-      speed = Math.min(35, 15.5 + distance * 0.015);
+      speed = Math.min(34, 15.5 + distance * 0.015);
       const moveZ = speed * dt;
       distance += moveZ;
       scoreEl.textContent = String(Math.floor(distance));
 
-      worldYaw += (targetWorldYaw - worldYaw) * Math.min(1, rawDt * 10);
-      worldGroup.rotation.y = worldYaw;
-      worldGroup.position.z += moveZ;
+      playerGroup.position.x += (targetX - playerGroup.position.x) * Math.min(1, dt * 15);
+      camera.position.x = playerGroup.position.x * 0.62;
 
-      const prevX = playerGroup.position.x;
-      playerGroup.position.x += (targetLaneX - playerGroup.position.x) * Math.min(1, rawDt * 15);
-      playerGroup.rotation.z = -(playerGroup.position.x - prevX) * 0.42;
-
-      const camZ = slowMoActive ? 7.6 : 8.7;
-      const camY = slowMoActive ? 4.5 : 5.1;
-      camera.position.x += (playerGroup.position.x * 0.65 - camera.position.x) * Math.min(1, rawDt * 10);
-      camera.position.y += (camY - camera.position.y) * Math.min(1, rawDt * 8);
-      camera.position.z += (camZ - camera.position.z) * Math.min(1, rawDt * 8);
-      camera.lookAt(playerGroup.position.x * 0.45, 1.55, -8.5);
-
-      const creepOffset = Math.min(1.65, distance * 0.0018);
-      monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, rawDt * 6.5);
-      monsterGroup.position.z = 4.3 - creepOffset + Math.sin(animTime * 2.4) * 0.45;
-      monsterGroup.position.y = Math.abs(Math.sin(animTime * (speed * 0.65))) * 0.18;
+      const creep = Math.min(1.5, distance * 0.0016);
+      monsterGroup.position.x += (playerGroup.position.x - monsterGroup.position.x) * Math.min(1, dt * 6.5);
+      monsterGroup.position.z = 4.3 - creep + Math.sin(animTime * 2.4) * 0.4;
+      monsterGroup.position.y = Math.abs(Math.sin(animTime * (speed * 0.65))) * 0.16;
 
       growlAccumulator += dt;
       if (growlAccumulator > 5.5) {
@@ -1179,28 +767,28 @@
       const isSliding = slideTimer > 0;
       if (isSliding) {
         slideTimer -= dt;
-        torsoGroup.rotation.x = 0.96;
-        torsoGroup.position.y = 0.6;
+        pTorso.rotation.x = 0.95;
+        pTorso.position.y = 0.6;
       } else {
-        torsoGroup.rotation.x = 0.16;
-        torsoGroup.position.y = 1.08 + Math.abs(Math.sin(animTime * (speed * 0.85))) * 0.05;
+        pTorso.rotation.x = 0.15;
+        pTorso.position.y = 1.05 + Math.abs(Math.sin(animTime * (speed * 0.85))) * 0.04;
       }
 
       const runCycle = animTime * (speed * 0.88);
-      leftLeg.root.rotation.x = Math.sin(runCycle) * 0.85;
-      leftLeg.joint.rotation.x = Math.max(0, -Math.cos(runCycle) * 0.9);
-      rightLeg.root.rotation.x = -Math.sin(runCycle) * 0.85;
-      rightLeg.joint.rotation.x = Math.max(0, Math.cos(runCycle) * 0.9);
+      pLeftLeg.root.rotation.x = Math.sin(runCycle) * 0.82;
+      pLeftLeg.joint.rotation.x = Math.max(0, -Math.cos(runCycle) * 0.85);
+      pRightLeg.root.rotation.x = -Math.sin(runCycle) * 0.82;
+      pRightLeg.joint.rotation.x = Math.max(0, Math.cos(runCycle) * 0.85);
 
-      leftArm.root.rotation.x = -Math.sin(runCycle) * 0.72;
-      leftArm.joint.rotation.x = -0.65 - Math.max(0, Math.sin(runCycle) * 0.45);
-      rightArm.root.rotation.x = Math.sin(runCycle) * 0.72;
-      rightArm.joint.rotation.x = -0.65 - Math.max(0, -Math.sin(runCycle) * 0.45);
+      pLeftArm.root.rotation.x = -Math.sin(runCycle) * 0.7;
+      pLeftArm.joint.rotation.x = -0.6 - Math.max(0, Math.sin(runCycle) * 0.4);
+      pRightArm.root.rotation.x = Math.sin(runCycle) * 0.7;
+      pRightArm.joint.rotation.x = -0.6 - Math.max(0, -Math.sin(runCycle) * 0.4);
 
-      mLeftLeg.root.rotation.x = Math.sin(runCycle * 0.82) * 0.72;
-      mRightLeg.root.rotation.x = -Math.sin(runCycle * 0.82) * 0.72;
-      mLeftArm.root.rotation.x = -0.45 + Math.cos(runCycle * 0.82) * 0.48;
-      mRightArm.root.rotation.x = -0.45 - Math.cos(runCycle * 0.82) * 0.48;
+      mLegL.root.rotation.x = Math.sin(runCycle * 0.85) * 0.7;
+      mLegR.root.rotation.x = -Math.sin(runCycle * 0.85) * 0.7;
+      mArmL.root.rotation.x = -0.5 + Math.cos(runCycle * 0.85) * 0.45;
+      mArmR.root.rotation.x = -0.5 - Math.cos(runCycle * 0.85) * 0.45;
 
       if (isGrounded && !isSliding) {
         stepAccumulator += moveZ;
@@ -1210,102 +798,86 @@
         }
       }
 
-      // Check gap fall
-      for (const item of bridgeItems) {
-        const effZ = item.mesh.position.z + worldGroup.position.z;
-        if (item.kind === 'gap' && isGrounded && Math.abs(effZ) < 2.2) {
+      // Recycle bridge segments & check broken gaps
+      let minSegZ = 0;
+      for (const s of segments) {
+        if (s.mesh.position.z < minSegZ) minSegZ = s.mesh.position.z;
+      }
+
+      for (const s of segments) {
+        s.mesh.position.z += moveZ;
+
+        if (s.isGap && isGrounded && Math.abs(s.mesh.position.z) < 2.1) {
           beginFall();
           break;
         }
-      }
 
-      // Recycle trees forward
-      for (const tree of trees) {
-        if (tree.position.z + worldGroup.position.z > 18) {
-          tree.position.z -= trees.length * 3.8;
+        if (s.mesh.position.z > 18) {
+          minSegZ -= SEG_LEN;
+          s.mesh.position.z = minSegZ;
+          s.isGap = Math.random() < 0.16;
+          scene.remove(s.mesh);
+          s.mesh = makeSegmentMesh(s.isGap);
+          s.mesh.position.z = minSegZ;
+          scene.add(s.mesh);
+          spawnRowContent(minSegZ, s.isGap);
         }
       }
 
-      // Magnet pickups
-      for (let i = magnets.length - 1; i >= 0; i--) {
-        const m = magnets[i];
-        m.rotation.y += rawDt * 3.5;
-        const worldPos = new THREE.Vector3();
-        m.getWorldPosition(worldPos);
-
-        if (
-          Math.abs(worldPos.x - playerGroup.position.x) < 1.1 &&
-          Math.abs(worldPos.y - (playerGroup.position.y + 1.1)) < 1.4 &&
-          Math.abs(worldPos.z - playerGroup.position.z) < 1.15
-        ) {
-          magnetTimer = 8.0;
-          magnetHud.classList.remove('hidden');
-          magnetAura.visible = true;
-          sound.magnet();
-          worldGroup.remove(m);
-          magnets.splice(i, 1);
-        } else if (worldPos.z > 14) {
-          worldGroup.remove(m);
-          magnets.splice(i, 1);
+      // Recycle jungle trees
+      let minTreeZ = 0;
+      for (const t of trees) {
+        if (t.position.z < minTreeZ) minTreeZ = t.position.z;
+      }
+      for (const t of trees) {
+        t.position.z += moveZ;
+        if (t.position.z > 18) {
+          minTreeZ -= 4.2;
+          t.position.z = minTreeZ;
         }
       }
 
-      // Coins collection + Magnet pull
+      // Coins collection
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
-        c.rotation.y += rawDt * 4.2;
-        const worldPos = new THREE.Vector3();
-        c.getWorldPosition(worldPos);
+        c.position.z += moveZ;
+        c.rotation.y += dt * 4.2;
 
-        const targetPlayerPos = new THREE.Vector3(
-          playerGroup.position.x,
-          playerGroup.position.y + 1.1,
-          playerGroup.position.z
-        );
-
-        if (magnetTimer > 0 && worldPos.distanceTo(targetPlayerPos) < 13.5) {
-          const toPlayer = targetPlayerPos.clone().sub(worldPos);
-          const pullStep = Math.min(toPlayer.length(), rawDt * 24);
-          toPlayer.normalize().multiplyScalar(pullStep);
-          const localDelta = toPlayer.applyAxisAngle(new THREE.Vector3(0, 1, 0), -worldYaw);
-          c.position.add(localDelta);
-          c.getWorldPosition(worldPos);
-        }
-
-        if (worldPos.distanceTo(targetPlayerPos) < 1.15) {
+        if (
+          Math.abs(c.position.x - playerGroup.position.x) < 1.0 &&
+          Math.abs(c.position.y - (playerGroup.position.y + 1.1)) < 1.3 &&
+          Math.abs(c.position.z - playerGroup.position.z) < 1.05
+        ) {
           coinCount++;
           coinsEl.textContent = String(coinCount);
           sound.coin();
-          worldGroup.remove(c);
+          scene.remove(c);
           coins.splice(i, 1);
-        } else if (worldPos.z > 14) {
-          worldGroup.remove(c);
+        } else if (c.position.z > 12) {
+          scene.remove(c);
           coins.splice(i, 1);
         }
       }
 
       // Obstacles collision
-      const playerBottom = playerGroup.position.y;
-      const playerTop = playerGroup.position.y + (isSliding ? 1.05 : 2.15);
+      const pBot = playerGroup.position.y;
+      const pTop = playerGroup.position.y + (isSliding ? 1.0 : 2.05);
 
       for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
-        const worldPos = new THREE.Vector3();
-        obs.getWorldPosition(worldPos);
+        obs.position.z += moveZ;
 
         if (
-          Math.abs(worldPos.x - playerGroup.position.x) < 0.85 &&
-          Math.abs(worldPos.z - playerGroup.position.z) < 0.82
+          Math.abs(obs.position.x - playerGroup.position.x) < 0.85 &&
+          Math.abs(obs.position.z - playerGroup.position.z) < 0.8
         ) {
-          const obsHalfH = obs.userData.isHigh ? 0.425 : 0.55;
-          const obsBottom = worldPos.y - obsHalfH;
-          const obsTop = worldPos.y + obsHalfH;
-          if (playerTop > obsBottom && playerBottom < obsTop) {
-            beginMonsterCatch();
+          const halfH = obs.userData.isHigh ? 0.425 : 0.55;
+          if (pTop > obs.position.y - halfH && pBot < obs.position.y + halfH) {
+            beginCatch();
             break;
           }
-        } else if (worldPos.z > 14) {
-          worldGroup.remove(obs);
+        } else if (obs.position.z > 12) {
+          scene.remove(obs);
           obstacles.splice(i, 1);
         }
       }
