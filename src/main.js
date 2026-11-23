@@ -84,12 +84,7 @@ fbxLoader.load('/models/unity_hero_mannequin.fbx',model=>{
     }else console.warn('Unity hero run animation contains no clip.');
   },undefined,error=>console.warn('Unity hero run animation could not be loaded.',error));
 },undefined,error=>console.error('Unity KinemIQ hero failed to load. No substitute character will be shown.',error));
-let guardian=new THREE.Group();
-mesh(guardian,sphereGeo,mats.monster,[0,1.4,0],[.58,.75,.42]);
-mesh(guardian,sphereGeo,mats.monster,[0,2,-.12],[.42,.43,.35]);
-for(const x of [-.15,.15])mesh(guardian,sphereGeo,mats.eye,[x,2.02,-.43],[.06,.045,.025],false);
-guardian.position.set(0,0,8.5);
-scene.add(guardian);
+let guardian=new THREE.Group();guardian.position.set(0,0,8.5);scene.add(guardian);
 fbxLoader.load('/models/unity_guardian_ape.fbx',ape=>{
   const model=prepareFBXCharacter(ape,2.55,Math.PI);
   const replacement=new THREE.Group();
@@ -104,7 +99,7 @@ fbxLoader.load('/models/unity_guardian_ape.fbx',ape=>{
     const runClip=ape.animations.find(clip=>/run|chase/i.test(clip.name))||ape.animations.find(clip=>/idle/i.test(clip.name))||ape.animations[0];
     guardianMixer.clipAction(makeInPlaceRunClip(runClip)).play();
   }
-},undefined,error=>console.warn('Unity guardian ape could not be loaded; using the built-in guardian.',error));
+},undefined,error=>console.error('Unity guardian ape failed to load. No substitute monster will be shown.',error));
 const obstacleGroup=new THREE.Group();scene.add(obstacleGroup);const obstacles=[],coins=[];let lane=1,laneOffset=0,verticalSpeed=0,jumpHeight=0,slide=0,active=false,paused=false,elapsed=0,distance=0,coinCount=0,best=Number(localStorage.getItem('jungleBest')||0);$('best').textContent=best;
 function obstacleAt(trackDistance,laneValue,kind){const frame=trackSystem.sample(trackDistance,laneValue*2);const g=new THREE.Group();g.position.copy(frame.position);g.rotation.y=Math.atan2(-frame.forward.x,-frame.forward.z);obstacleGroup.add(g);if(kind==='rock')mesh(g,new THREE.DodecahedronGeometry(.75,1),mats.dark,[0,.65,0],[1,.8,1]);else if(kind==='wall')block(g,mats.stone,0,.7,0,1.8,1.4,.55);else block(g,mats.bark,0,1.85,0,2.2,.3,.3);g.userData={kind,hit:false,distance:trackDistance,lane:laneValue};obstacles.push(g)}
 function coinAt(trackDistance,laneValue){const frame=trackSystem.sample(trackDistance,laneValue*2);const visual=new THREE.Group();visual.position.copy(frame.position);visual.position.y+=.95;visual.rotation.y=Math.atan2(-frame.forward.x,-frame.forward.z);mesh(visual,new THREE.CylinderGeometry(.24,.24,.07,20),mats.gold,[0,0,0],[1,1,1]);obstacleGroup.add(visual);coins.push({visual,distance:trackDistance,lane:laneValue,taken:false})}
