@@ -38,7 +38,18 @@ function segment(z,i){
 for(let i=0;i<7;i++)segments.push(segment(-i*18,i));
 function heroModel(){const g=new THREE.Group();mesh(g,sphereGeo,mats.hero,[0,1.12,0],[.34,.48,.23]);mesh(g,sphereGeo,mats.skin,[0,1.78,-.01],[.21,.26,.19]);mesh(g,sphereGeo,mats.dark,[0,1.96,.02],[.22,.1,.2]);for(const x of [-.16,.16]){mesh(g,new THREE.CapsuleGeometry(.11,.38,4,8),mats.cloth,[x,.42,0],[1,1,1]);mesh(g,new THREE.CapsuleGeometry(.09,.35,4,8),mats.hero,[x*2,1.15,0],[1,1,1])}return g}
 let hero=heroModel();hero.position.set(0,.22,2.5);scene.add(hero);
-let heroMixer=null,heroRunAction=null,heroModelLoaded=false,guardianMixer=null;
+let heroMixer=null,heroRunAction=null,heroModelLoaded=false,guardianMixer=null,heroAnimationRoot=null,heroAnimationRootPosition=new THREE.Vector3();
+function makeInPlaceRunClip(sourceClip){
+  // Disable root/hips translation from the imported FBX run cycle. The game track
+  // supplies forward movement; allowing root motion here makes the hero jump/loop
+  // back to the same spawn point at the end of each animation cycle.
+  const clip=sourceClip.clone();
+  clip.tracks=clip.tracks.filter(track=>{
+    const name=track.name||'';
+    return !( /(?:^|[|/:.])(?:mixamorig)?(?:hips|root|armature)(?:[|/:.]|$).*\\.position$/i.test(name) || name===' .position' || name==='.position' );
+  });
+  return clip;
+}
 const fbxLoader=new FBXLoader();
 function prepareFBXCharacter(root,targetHeight,turn=0){
   root.updateMatrixWorld(true);
@@ -61,10 +72,11 @@ fbxLoader.load('/models/unity_hero_mannequin.fbx',object=>{
   scene.remove(hero);
   hero=replacement;
   heroModelLoaded=true;
+  heroAnimationRoot=object;heroAnimationRootPosition.copy(object.position);
   heroMixer=new THREE.AnimationMixer(object);
   fbxLoader.load('/models/unity_hero_run.fbx',runObject=>{
-    const runClip=runObject.animations?.find(clip=>/run|jog|sprint/i.test(clip.name))||runObject.animations?.[0];
-    if(runClip){heroRunAction=heroMixer.clipAction(runClip);heroRunAction.play()}
+    const sourceClip=runObject.animations?.find(clip=>/run|jog|sprint/i.test(clip.name))||runObject.animations?.[0];
+    if(sourceClip){const runClip=makeInPlaceRunClip(sourceClip);heroRunAction=heroMixer.clipAction(runClip);heroRunAction.play()}
   },undefined,error=>console.warn('Unity hero run animation could not be loaded.',error));
 },undefined,error=>{
   console.warn('Unity hero FBX could not be loaded; trying the existing black-suit GLB.',error);
@@ -87,7 +99,7 @@ fbxLoader.load('/models/unity_hero_mannequin.fbx',object=>{
     scene.remove(hero);
     hero=replacement;
     heroModelLoaded=true;
-    if(gltf.animations?.length){heroMixer=new THREE.AnimationMixer(model);const clip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];heroRunAction=heroMixer.clipAction(clip);heroRunAction.play()}
+    if(gltf.animations?.length){heroAnimationRoot=model;heroAnimationRootPosition.copy(model.position);heroMixer=new THREE.AnimationMixer(model);const sourceClip=gltf.animations.find(c=>/run|walk|jog/i.test(c.name))||gltf.animations[0];heroRunAction=heroMixer.clipAction(makeInPlaceRunClip(sourceClip));heroRunAction.play()}
   },undefined,glbError=>console.warn('Black-suit fallback could not be loaded; using the built-in character.',glbError));
 });
 let guardian=new THREE.Group();
@@ -119,5 +131,5 @@ document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('pointe
 function reset(){for(const o of obstacles)obstacleGroup.remove(o);obstacles.length=0;coins.length=0;lane=1;jump=0;slide=0;elapsed=0;distance=0;coinCount=0;spawn=0;hero.position.set(0,.22,2.5);guardian.position.set(0,.22,7.8);segments.forEach((s,i)=>s.position.z=-i*18)}
 function finish(){active=false;best=Math.max(best,Math.floor(distance));localStorage.setItem('jungleBest',best);$('best').textContent=best;$('message').textContent='The guardian caught you! Distance: '+Math.floor(distance)+' m · Coins: '+coinCount;$('play').textContent='RUN AGAIN';$('menu').classList.remove('hidden');$('hud').classList.add('hidden');$('controls').classList.add('hidden')}
 $('play').onclick=()=>{reset();active=true;paused=false;$('menu').classList.add('hidden');$('hud').classList.remove('hidden');$('controls').classList.remove('hidden')};$('pause').onclick=()=>{if(!active)return;paused=!paused;$('message').textContent=paused?'Run paused.':'Run through ancient ruins, dodge deadly traps and escape the temple guardian.';$('play').textContent=paused?'RESUME':'START RUN';$('menu').classList.toggle('hidden',!paused)};
-const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer)heroMixer.update(dt);if(guardianMixer)guardianMixer.update(dt);elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>18)s.position.z-=126}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
+const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);if(active&&!paused){if(heroMixer){heroMixer.update(dt);if(heroAnimationRoot)heroAnimationRoot.position.copy(heroAnimationRootPosition)}if(guardianMixer)guardianMixer.update(dt);elapsed+=dt;const speed=Math.min(23,14+elapsed*.16);distance+=speed*dt*.5;spawn+=dt;if(spawn>1.25){pattern();spawn=0}hero.position.x+=(lanes[lane]-hero.position.x)*Math.min(1,dt*12);if(jump){hero.position.y+=jump*dt*8;jump-=dt*2.6;if(jump<=0){jump=0;hero.position.y=.22}}if(slide>0)slide-=dt;hero.scale.y=slide>0?.62:1;guardian.position.z=7.8-Math.min(2,elapsed*.015);for(const s of segments){s.position.z+=speed*dt;if(s.position.z>18)s.position.z-=126}for(const o of obstacles){o.position.z+=speed*dt;if(!o.userData.hit&&Math.abs(o.position.z-hero.position.z)<.8&&Math.abs(o.position.x-hero.position.x)<.85){o.userData.hit=true;const safe=o.userData.kind==='branch'?slide>0:jump>0;if(!safe){finish();break}}}for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].position.z>15){obstacleGroup.remove(obstacles[i]);obstacles.splice(i,1)}for(const c of coins){c.z+=speed*dt;if(!c.taken&&Math.abs(c.z-hero.position.z)<.8&&Math.abs(c.x-hero.position.x)<.8){c.taken=true;coinCount++}}for(let i=coins.length-1;i>=0;i--)if(coins[i].z>15)coins.splice(i,1);$('distance').textContent=Math.floor(distance);$('coins').textContent=coinCount}camera.position.x+=(hero.position.x*.2-camera.position.x)*.04;camera.lookAt(hero.position.x*.15,1.45,-10);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,GRAPHICS.pixelRatio))});
