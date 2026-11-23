@@ -76,7 +76,7 @@ export class TrackSystem {
     const up = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(forward, up).normalize();
     const correctedUp = new THREE.Vector3().crossVectors(right, forward).normalize();
-    const basis = new THREE.Matrix4().makeBasis(right, correctedUp, forward.clone().negate());
+    const basis = new THREE.Matrix4().makeBasis(right, forward, correctedUp);
     return new THREE.Quaternion().setFromRotationMatrix(basis);
   }
 
