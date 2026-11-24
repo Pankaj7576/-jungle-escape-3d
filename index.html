@@ -223,6 +223,7 @@
 
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { bindGameInput } from './src/input-system.js';
 
     // ---------------- PROCEDURAL TEXTURES ----------------
     function createWoodTexture(baseHex, grainHex, plankLines = true) {
@@ -772,34 +773,16 @@
       sound.slide();
     }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLeft();
-      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRight();
-      else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') {
-        e.preventDefault();
-        jump();
-      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') slide();
-    });
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    window.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchend', (e) => {
-      if (state !== 'playing') return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 28) moveRight();
-        else if (dx < -28) moveLeft();
-      } else {
-        if (dy < -28) jump();
-        else if (dy > 28) slide();
+    bindGameInput({
+      canvas,
+      controlsRoot: document.body,
+      action(name) {
+        if (name === 'left') moveLeft();
+        else if (name === 'right') moveRight();
+        else if (name === 'jump') jump();
+        else if (name === 'slide') slide();
       }
-    }, { passive: true });
+    });
 
     function startGame() {
       sound.init();

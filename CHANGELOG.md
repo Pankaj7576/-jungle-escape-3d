@@ -1,5 +1,11 @@
 # Jungle Escape 3D — Version History
 
+## 1.010
+- Connected the tested pointer/keyboard input guard to the shipped `index.html` game, so only one deliberate primary-canvas swipe or a fresh non-repeating key press can change lanes.
+- Added a 36 px swipe dead zone, diagonal-gesture rejection, pointer-capture/cancel handling, and protection against HUD taps being interpreted as lane changes.
+- Added automated input regression tests and made them part of the Android build workflow.
+- Device gameplay and performance testing remains required.
+
 ## 1.002
 - Rebuilt gameplay around a procedural modular track system that generates and recycles straight, 90-degree left/right turn, and broken-gap sections.
 - Added curved world-space lane positioning, low stone guardrails, canyon/mountain scenery, and a spring-arm camera with collision checks.
