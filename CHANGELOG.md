@@ -1,5 +1,10 @@
 # Jungle Escape 3D — Version History
 
+## 1.011
+- Bundled Three.js from the existing local npm dependency instead of loading it from unpkg at runtime, removing the game's external renderer-CDN dependency from the Android APK.
+- Kept the 1.010 pointer/keyboard lane-input guard and existing gameplay unchanged.
+- Real-device offline launch and performance checks are still required.
+
 ## 1.010
 - Connected the tested pointer/keyboard input guard to the shipped `index.html` game, so only one deliberate primary-canvas swipe or a fresh non-repeating key press can change lanes.
 - Added a 36 px swipe dead zone, diagonal-gesture rejection, pointer-capture/cancel handling, and protection against HUD taps being interpreted as lane changes.
