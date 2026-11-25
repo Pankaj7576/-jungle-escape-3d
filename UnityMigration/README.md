@@ -1,6 +1,6 @@
 # Jungle Escape — Unity Migration
 
-This is a separate Unity project track. It does not replace the Three.js Android release or modify main. The latest verified Three.js Android release is 1.005 on release/1.005-render-loop-efficiency; main remains on the older 1.002 baseline.
+This is a separate Unity project track. It does not replace the Three.js Android release or modify main. The latest verified Three.js Android APK is version 1.011 on `main`; this Unity migration branch is version `1.003`. The Unity login gate is source-hardened, but Unity Editor compilation, Cloud Project linking and an installable Unity APK are not yet verified.
 
 ## Current project contents
 - A Unity 6 project skeleton is included in this folder: Assets, Packages, runtime scripts, Editor tools and ProjectSettings/ProjectVersion.txt.

@@ -36,15 +36,14 @@ namespace JungleEscape
             guardian?.SetChaseActive(false);
             ui?.HideGamePanels();
 
-            if (authentication != null)
+            if (authentication == null)
             {
-                await authentication.InitializeAsync();
+                Debug.LogError("Jungle Escape authentication manager is missing. Login is required; gameplay remains locked.");
+                ui?.HideGamePanels();
+                return;
             }
-            else
-            {
-                Debug.LogError("Jungle Escape authentication manager is missing. Login is required.");
-                ui?.ShowMainMenu();
-            }
+
+            await authentication.InitializeAsync();
         }
 
         public void OnPlayerAuthenticated()

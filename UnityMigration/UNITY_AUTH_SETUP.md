@@ -1,6 +1,6 @@
 # Jungle Escape 3D — Player Login Setup
 
-## Current repository verification — 2026-11-16
+## Current repository verification — 2026-11-25
 
 - The Player Accounts settings asset at `Assets/Resources/UnityPlayerAccountSettings.asset` already contains a non-empty Client ID. Do not replace it unless the Unity Dashboard Auth Client has changed.
 - This branch contains `ProjectSettings/ProjectVersion.txt` pinned to Unity `6000.0.60f1`, but it does not contain `ProjectSettings/ProjectSettings.asset`. The Unity Cloud project link therefore cannot be confirmed from the repository. Open `UnityMigration` in Unity Editor, sign in with the intended Unity ID, and link the existing Cloud Project ID below. Do not create a second Unity Cloud project.
@@ -11,7 +11,7 @@
 
 ## Implemented in code
 
-- Login gate before the game menu.
+- Login gate before the game menu; the GameBootstrap now fails closed if the authentication manager is missing, and generated-scene validation checks the login Canvas, GraphicRaycaster, UIFlow and GameBootstrap references.
 - Unity Player Accounts browser sign-in and account creation via `StartSignInAsync(false/true)`.
 - The Player Accounts access token is exchanged with Unity Authentication via `SignInWithUnityAsync`; the service either creates a new UGS player or restores the player associated with that account.
 - Logout clears the Unity Authentication session and signs out of Player Accounts.

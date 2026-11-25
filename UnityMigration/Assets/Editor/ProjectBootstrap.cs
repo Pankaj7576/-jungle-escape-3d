@@ -200,6 +200,20 @@ namespace JungleEscape.EditorTools
             Require(ui != null, "UIFlow is missing.");
             Require(authentication != null, "JungleEscapeAuth is missing.");
             Require(eventSystem != null, "EventSystem is missing.");
+
+            if (authentication != null)
+            {
+                SerializedObject authData = new SerializedObject(authentication);
+                Canvas loginCanvas = authData.FindProperty("canvas").objectReferenceValue as Canvas;
+                Require(loginCanvas != null, "JungleEscapeAuth login Canvas reference is missing.");
+                Require(loginCanvas.GetComponent<GraphicRaycaster>() != null,
+                    "JungleEscapeAuth login Canvas requires a GraphicRaycaster.");
+                Require(loginCanvas.GetComponent<UIFlow>() == ui,
+                    "JungleEscapeAuth login Canvas must host the generated UIFlow.");
+                Require(authData.FindProperty("game").objectReferenceValue == game,
+                    "JungleEscapeAuth GameBootstrap reference is incorrect.");
+            }
+
             SwipeInput.ValidateGestureClassifier();
 
             if (director != null)

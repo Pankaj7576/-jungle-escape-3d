@@ -1,5 +1,10 @@
 # Jungle Escape 3D — Version History
 
+## 1.003
+- Hardened the Unity login gate: if the authentication manager is missing, the main menu stays locked instead of allowing gameplay without an account.
+- Added generated-scene checks for the Player Accounts login Canvas, GraphicRaycaster, UIFlow and GameBootstrap references.
+- Verification: source-level checks only. Unity Editor import/compile, Cloud Project linking, Player Accounts provider configuration, Cloud Save and a Unity Android APK remain unverified.
+
 ## 1.002
 - Rebuilt gameplay around a procedural modular track system that generates and recycles straight, 90-degree left/right turn, and broken-gap sections.
 - Added curved world-space lane positioning, low stone guardrails, canyon/mountain scenery, and a spring-arm camera with collision checks.
