@@ -1,19 +1,19 @@
 # Jungle Escape 3D — The Lost Temple
 
-A mobile-first 3D endless runner built with Three.js, Vite and Capacitor.
+A mobile-first original 3D endless runner built with Three.js, Vite and Capacitor.
 
-**Current game release: `1.002`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Each accepted update increments the release by `0.001` and gets a permanent rollback snapshot branch (`versions/<version>`). Previous snapshots are preserved.
+**Current Android release: `1.012`** — see [`VERSION`](VERSION) and [`CHANGELOG.md`](CHANGELOG.md). Every accepted release has a permanent rollback snapshot branch named `versions/<version>`.
 
-## Gameplay systems
-- Procedural modular track with straight sections, 90-degree left/right curves and broken bridge gaps.
-- Three-lane movement, jumpable rocks/walls, slide arches, coin trails and canyon scenery.
-- Spring-arm third-person camera with collision checks and turn-aware follow.
-- Bundled black-suit GLB runner with any available animation clips, plus articulated procedural animation fallback.
-- Procedural articulated temple guardian, coin magnet, speed boost and one-time gem revive.
-- Portrait-first touch controls, keyboard support, pause, HUD and main menu.
+## Active Android game
+The Android build uses the root `index.html` entry point. It imports the locally installed Three.js package and the explicit pointer/keyboard input guard in `src/input-system.js`. The separate modular scene prototype in `src/main.js` is not the active entry point for the current APK.
 
-## Free asset policy
-The project uses Three.js and the existing bundled character model. Environment, obstacles, guardian, pickups and fallback animations are generated in code; no paid asset dependency is required.
+- Procedurally generated jungle bridge sections, 90-degree turn junctions and broken gaps.
+- Three-lane movement with deliberate left/right swipes, jump and slide actions.
+- Obstacles, coin collection, distance/best-score tracking and a pursuing temple monster.
+- Portrait-first touch controls, keyboard testing and synthesized sound effects.
+- Mobile renderer pixel ratio capped at 1.5 to limit GPU fill-rate on high-density displays.
+
+The current character and environment are procedural prototypes. Final production character models, detailed stone-temple art, real-device FPS/thermal profiling and gameplay QA remain future work; this is not yet an AAA-finished game.
 
 ## Run locally
 `npm install` then `npm run dev`.
@@ -22,4 +22,7 @@ The project uses Three.js and the existing bundled character model. Environment,
 `npm run build`, `npx cap add android` (first time), then `npx cap sync android`.
 Open Android Studio with `npx cap open android`.
 
-GitHub Actions builds a portrait Android debug APK and deploys the web build to GitHub Pages.
+GitHub Actions runs syntax checks, input and renderer-budget tests, a Vite production build, Capacitor sync and a portrait Android debug APK build.
+
+## Unity migration
+The separate `unity-migration/phase-1` branch contains the Unity 6 migration and login prototype. Its Player Accounts dashboard configuration, Cloud Project link, Unity Editor compilation and Unity Android APK are not yet verified. See `UnityMigration/UNITY_AUTH_SETUP.md` on that branch.

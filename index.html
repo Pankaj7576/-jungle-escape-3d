@@ -189,7 +189,7 @@
   <div id="start-screen" class="overlay">
     <div class="logo-wrap">
       <div class="logo-badge">
-        <div class="logo-sub">Temple Run 1 &amp; 2 Mechanics</div>
+        <div class="logo-sub">ENDLESS JUNGLE RUNNER</div>
         <div class="logo-title">JUNGLE ESCAPE</div>
       </div>
       <div class="logo-3d">3D</div>
@@ -224,6 +224,7 @@
   <script type="module">
     import * as THREE from 'three';
     import { bindGameInput } from './src/input-system.js';
+    import { getRenderPixelRatio } from './src/render-config.js';
 
     // ---------------- PROCEDURAL TEXTURES ----------------
     function createWoodTexture(baseHex, grainHex, plankLines = true) {
@@ -329,8 +330,8 @@
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 180);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(getRenderPixelRatio(window.devicePixelRatio));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
     const hemiLight = new THREE.HemisphereLight(0xd1fae5, 0x0b1f13, 1.25);
@@ -848,6 +849,7 @@
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(getRenderPixelRatio(window.devicePixelRatio));
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
