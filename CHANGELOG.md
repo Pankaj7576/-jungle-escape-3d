@@ -4,7 +4,8 @@
 - Dispose generated bridge, tree, coin and obstacle geometries when a run is reset or a temporary object leaves the world, avoiding repeated GPU-buffer accumulation across restarts and long sessions.
 - Reuse one shared turn-marker material; shared gameplay materials and textures are deliberately retained.
 - Added focused unit tests for nested geometry cleanup, duplicate geometry references, parent removal and safe no-op inputs.
-- No lane, jump, slide, obstacle, coin, turn, gap or guardian-chase gameplay behavior changed. Real-device GPU-memory profiling remains required.
+- No lane, jump, slide, obstacle, coin, turn, gap or guardian-chase gameplay behavior changed.
+- Verification: GitHub Actions run 45959459534 passed JavaScript syntax checks, all regression tests, Vite production build, Capacitor sync, portrait manifest configuration and Gradle `assembleDebug`; the downloaded APK archive passed integrity checks. Real-device GPU-memory profiling remains required.
 
 ## 1.012
 - Capped the active Android renderer's device-pixel ratio at 1.5 on startup and resize to reduce high-density mobile GPU fill-rate while keeping antialiasing and shadows enabled.
