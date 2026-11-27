@@ -52,7 +52,7 @@ jobs:
       - name: Check JavaScript syntax
         run: npm run check
 
-      - name: Run input regression tests
+      - name: Run regression tests
         run: npm test
 
       - name: Build web app
