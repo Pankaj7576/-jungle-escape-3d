@@ -2,7 +2,7 @@
 - Added a two-segment bridge recovery buffer after every generated gap, preventing random back-to-back gap sections that demand consecutive jumps.
 - Kept at least three bridge sections between a turn junction and a newly eligible gap; lane input, jump physics, slide, obstacle, coin and guardian-chase logic are unchanged.
 - Added deterministic tests for gap spacing, turn scheduling/direction and invalid random sources.
-- Android build verification is pending for this commit; real-device gameplay testing remains required.
+- Verification: GitHub Actions run 46123812397 passed JavaScript syntax checks, all regression tests, Vite production build, Capacitor sync, portrait manifest configuration and Gradle `assembleDebug`; the downloaded APK archive passed integrity and Android package inspection. Real-device gameplay testing remains required.
 
 # Jungle Escape 3D — Version History
 
