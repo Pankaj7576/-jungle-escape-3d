@@ -7,7 +7,7 @@ A mobile-first original 3D endless runner built with Three.js, Vite and Capacito
 ## Active Android game
 The Android build uses the root `index.html` entry point. It imports the locally installed Three.js package and the explicit pointer/keyboard input guard in `src/input-system.js`. The separate modular scene prototype in `src/main.js` is not the active entry point for the current APK.
 
-- Procedurally generated jungle bridge sections, 90-degree turn junctions and broken gaps.
+- Procedurally generated jungle bridge sections, 90-degree turn junctions and broken gaps, with a two-bridge recovery stretch between gaps.
 - Three-lane movement with deliberate left/right swipes, jump and slide actions.
 - Obstacles, coin collection, distance/best-score tracking and a pursuing temple monster.
 - Portrait-first touch controls, keyboard testing and synthesized sound effects.

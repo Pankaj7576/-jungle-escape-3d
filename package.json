@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "check": "node --check src/main.js && node --check src/input-system.js && node --check src/three-resource-cleanup.js",
+    "check": "node --check src/main.js && node --check src/input-system.js && node --check src/three-resource-cleanup.js && node --check src/track-pattern.js",
     "test": "node --test"
   },
   "dependencies": {

@@ -226,6 +226,7 @@
     import { bindGameInput } from './src/input-system.js';
     import { getRenderPixelRatio } from './src/render-config.js';
     import { removeAndDisposeObject } from './src/three-resource-cleanup.js';
+    import { createTrackPattern } from './src/track-pattern.js';
 
     // ---------------- PROCEDURAL TEXTURES ----------------
     function createWoodTexture(baseHex, grainHex, plankLines = true) {
@@ -662,18 +663,7 @@
       }
     }
 
-    let segsSinceTurn = 0;
-    function nextKind() {
-      segsSinceTurn++;
-      if (segsSinceTurn >= 11 && Math.random() < 0.35) {
-        segsSinceTurn = 0;
-        return Math.random() < 0.5 ? 'turnLeft' : 'turnRight';
-      }
-      if (segsSinceTurn > 3 && Math.random() < 0.14) {
-        return 'gap';
-      }
-      return 'bridge';
-    }
+    let nextTrackKind = createTrackPattern();
 
     function initWorld() {
       while (worldGroup.children.length > 0) {
@@ -690,10 +680,10 @@
       cursorZ = 12;
       cursorYaw = 0;
       segCount = 0;
-      segsSinceTurn = 0;
+      nextTrackKind = createTrackPattern();
 
       for (let i = 0; i < 36; i++) {
-        addSegment(i < 4 ? 'bridge' : nextKind());
+        addSegment(i < 4 ? 'bridge' : nextTrackKind());
       }
 
       for (let i = 0; i < 70; i++) {
